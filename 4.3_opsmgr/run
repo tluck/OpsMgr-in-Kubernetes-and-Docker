@@ -1,0 +1,13 @@
+#!/bin/bash
+
+source docker_id
+
+data="$(pwd)/data"
+
+docker run \
+        --init --name opsmgr -h opsmgr \
+        -p 8080:8080 \
+        -p 27016:27017 \
+        --network mongonet \
+        --mount type=bind,source=${data},target=/shareddata  \
+        -itd $DOCKER_USERNAME/mongodb:opsmgr_$MONGODB_VERSION 

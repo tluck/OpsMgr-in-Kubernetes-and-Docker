@@ -1,0 +1,4 @@
+cd 4.3_opsmgr
+./build
+./run
+

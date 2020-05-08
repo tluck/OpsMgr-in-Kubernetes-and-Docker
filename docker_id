@@ -1,0 +1,2 @@
+export DOCKER_USERNAME=tjluckenbach
+export MONGODB_VERSION=4.2

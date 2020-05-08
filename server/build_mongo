@@ -1,0 +1,10 @@
+#!/bin/bash
+
+export DOCKER_USERNAME=tjluckenbach
+export MONGODB_VERSION=4.2
+
+#cd /opt/Source/mongo/
+
+chmod 755 ./docker-entrypoint.sh
+docker build --build-arg MONGO_PACKAGE=mongodb-enterprise --build-arg MONGO_REPO=repo.mongodb.com -t $DOCKER_USERNAME/automation:$MONGODB_VERSION .
+

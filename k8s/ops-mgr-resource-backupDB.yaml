@@ -1,0 +1,21 @@
+---
+apiVersion: mongodb.com/v1
+kind: MongoDB
+metadata:
+  name: ops-mgr-backup
+  namespace: mongodb
+spec:
+  members: 3
+  version: 4.2.8-ent
+  type: ReplicaSet
+  project: ops-mgr-config-backup
+  #credentials: admin-public-api-key
+  credentials: opsmanager-admin-key
+  persistent: true
+  podSpec:
+    cpu: "0.5"
+    # note: it's important to always specify memory otherwise wired tiger cache will be calculated incorrectly and
+    # monitoring tools will report the size of Kubernetes node instead of the real size of the container
+    memory: 250Mi
+    storage: 1Gi
+ 

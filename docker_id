@@ -1,8 +1,0 @@
-export DOCKER_USERNAME=tjluckenbach
-export MONGO_VERSION=4.2.6
-
-export DOWNLOAD="https://downloads.mongodb.com/on-prem-mms/deb"
-export MMSPACKAGE="mongodb-mms_4.3.9.100.20200331T2242Z-1_x86_64.deb"
-
-export OPSMGR="http://opsmgr:8080/download/agent/automation"
-export AGENTPACKAGE="mongodb-mms-automation-agent-manager_10.12.2.6205-1_amd64.ubuntu1604.deb"

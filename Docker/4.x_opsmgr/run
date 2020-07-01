@@ -10,4 +10,4 @@ docker run \
         -p 27016:27017 \
         --network mongonet \
         --mount type=bind,source=${data},target=/shareddata  \
-        -itd $DOCKER_USERNAME/mongodb:opsmgr_$MONGO_VERSION 
+        -itd $DOCKER_USERNAME/mongodb:opsmgr_$OPSMGR_VERSION 

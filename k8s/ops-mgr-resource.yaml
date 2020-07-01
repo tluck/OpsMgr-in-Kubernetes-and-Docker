@@ -1,0 +1,49 @@
+---
+apiVersion: mongodb.com/v1
+kind: MongoDBOpsManager
+metadata:
+  name: opsmanager
+
+spec:
+  replicas: 1
+  version: 4.2.13
+  adminCredentials: admin-user-credentials 
+  # Should match metadata.name in the Kubernetes secret for the admin user
+  
+  externalConnectivity:
+    type: NodePort
+    port: 32080
+
+  applicationDatabase:
+    members: 3
+    version: 4.2.8-ent
+    persistent: true
+    podSpec:
+      cpu: "0.5"
+      memory: 400Mi
+      storage: 1Gi
+ 
+  configuration:
+    mms.ignoreInitialUiSetup: "true"
+    automation.versions.source: mongodb
+    mms.adminEmailAddr: thomas.luckenbach@mongodb.com
+    mms.fromEmailAddr: thomas.luckenbach@mongodb.com
+    mms.mail.hostname: smtp.fake.com
+    mms.mail.port: "25"
+    mms.mail.ssl: "true"
+    mms.mail.transport: smtp
+    mms.replyToEmailAddr: thomas.luckenbach@mongodb.com
+    mms.user.bypassInviteForExistingUsers: "true"
+    mms.publicApi.whitelistEnabled: "false"
+
+  backup:
+    enabled: true
+    opLogStores:
+      - name: oplog1
+        mongodbResourceRef:
+          name: ops-mgr-backup
+    blockStores:
+      - name: blockStore1
+        mongodbResourceRef:
+          name: ops-mgr-backup
+  

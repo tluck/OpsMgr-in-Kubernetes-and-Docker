@@ -1,15 +1,13 @@
 #!/bin/bash
 
-source docker_id
-
-docker network create mongonet
+source docker.conf
 
 docker build \
         --build-arg MONGO_PACKAGE=mongodb-enterprise \
         --network mongonet \
-        --build-arg DOWNLOAD=$DOWNLOAD \
-        --build-arg PACKAGE=$MMSPACKAGE \
+        --build-arg DOWNLOAD=$OPSMGR \
+        --build-arg PACKAGE=$AGENTPACKAGE \
         --build-arg MONGO_VERSION=$MONGO_VERSION \
         --build-arg MONGO_REPO=repo.mongodb.com \
-        -t $DOCKER_USERNAME/mongodb:opsmgr_$MONGO_VERSION .
+        -t $DOCKER_USERNAME/mongodb:node_$MONGO_VERSION .
 

@@ -18,9 +18,9 @@ RUN set -eux; \
     rm -rf /var/lib/apt/lists/*
 
 # grab gosu for easy step-down from root (https://github.com/tianon/gosu/releases)
-ENV GOSU_VERSION 1.11
+ENV GOSU_VERSION 1.12
 # grab "js-yaml" for parsing mongod's YAML config files (https://github.com/nodeca/js-yaml/releases)
-ENV JSYAML_VERSION 3.13.0
+ENV JSYAML_VERSION 3.13.1
 
 RUN set -ex; \
     \
@@ -81,7 +81,7 @@ ENV MONGO_PACKAGE=${MONGO_PACKAGE} MONGO_REPO=${MONGO_REPO}
 
 ENV MONGO_MAJOR 4.2
 ARG MONGO_VERSION
-ENV MONGO_VERSION ${MONGO_VERSION:-4.2.5}
+ENV MONGO_VERSION ${MONGO_VERSION:-4.2.8}
 # bashbrew-architectures:amd64 arm64v8 s390x
 RUN echo "deb http://$MONGO_REPO/apt/ubuntu bionic/${MONGO_PACKAGE%-unstable}/$MONGO_MAJOR multiverse" | tee "/etc/apt/sources.list.d/${MONGO_PACKAGE%-unstable}.list"
 
@@ -99,6 +99,15 @@ RUN set -x \
     && rm -rf /var/lib/mongodb \
     && mv /etc/mongod.conf /etc/mongod.conf.orig
 
+# remove it now but keep dependency
+RUN set -x \
+    && apt remove -y \
+        ${MONGO_PACKAGE}-server=$MONGO_VERSION \
+        ${MONGO_PACKAGE}-shell=$MONGO_VERSION \
+        ${MONGO_PACKAGE}-mongos=$MONGO_VERSION \
+        ${MONGO_PACKAGE}-tools=$MONGO_VERSION \
+    && apt-get clean
+
 ARG DOWNLOAD
 ARG PACKAGE
 
@@ -106,13 +115,13 @@ RUN set -x \
     && curl -OL ${DOWNLOAD}/${PACKAGE} \
     && dpkg --install ${PACKAGE}
 
-RUN mkdir -p /data/db /data/configdb /data/backups \
-    && chown -R mongodb:mongodb /data/db /data/configdb /data/backups
+RUN mkdir -p /data/db /data/configdb \
+    && chown -R mongodb:mongodb /data/db /data/configdb
 
-VOLUME /data/db /data/configdb /data/backups
+VOLUME /data/db /data/configdb
 
 COPY docker-entrypoint.sh /usr/local/bin/
 ENTRYPOINT ["docker-entrypoint.sh"]
 
-EXPOSE 8080 27017
-CMD ["mongod"]
+EXPOSE 27017
+CMD ["/bin/bash"]

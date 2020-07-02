@@ -8,7 +8,7 @@ spec:
   members: 3
   version: 4.2.6-ent
   type: ReplicaSet
-  project: ops-mgr-config
+  project: my-replica-set
   #credentials: admin-public-api-key
   credentials: opsmanager-admin-key
   persistent: true
@@ -19,9 +19,9 @@ spec:
     memory: 250Mi
     storage: 1Gi
 
-#security:
-#    tls:
-#      enabled: true
+  security:
+    tls:
+      enabled: false
 
 #  connectivity:
     # replicaSetHorizons consists of a list of maps where each map represents a node within

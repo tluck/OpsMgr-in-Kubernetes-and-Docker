@@ -2,28 +2,18 @@
 
 . init.conf
 
-# create namespace and mongo operator
-##kubectl create namespace mongodb
-##kubectl config set-context $(kubectl config current-context) --namespace=mongodb
-##kubectl apply -f crds.yaml
-##kubectl apply -f mongodb-enterprise.yaml
-##kubectl get all -n mongodb
-##kubectl describe pods -n mongodb
+# update/create configmap with OrgId
+#sed -e "s|ORGID|${orgId}|g" -e "s|OPSMGRURL|${opsMgrUrl}|g"  ops-mgr-operator-configmap-ops-mgr-backup.yaml | kubectl apply -f -
 
-# create secret - API key from OpsManager
-#kubectl -n mongodb delete secret admin-public-api-key
-#kubectl -n mongodb create secret generic admin-public-api-key \
-#    --from-literal="user=${user}" \
-#    --from-literal="publicApiKey=${publicApiKey}"
+kubectl create configmap ops-mgr-backup \
+  --from-literal="baseUrl=${opsMgrUrl}" \
+  --from-literal="projectName=OpsMgrBackup"  #Optional
+ # --from-literal="orgId={orgId}" #Optional
 
-#kubectl describe secrets/admin-public-api-key -n mongodb
-
-# create configmap with OrgId
-sed -e "s|ORGID|${orgId}|g" -e "s|OPSMGRURL|${opsMgrUrl}|g"  ops-mgr-operator-configmap-backup.yaml | kubectl apply -f -
 kubectl get configmaps -n mongodb
 
 # create replica set
-kubectl apply -f ops-mgr-resource-backupDB.yaml 
+kubectl apply -f ops-mgr-resource-ops-mgr-backup.yaml 
 
 while true
 do

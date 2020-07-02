@@ -8,7 +8,7 @@ spec:
   members: 3
   version: 4.2.8-ent
   type: ReplicaSet
-  project: ops-mgr-config-backup
+  project: ops-mgr-backup
   #credentials: admin-public-api-key
   credentials: opsmanager-admin-key
   persistent: true

@@ -34,3 +34,9 @@ do
     fi
     sleep 10
 done
+
+opsMgrUrl=$( kubectl get om -o json | jq .items[0].status.opsManager.url )
+cat init.conf |sed -e '/opsMgrUrl/d' > new
+echo  opsMgrUrl="$opsMgrUrl"
+echo  opsMgrUrl="$opsMgrUrl" >> new
+mv new init.conf

@@ -6,7 +6,7 @@ metadata:
 
 spec:
   replicas: 1
-  version: 4.2.13
+  version: 4.2.14
   adminCredentials: admin-user-credentials 
   # Should match metadata.name in the Kubernetes secret for the admin user
   

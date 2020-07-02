@@ -14,6 +14,6 @@ curl --user "${user}:${publicApiKey}" --digest \
 --header 'Content-Type: application/json' \
 --request POST "http://opsmgr:32080/api/public/v1.0/admin/whitelist?pretty=true" \
 --data @data.json \
--o whitelist.json 2>&1 > /dev/null
+-o whitelist.json > /dev/null 2>&1
 
 cat whitelist.json

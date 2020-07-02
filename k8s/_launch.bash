@@ -5,7 +5,7 @@ printf "%s\n" "Deploy OM and wait until Running status..."
 deploy_OM.bash
 
 printf "\n%s\n" "__________________________________________________________________________________________"
-printf "%s\n" "Create the firt Org in OM ..."
+printf "%s\n" "Create the first Org in OM ..."
 deploy_org.bash
 
 printf "\n%s\n" "__________________________________________________________________________________________"

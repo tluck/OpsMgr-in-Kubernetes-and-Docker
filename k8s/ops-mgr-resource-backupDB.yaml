@@ -18,4 +18,3 @@ spec:
     # monitoring tools will report the size of Kubernetes node instead of the real size of the container
     memory: 250Mi
     storage: 1Gi
- 

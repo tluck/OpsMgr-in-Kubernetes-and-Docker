@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 . init.conf
 
@@ -24,3 +24,16 @@ kubectl get configmaps -n mongodb
 
 # create replica set
 kubectl apply -f ops-mgr-resource-backupDB.yaml 
+
+while true
+do
+    kubectl get mongodb/ops-mgr-backup
+    kubectl get mongodb/ops-mgr-backup -o json| jq '.status.phase, .status.message'
+    status=$( kubectl wait --for condition=ready pod/ops-mgr-backup-2 )
+    if [[ $? == 0 ]];
+    then
+        printf "%s\n" $status
+        break
+    fi
+    sleep 10
+done

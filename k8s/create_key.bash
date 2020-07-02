@@ -19,7 +19,7 @@ curl --user "${user}:${publicApiKey}" --digest \
     "desc" : "New API key for Global Testing",
     "roles" : [ "GLOBAL_OWNER" ]
   }' \
-  -o key.json 2>&1 > /dev/null
+  -o key.json > /dev/null 2>&1
 
 cat init.conf |sed -e '/privateKey/d' -e '/publicKey/d' > new
 echo  publicKey="$( cat key.json |jq .username )"

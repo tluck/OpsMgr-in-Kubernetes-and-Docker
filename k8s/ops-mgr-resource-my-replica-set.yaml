@@ -6,7 +6,7 @@ metadata:
   namespace: mongodb
 spec:
   members: 3
-  version: 4.2.7-ent
+  version: 4.2.6-ent
   type: ReplicaSet
   project: ops-mgr-config
   #credentials: admin-public-api-key
@@ -18,10 +18,11 @@ spec:
     # monitoring tools will report the size of Kubernetes node instead of the real size of the container
     memory: 250Mi
     storage: 1Gi
-#    
-#  security:
+
+#security:
 #    tls:
 #      enabled: true
+
 #  connectivity:
     # replicaSetHorizons consists of a list of maps where each map represents a node within
     # the replica set and maps names of DNS horizons to externally connectable DNS names.
@@ -34,3 +35,4 @@ spec:
 #      - "my-replica-set": "docker-desktop:32016"
 #      - "my-replica-set": "docker-desktop:32242"
 #      - "my-replica-set": "docker-desktop:31539"
+

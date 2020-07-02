@@ -20,7 +20,7 @@ spec:
     persistent: true
     podSpec:
       cpu: "0.5"
-      memory: 400Mi
+      memory: 250Mi
       storage: 1Gi
  
   configuration:

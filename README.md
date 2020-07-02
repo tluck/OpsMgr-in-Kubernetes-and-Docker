@@ -1,10 +1,10 @@
-# OpsMgrDocker
+# OpsMgr Docker and K8s Demo
 Ops Manager Demo Environment (in Docker)
 
 GitHub Repo: 			https://github.com/tluck/OpsMgrDocker
 Docker Image Repo: 	https://hub.docker.com/repository/docker/tjluckenbach/mongodb
 
-## Summary:
+## For Docker Summary:
 Runs OpsManager 4.3 with severval agent-ready "empty nodes" to demo Automation and Backup
 
 ### Step 1. StartUp OpsMgr
@@ -31,3 +31,15 @@ Runs OpsManager 4.3 with severval agent-ready "empty nodes" to demo Automation a
 
 ### Step 5.
 - Provision a cluster on the nodes
+
+
+## For Kubernetes Summary:
+
+### Step 1. Run the _launch.bash script
+- Deploy  the K8s Operator
+  - Then deploys the resources
+- Deploy the OM Resources 
+  -  OpsManager
+  -  App DB
+- Deploy a Production DB (on down rev DB)
+- Deploy the OM Backing DBs

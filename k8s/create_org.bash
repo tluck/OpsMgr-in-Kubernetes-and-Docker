@@ -7,7 +7,7 @@ curl --user "${publicKey}:${privateKey}" --digest \
  --header 'Content-Type: application/json' \
  --request POST "http://opsmgr:32080/api/public/v1.0/orgs?pretty=true" \
  --data '{ "name" : "Demo" }' \
- -o org.json 2>&1 > /dev/null
+ -o org.json > /dev/null 2>&1
 
 cat init.conf |sed -e '/orgId/d' > new
 echo  orgId="$( cat org.json | jq .id )"

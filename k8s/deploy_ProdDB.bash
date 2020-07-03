@@ -3,14 +3,14 @@
 . init.conf
 
 # update/create configmap with OrgId
-#sed -e "s|ORGID|${orgId}|g" -e "s|OPSMGRURL|${opsMgrUrl}|g"  ops-mgr-operator-configmap-my-replica-set.yaml | kubectl apply -f -
+# sed -e "s|ORGID|${orgId}|g" -e "s|OPSMGRURL|${opsMgrUrl}|g"  ops-mgr-operator-configmap-my-replica-set.yaml | kubectl apply -f -
 
-kubectl delete configmap my-replica-set
+# Create map for OM Org/Project
+kubectl delete configmap my-replica-set > /dev/null 2>&1
 kubectl create configmap my-replica-set \
   --from-literal="baseUrl=${opsMgrUrl}" \
   --from-literal="projectName=MyReplicaSet"  #Optional
  # --from-literal="orgId={$orgId}>" #Optional
-
 kubectl get configmaps -n mongodb
 
 # create replica set

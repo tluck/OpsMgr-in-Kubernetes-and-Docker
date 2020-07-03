@@ -5,25 +5,26 @@
 # metrics
 kubectl apply -f /opt/Source/metrics-server/components.yaml 
 
-# create namespace and mongo operator
+# Create the namespace and MongoDB Enterprise Operator
 kubectl create namespace mongodb
 kubectl config set-context $(kubectl config current-context) --namespace=mongodb
 kubectl apply -f crds.yaml
 kubectl apply -f mongodb-enterprise.yaml
-kubectl get all -n mongodb
-kubectl describe pods -n mongodb
+#kubectl get all -n mongodb
+#kubectl describe pods -n mongodb
 
-# create secret - for main admin user
-kubectl delete secret admin-user-credentials
+# Create the credentials for main admin user
+kubectl delete secret admin-user-credentials > /dev/null 2>&1
 kubectl create secret generic admin-user-credentials \
   --from-literal=Username="${user}" \
   --from-literal=Password="${password}" \
   --from-literal=FirstName="${firstName}" \
   --from-literal=LastName="${lastName}"
 
-# apply resource file to build OpsManager
+# Apply resource file to Deploy OpsManager
 kubectl apply -f ops-mgr-resource.yaml
 
+# Monitor the progress until the OpsMgr app is ready
 while true
 do
     kubectl get om 

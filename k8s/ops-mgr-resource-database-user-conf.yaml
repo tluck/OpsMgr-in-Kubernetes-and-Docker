@@ -5,7 +5,7 @@ metadata:
   name: dbadmin
 spec:
   passwordSecretKeyRef:
-    name: dbadmin-secret
+    name: dbadmin-credentials
     # Match to metadata.name of the User Secret
     key: password
   username: "dbAdmin"

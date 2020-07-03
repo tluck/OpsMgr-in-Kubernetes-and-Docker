@@ -6,7 +6,7 @@ metadata:
   namespace: mongodb
 spec:
   members: 3
-  version: 4.2.6-ent
+  version: 4.2.8-ent
   type: ReplicaSet
   project: my-replica-set
   #credentials: admin-public-api-key
@@ -18,10 +18,12 @@ spec:
     # monitoring tools will report the size of Kubernetes node instead of the real size of the container
     memory: 250Mi
     storage: 1Gi
-
   security:
     tls:
-      enabled: false
+      enabled: true
+    authentication:
+      enabled : true
+      modes: ["SCRAM"]
 
 #  connectivity:
     # replicaSetHorizons consists of a list of maps where each map represents a node within

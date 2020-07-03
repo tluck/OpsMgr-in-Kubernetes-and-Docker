@@ -23,7 +23,7 @@ do
     status=$( kubectl wait --for condition=ready pod/my-replica-set-2 )
     if [[ $? == 0 ]];
     then
-        printf "%s\n" $status
+        printf "%s\n" "$status"
         break
     fi
     sleep 10

@@ -27,8 +27,8 @@ kubectl apply -f ops-mgr-resource.yaml
 while true
 do
     kubectl get om 
-    status=$( kubectl get om -o json | jq .items[0].status.opsManager.phase )
-    if [[ $status == \"Running\" ]];
+    eval status=$( kubectl get om -o json | jq .items[0].status.opsManager.phase )
+    if [[ $status == "Running" ]];
     then
         break
     fi

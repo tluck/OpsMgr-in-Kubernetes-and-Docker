@@ -15,3 +15,7 @@ deploy_OM_BackupDB.bash
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Create the 1st Production DB ..."
 deploy_ProdDB.bash
+
+printf "\n%s\n" "__________________________________________________________________________________________"
+printf "%s\n" "Create the DB User(s) ..."
+deploy_DBUsers.bash

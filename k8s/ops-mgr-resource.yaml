@@ -7,6 +7,7 @@ metadata:
 spec:
   replicas: 1
   version: 4.2.14
+  jvmParameters: ["-Xms1024m", "-Xmx2048m"] 
   adminCredentials: admin-user-credentials 
   # Should match metadata.name in the Kubernetes secret for the admin user
   
@@ -38,6 +39,7 @@ spec:
 
   backup:
     enabled: true
+    jvmParameters: ["-Xms512m", "-Xmx1024m"] 
     opLogStores:
       - name: oplog1
         mongodbResourceRef:

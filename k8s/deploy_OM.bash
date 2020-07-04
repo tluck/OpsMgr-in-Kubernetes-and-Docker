@@ -2,7 +2,7 @@
 
 . init.conf
 
-# metrics
+# Create the metrics server
 kubectl apply -f /opt/Source/metrics-server/components.yaml 
 
 # Create the namespace and MongoDB Enterprise Operator
@@ -21,7 +21,7 @@ kubectl create secret generic admin-user-credentials \
   --from-literal=FirstName="${firstName}" \
   --from-literal=LastName="${lastName}"
 
-# Apply resource file to Deploy OpsManager
+#  Deploy OpsManager resources
 kubectl apply -f ops-mgr-resource.yaml
 
 # Monitor the progress until the OpsMgr app is ready
@@ -36,8 +36,10 @@ do
     sleep 10
 done
 
+# get the OpsMgr URL and internal IP
 opsMgrUrl=$( kubectl get om -o json | jq .items[0].status.opsManager.url )
-cat init.conf |sed -e '/opsMgrUrl/d' > new
-echo  opsMgrUrl="$opsMgrUrl"
-echo  opsMgrUrl="$opsMgrUrl" >> new
+opsMgrIp=$(  kubectl get pod/opsmanager-0 -o json | jq .status.podIP )
+cat init.conf |sed -e '/opsMgrUrl/d' -e '/opsMgrIp/d' > new
+echo  opsMgrUrl="$opsMgrUrl" | tee -a new
+echo  opsMgrIp="$opsMgrIp"  | tee -a new
 mv new init.conf

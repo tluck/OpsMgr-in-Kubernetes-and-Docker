@@ -5,7 +5,7 @@
 # update/create configmap with OrgId
 #sed -e "s|ORGID|${orgId}|g" -e "s|OPSMGRURL|${opsMgrUrl}|g"  ops-mgr-operator-configmap-ops-mgr-backup.yaml | kubectl apply -f -
 
-# Create map for OM Org/Project
+# Create a map for OM Org/Project
 kubectl delete configmap ops-mgr-backup > /dev/null 2>&1
 kubectl create configmap ops-mgr-backup \
   --from-literal="baseUrl=${opsMgrUrl}" \

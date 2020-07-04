@@ -22,9 +22,9 @@ spec:
     tls:
       enabled: true
       ca: ca-pem
-#    authentication:
-#      enabled : true
-#      modes: ["SCRAM"]
+    authentication:
+      enabled : true
+      modes: ["SCRAM"]
 
 #  connectivity:
     # replicaSetHorizons consists of a list of maps where each map represents a node within

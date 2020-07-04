@@ -14,4 +14,4 @@ deploy_OM_BackupDB.bash
 
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Create the 1st Production DB ..."
-deploy_ProdDB_Secure.bash
+deploy_ProdDB.bash

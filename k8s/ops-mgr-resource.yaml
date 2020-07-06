@@ -7,10 +7,22 @@ metadata:
 spec:
   replicas: 1
   version: 4.2.14
-  jvmParameters: ["-Xms1024m", "-Xmx2048m"] 
-  adminCredentials: admin-user-credentials 
-  # Should match metadata.name in the Kubernetes secret for the admin user
-  
+  jvmParameters: ["-Xms2048m", "-Xmx2048m"] 
+  adminCredentials: admin-user-credentials # Should match metadata.name in the Kubernetes secret for the admin user
+  statefulSet:
+    spec:
+      template:
+        metadata:
+          annotations:
+            key1: value1
+        spec:
+          containers:
+            - name: mongodb-ops-manager
+              resources:
+                limits:
+                  cpu: "1.0"
+                  memory: 3G
+
   externalConnectivity:
     type: NodePort
     port: 32080
@@ -39,7 +51,7 @@ spec:
 
   backup:
     enabled: true
-    jvmParameters: ["-Xms512m", "-Xmx1024m"] 
+    jvmParameters: ["-Xms1024m", "-Xmx1024m"] 
     opLogStores:
       - name: oplog1
         mongodbResourceRef:
@@ -48,4 +60,13 @@ spec:
       - name: blockStore1
         mongodbResourceRef:
           name: ops-mgr-backup
-  
+    statefulSet:
+      spec:
+        template:
+          spec:
+            containers:
+              - name: mongodb-backup-daemon
+                resources:
+                  requests:
+                    cpu: "0.5"
+                    memory: 1.5Gi  

@@ -1,5 +1,4 @@
 ---
-# Source: mongodb-enterprise-operator/templates/crds.yaml
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
@@ -12,7 +11,7 @@ spec:
     kind: MongoDB
     plural: mongodb
     shortNames:
-    - mdb
+      - mdb
     singular: mongodb
   additionalPrinterColumns:
     - name: Type
@@ -91,16 +90,6 @@ spec:
 
             additionalMongodConfig:
               type: object
-              properties:
-                net:
-                  type: object
-                  properties:
-                    ssl:
-                      type: object
-                      properties:
-                        mode:
-                          type: string
-                          enum: ["disabled", "allowSSL", "preferSSL", "requireSSL", "allowTLS", "preferTLS", "requireTLS"]
 
             exposedExternally:
               type: boolean
@@ -180,6 +169,14 @@ spec:
                 authentication:
                   type: object
                   properties:
+                    agents:
+                      type: object
+                      properties:
+                        mode:
+                          type: string
+                          enum: ["SCRAM", "X509"]
+                      required:
+                        - mode
                     enabled:
                       type: boolean
                     modes:
@@ -401,8 +398,10 @@ spec:
                             labelSelector:
                               type: object
             configServerCount:
+              minimum: 1
               type: integer
             mongodsPerShardCount:
+              minimum: 1
               type: integer
             mongosCount:
               minimum: 1
@@ -410,8 +409,23 @@ spec:
             shardCount:
               minimum: 1
               type: integer
+            mongos:
+              type: object
+              properties:
+                additionalMongodConfig:
+                  type: object
+            configSrv:
+              type: object
+              properties:
+                additionalMongodConfig:
+                  type: object
+            shard:
+              type: object
+              properties:
+                additionalMongodConfig:
+                  type: object
+
 ---
-# Source: mongodb-enterprise-operator/templates/crds.yaml
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
@@ -424,7 +438,7 @@ spec:
     kind: MongoDBUser
     plural: mongodbusers
     shortNames:
-    - mdbu
+      - mdbu
     singular: mongodbuser
   additionalPrinterColumns:
     - name: State
@@ -438,61 +452,60 @@ spec:
   subresources:
     status: {}
   validation:
-      openAPIV3Schema:
-        type: object
-        properties:
-          spec:
-            type: object
-            properties:
-              username:
-                type: string
-                description: "The username of the user"
-              db:
-                type: string
-                description: "The database the user is stored in"
-              project:
-                type: string
-                description: "The project the user belongs to"
-              passwordSecretKeyRef:
+    openAPIV3Schema:
+      type: object
+      properties:
+        spec:
+          type: object
+          properties:
+            username:
+              type: string
+              description: "The username of the user"
+            db:
+              type: string
+              description: "The database the user is stored in"
+            project:
+              type: string
+              description: "The project the user belongs to"
+            passwordSecretKeyRef:
+              type: object
+              properties:
+                name:
+                  type: string
+                key:
+                  type: string
+              description: "DEPRECATED The project the user belongs to"
+            mongodbResourceRef:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: "The name of a MongoDB resource in the same namespace"
+            roles:
+              type: array
+              items:
                 type: object
                 properties:
                   name:
                     type: string
-                  key:
+                    description: "The name of the role"
+                  db:
                     type: string
-                description: "DEPRECATED The project the user belongs to"
-              mongodbResourceRef:
-                type: object
-                properties:
-                  name:
-                    type: string
-                    description: "The name of a MongoDB resource in the same namespace"
-              roles:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    name:
-                      type: string
-                      description: "The name of the role"
-                    db:
-                      type: string
-                      description: "The db the role can act on"
-                    passwordSecretKeyRef:
-                      type: object
-                      properties:
-                        name:
-                          type: string
-                        key:
-                          type: string
-                  required:
-                    - name
-                    - db
-            required:
-              - username
-              - db
+                    description: "The db the role can act on"
+                  passwordSecretKeyRef:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      key:
+                        type: string
+                required:
+                  - name
+                  - db
+          required:
+            - username
+            - db
 ---
-# Source: mongodb-enterprise-operator/templates/crds.yaml
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
@@ -505,7 +518,7 @@ spec:
     kind: MongoDBOpsManager
     plural: opsmanagers
     shortNames:
-    - om
+      - om
     singular: opsmanager
   additionalPrinterColumns:
     - name: Replicas
@@ -638,7 +651,7 @@ spec:
                           name:
                             type: string
                         required:
-                            - name
+                          - name
                     required:
                       - name
                       - mongodbResourceRef
@@ -662,7 +675,7 @@ spec:
                           name:
                             type: string
                         required:
-                            - name
+                          - name
                     required:
                       - name
                       - mongodbResourceRef
@@ -827,24 +840,18 @@ spec:
           required:
             - version
             - applicationDatabase
-
-
-# This ClusterRole is necessary in order to use validating webhooks—these will
-# prevent you from applying a variety of invalid resource definitions. The
-# validating webhooks are optional so this can be removed if necessary.
 ---
-# Source: mongodb-enterprise-operator/templates/crds.yaml
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: mongodb-enterprise-operator-mongodb-webhook
 rules:
-- apiGroups:
-  - "admissionregistration.k8s.io"
-  resources:
-  - validatingwebhookconfigurations
-  verbs:
-  - get
-  - create
-  - update
-  - delete
+  - apiGroups:
+      - "admissionregistration.k8s.io"
+    resources:
+      - validatingwebhookconfigurations
+    verbs:
+      - get
+      - create
+      - update
+      - delete

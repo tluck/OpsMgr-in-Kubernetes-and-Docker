@@ -2,13 +2,13 @@ version: '2'
 
 services:
   node:
-    image: "tjluckenbach/mongodb:node_4.2.6"
+    image: "tjluckenbach/mongodb:node_4.2.8"
     environment:
       - DOWNLOAD="https://downloads.mongodb.com/on-prem-mms/deb"
-      - MMSPACKAGE="mongodb-mms_4.3.9.100.20200331T2242Z-1_x86_64.deb"
       - OPSMGR="http://opsmgr:8080/download/agent/automation"
-      - AGENTPACKAGE="mongodb-mms-automation-agent-manager_10.12.2.6205-1_amd64.ubuntu1604.deb"
-    #command:
+      - MMSPACKAGE="mongodb-mms_4.2.14.56911.20200603T2242Z-1_x86_64.deb"
+      - AGENTPACKAGE="mongodb-mms-automation-agent-manager_10.2.18.5978-1_amd64.ubuntu1604.deb"
+    command: /bin/bash
     ulimits:
         memlock: -1
     ports:
@@ -20,10 +20,10 @@ services:
 #        mongonet:
             
 
-networks:
-  mongonet:
-    ipam:
-        driver: default
-        config:
-        - subnet: "172.19.0.0/24"
+#networks:
+#  mongonet:
+#    ipam:
+#        driver: default
+#        config:
+#        - subnet: "172.18.0.0/24"
 

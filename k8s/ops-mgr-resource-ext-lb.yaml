@@ -1,0 +1,72 @@
+---
+apiVersion: mongodb.com/v1
+kind: MongoDBOpsManager
+metadata:
+  name: opsmanager
+
+spec:
+  replicas: 1
+  version: 4.2.14
+  jvmParameters: ["-Xms2048m", "-Xmx2048m"] 
+  adminCredentials: admin-user-credentials # Should match metadata.name in the Kubernetes secret for the admin user
+  statefulSet:
+    spec:
+      template:
+        metadata:
+          annotations:
+            key1: value1
+        spec:
+          containers:
+            - name: mongodb-ops-manager
+              resources:
+                limits:
+                  cpu: "1.0"
+                  memory: 3G
+
+  externalConnectivity:
+    type: LoadBalancer
+    #port: 32080
+
+  applicationDatabase:
+    members: 3
+    version: 4.2.8-ent
+    persistent: true
+    podSpec:
+      cpu: "0.5"
+      memory: 250Mi
+      storage: 1Gi
+ 
+  configuration:
+    mms.ignoreInitialUiSetup: "true"
+    automation.versions.source: mongodb
+    mms.adminEmailAddr: thomas.luckenbach@mongodb.com
+    mms.fromEmailAddr: thomas.luckenbach@mongodb.com
+    mms.mail.hostname: smtp.fake.com
+    mms.mail.port: "25"
+    mms.mail.ssl: "true"
+    mms.mail.transport: smtp
+    mms.replyToEmailAddr: thomas.luckenbach@mongodb.com
+    mms.user.bypassInviteForExistingUsers: "true"
+    mms.publicApi.whitelistEnabled: "false"
+
+  backup:
+    enabled: true
+    jvmParameters: ["-Xms1024m", "-Xmx1024m"] 
+    opLogStores:
+      - name: oplog1
+        mongodbResourceRef:
+          name: ops-mgr-backup
+    blockStores:
+      - name: blockStore1
+        mongodbResourceRef:
+          name: ops-mgr-backup
+    statefulSet:
+      spec:
+        template:
+          spec:
+            containers:
+              - name: mongodb-backup-daemon
+                resources:
+                  requests:
+                    cpu: "0.5"
+                    memory: 1.5Gi  

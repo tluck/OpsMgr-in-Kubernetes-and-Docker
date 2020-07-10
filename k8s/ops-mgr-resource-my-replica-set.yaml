@@ -6,7 +6,7 @@ metadata:
   namespace: mongodb
 spec:
   members: 3
-  version: 4.2.8-ent
+  version: 4.2.6-ent
   type: ReplicaSet
   project: my-replica-set
   #credentials: admin-public-api-key
@@ -16,16 +16,16 @@ spec:
     cpu: "0.5"
     # note: it's important to always specify memory otherwise wired tiger cache will be calculated incorrectly and
     # monitoring tools will report the size of Kubernetes node instead of the real size of the container
-    memory: 250Mi
+    memory: 400Mi
     storage: 1Gi
-#  security:
-#    tls:
-#      enabled: true
-#    authentication:
-#      enabled : true
+  security:
+    tls:
+      enabled: false
+#      ca: ca-pem
+    authentication:
+      enabled : false
 #      modes: ["SCRAM"]
 
-#  connectivity:
     # replicaSetHorizons consists of a list of maps where each map represents a node within
     # the replica set and maps names of DNS horizons to externally connectable DNS names.
     # In the following example, this would allow a client to make a replica set connection
@@ -33,8 +33,9 @@ spec:
     # mongodb://mdb0-test-website.com:1337,mdb1-test-website.com:1338,mdb2-test-website.com:1339.
     # The length of the replicaSetHorizons list must be equal to the number of the members in the
     # replica set and each member should have all of the same DNS horizon names specified.connectivity:
-#    replicaSetHorizons:
-#      - "my-replica-set": "docker-desktop:32016"
-#      - "my-replica-set": "docker-desktop:32242"
-#      - "my-replica-set": "docker-desktop:31539"
+  # connectivity:
+  #   replicaSetHorizons:
+  #     - "my-replica-set": "ec2-54-149-94-44.us-west-2.compute.amazonaws.com:30619"
+  #     - "my-replica-set": "ec2-44-234-87-59.us-west-2.compute.amazonaws.com:30863"
+  #     - "my-replica-set": "ec2-18-237-238-49.us-west-2.compute.amazonaws.com:31162"
 

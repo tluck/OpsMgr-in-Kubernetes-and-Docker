@@ -40,8 +40,13 @@ done
 # get the OpsMgr URL and internal IP
 opsMgrUrl=$( kubectl get om -o json | jq .items[0].status.opsManager.url )
 opsMgrIp=$(  kubectl get pod/opsmanager-0 -o json | jq .status.podIP )
-cat init.conf |sed -e '/opsMgrUrl/d' -e '/opsMgrIp/d' > new
-echo  opsMgrUrl="$opsMgrUrl" | tee -a new
-echo  opsMgrIp="$opsMgrIp"  | tee -a new
-mv new init.conf
 kubectl get svc/opsmanager-svc-ext
+eval hostname=$( kubectl get svc/opsmanager-svc-ext -o json | jq .status.loadBalancer.ingress[0].hostname ) 
+opsMgrUrlExt=http://${hostname}:$( kubectl get svc/opsmanager-svc-ext -o json | jq .spec.ports[0].port )
+
+cat init.conf |sed -e '/opsMgrUrl/d' -e '/opsMgrIp/d' -e '/opsMgrUrlExt/d'> new
+echo  opsMgrUrl="$opsMgrUrl"        | tee -a new
+echo  opsMgrIp="$opsMgrIp"          | tee -a new
+echo  opsMgrUrlExt=\""$opsMgrUrlExt"\"  | tee -a new
+
+mv new init.conf

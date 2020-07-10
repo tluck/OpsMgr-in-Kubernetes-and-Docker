@@ -2,9 +2,6 @@
 
 source init.conf
 
-# Set namespace
-kubectl config set-context $(kubectl config current-context) --namespace=mongodb
-
 # Create map for OM Org/Project
 kubectl delete configmap my-replica-set > /dev/null 2>&1
 kubectl create configmap my-replica-set \
@@ -14,7 +11,7 @@ kubectl create configmap my-replica-set \
 
 # Create a 3 member replica set
 
-# Create a secret for the member certs
+# Create a secret for the member certs for TLS
 # kubectl delete secret my-replica-set-cert
 # sleep 10
 # kubectl get secrets
@@ -22,16 +19,15 @@ kubectl create configmap my-replica-set \
 #   --from-file=my-replica-set-0-pem \
 #   --from-file=my-replica-set-1-pem \
 #   --from-file=my-replica-set-2-pem
-
 # Create a map for the cert
-kubectl delete configmap ca-pem
-kubectl create configmap ca-pem --from-file=ca-pem
+# kubectl delete configmap ca-pem
+# kubectl create configmap ca-pem --from-file=ca-pem
 
 # Create a a secret for db user credentials
 kubectl delete secret dbadmin-credentials > /dev/null 2>&1
 kubectl create secret generic dbadmin-credentials \
-  --from-literal=name="dbAdmin" \
-  --from-literal=password="${password}"
+  --from-literal=name="${dbadmin}" \
+  --from-literal=password="${dbpassword}"
 
 # Create the User Resource
 kubectl apply -f ops-mgr-resource-database-user-conf.yaml

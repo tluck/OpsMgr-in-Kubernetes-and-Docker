@@ -19,6 +19,9 @@ then
     out=( x localhost x localhost x localhost )
 fi
 
-echo "      -" \"my-replica-set\": \"${out[1]}:$np0\"
-echo "      -" \"my-replica-set\": \"${out[3]}:$np1\"
-echo "      -" \"my-replica-set\": \"${out[5]}:$np2\"
+cat $1 | sed -e '/nodeport/d' > new
+echo "      -" \"nodeport\": \"${out[1]}:$np0\" | tee -a new
+echo "      -" \"nodeport\": \"${out[3]}:$np1\" | tee -a new
+echo "      -" \"nodeport\": \"${out[5]}:$np2\" | tee -a new
+mv new $1
+

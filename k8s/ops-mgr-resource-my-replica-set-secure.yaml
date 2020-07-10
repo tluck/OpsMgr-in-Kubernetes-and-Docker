@@ -21,21 +21,18 @@ spec:
   security:
     tls:
       enabled: true
-      #ca: ca-pem
+      # ca: ca-pem
     authentication:
       enabled : false
-#      modes: ["SCRAM"]
+      # modes: ["SCRAM"]
 
-    # replicaSetHorizons consists of a list of maps where each map represents a node within
-    # the replica set and maps names of DNS horizons to externally connectable DNS names.
-    # In the following example, this would allow a client to make a replica set connection
-    # from outside the replica set using a connection string like
-    # mongodb://mdb0-test-website.com:1337,mdb1-test-website.com:1338,mdb2-test-website.com:1339.
-    # The length of the replicaSetHorizons list must be equal to the number of the members in the
-    # replica set and each member should have all of the same DNS horizon names specified.connectivity:
+# replicaSetHorizons consists of a list of maps where each map represents a node within
+# the replica set and maps names of DNS horizons to externally connectable DNS names.
+# The length of the replicaSetHorizons list must be equal to the number of the members in the
+# replica set and each member should have all of the same DNS horizon names specified.connectivity:
   # connectivity:
   #   replicaSetHorizons:
-  #     - "my-replica-set": "ec2-54-149-94-44.us-west-2.compute.amazonaws.com:32726"
-  #     - "my-replica-set": "ec2-44-234-87-59.us-west-2.compute.amazonaws.com:31531"
-  #     - "my-replica-set": "ec2-54-218-93-54.us-west-2.compute.amazonaws.com:31516"
+  #     - "nodeport": "ec2-54-149-94-44.us-west-2.compute.amazonaws.com:32726"
+  #     - "nodeport": "ec2-44-234-87-59.us-west-2.compute.amazonaws.com:31531"
+  #     - "nodeport": "ec2-54-218-93-54.us-west-2.compute.amazonaws.com:31516"
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. init.conf
+source init.conf
 
 # update/create configmap with OrgId
 #sed -e "s|ORGID|${orgId}|g" -e "s|OPSMGRURL|${opsMgrUrl}|g"  ops-mgr-operator-configmap-ops-mgr-backup.yaml | kubectl apply -f -

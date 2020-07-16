@@ -1,5 +1,23 @@
 #!/bin/bash
 
+d=$( dirname "$0" )
+cd "${d}"
+PATH=$PATH:"${d}"/Misc
+
+which jq > /dev/null
+if [[ $? != 0 ]]
+then
+    printf "%s\n" "Exiting - Missing jq tool - run: brew install jq"
+    exit 1
+fi
+
+kubectl api-resources > /dev/null 2>&1
+if [[ $? != 0 ]]
+then
+    printf "%s\n" "Exiting - Check kubectl or cluster readiness"
+    exit 1
+fi
+
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Deploy the Operator ..."
 deploy_Operator.bash

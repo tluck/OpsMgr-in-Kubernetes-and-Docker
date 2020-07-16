@@ -32,6 +32,6 @@ spec:
 # replica set and each member should have all of the same DNS horizon names specified.connectivity:
   connectivity:
     replicaSetHorizons:
-      - "nodeport": "localhost:32285"
-      - "nodeport": "localhost:31758"
-      - "nodeport": "localhost:32523"
+      - "nodeport": "localhost:31824"
+      - "nodeport": "localhost:31911"
+      - "nodeport": "localhost:32190"

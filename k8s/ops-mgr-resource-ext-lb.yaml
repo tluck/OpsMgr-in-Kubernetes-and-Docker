@@ -7,7 +7,7 @@ metadata:
 spec:
   replicas: 1
   version: 4.2.14
-  jvmParameters: ["-Xms2048m", "-Xmx2048m"] 
+  jvmParameters: ["-Xms2048m", "-Xmx2048m"] # only for demo mode
   adminCredentials: admin-user-credentials # Should match metadata.name in the Kubernetes secret for the admin user
   statefulSet:
     spec:
@@ -21,7 +21,7 @@ spec:
               resources:
                 limits:
                   cpu: "1.0"
-                  memory: 3G
+                  memory: 3G # only for demo mode - 5GB or more is best
 
   externalConnectivity:
     type: LoadBalancer

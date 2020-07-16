@@ -20,6 +20,8 @@ do
     sleep 10
 done
 
+cat Misc/C
+
 exit
 
 # Alternate way to monitor - wait for last pod in the set

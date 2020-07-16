@@ -21,4 +21,4 @@ fi
 kubectl exec my-replica-set-0 -i -t -- cat /mongodb-automation/ca.pem > ca.pem
 kubectl exec my-replica-set-0 -i -t -- cat /mongodb-automation/server.pem > server.pem
 
-mongo mongodb://${out[1]}:$np0,${out[3]}:$np1,${out[5]}:$np2/?replicaSet=my-replica-set --tls --tlsCAFile ca.pem --tlsCertificateKeyFile server.pem -u dbAdmin -p Mongodb1$ 
+mongo mongodb://${out[1]}:$np0,${out[3]}:$np1,${out[5]}:$np2/?replicaSet=my-replica-set --tls --tlsCAFile ca.pem --tlsCertificateKeyFile server.pem -u $dbadmin -p $dbpassword

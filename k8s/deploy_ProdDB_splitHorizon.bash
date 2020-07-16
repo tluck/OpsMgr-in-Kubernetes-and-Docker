@@ -20,7 +20,7 @@ do
     sleep 10
 done
 
-cat Misc/C
+printf "%s\n" "Connect by running: Misc/connect_to_my-replica-set.bash"
 
 exit
 

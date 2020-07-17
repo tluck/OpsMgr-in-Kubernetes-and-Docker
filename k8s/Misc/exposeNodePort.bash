@@ -4,6 +4,7 @@ if [[ $1 == "" ]]
 then
     printf "%s\n" "Exit - need yaml file argument"
     exit 1
+fi
 
 # remove any old services
 kubectl delete svc my-replica-set-0 > /dev/null 2>&1
@@ -44,7 +45,7 @@ fi
 
 num=${#dnlist[@]}
 
-cat $1 | sed -e '/nodeport/d' -e '/connectivity/d' -e '/replicaSetHorizons/d'> new
+cat $1 | sed -e '/nodeport/d' -e '/connectivity:/d' -e '/replicaSetHorizons:/d' > new
 echo "  connectivity:"                       | tee -a new
 echo "    replicaSetHorizons:"               | tee -a new
 echo "      -" \"nodeport\": \"${hn0}:$np0\" | tee -a new
@@ -53,5 +54,7 @@ echo "      -" \"nodeport\": \"${hn2}:$np2\" | tee -a new
 mv new $1
 
 cat init.conf | sed -e '/myReplicaSetConnect/d' > new
+echo
 echo "myReplicaSetConnect=\"mongodb://${hn0}:$np0,${hn1}:$np1,${hn2}:$np2/?replicaSet=my-replica-set --tls --tlsCAFile ca.pem --tlsCertificateKeyFile server.pem -u \$dbadmin -p \$dbpassword\"" | tee -a new
+echo
 mv new init.conf

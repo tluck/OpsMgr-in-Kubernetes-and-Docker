@@ -1,8 +1,16 @@
 #!/bin/bash
 
+d=$( dirname "$0" )
+cd "${d}"
+PATH=$PATH:"${d}"/Misc
+
 source init.conf
 
-Misc/expose.bash ops-mgr-resource-my-replica-set-secure-auth.yaml
+# expose nodeports - creates nodeport service for each pod of member set
+# add the nodeport map for splitHorizon
+Misc/exposeNodePort.bash ops-mgr-resource-my-replica-set-secure-auth.yaml
+
+# redeploy with new map
 kubectl apply -f ops-mgr-resource-my-replica-set-secure-auth.yaml
 
 # Monitor the progress

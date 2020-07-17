@@ -1,5 +1,9 @@
 #!/bin/bash
 
+d=$( dirname "$0" )
+cd "${d}"
+PATH=$PATH:"${d}"/Misc
+
 source init.conf
 
 # update/create configmap with OrgId
@@ -9,9 +13,11 @@ source init.conf
 kubectl delete configmap ops-mgr-backup > /dev/null 2>&1
 kubectl create configmap ops-mgr-backup \
   --from-literal="baseUrl=${opsMgrUrl}" \
-  --from-literal="projectName=OpsMgrBackup"  #Optional
- # --from-literal="orgId={orgId}" #Optional
-
+  --from-literal="projectName=OpsMgrBackup" \
+  
+  #--from-literal="sslMMSCAConfigMap=opsmanager-cert-ca" \
+  #--from-literal="sslRequireValidMMSServerCertificates=‘true’"
+  # --from-literal="orgId={orgId}" #Optional
 kubectl get configmaps -n mongodb
 
 # Create the replica set for the Backing DBs

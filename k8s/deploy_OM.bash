@@ -1,5 +1,9 @@
 #!/bin/bash
 
+d=$( dirname "$0" )
+cd "${d}"
+PATH=$PATH:"${d}"/Misc
+
 source init.conf
 
 # Create the credentials for main admin user
@@ -10,9 +14,15 @@ kubectl create secret generic admin-user-credentials \
   --from-literal=FirstName="${firstName}" \
   --from-literal=LastName="${lastName}"
 
+# for enablement of TLS (https)
+cat MyKey.key mms-ca.crt > server.pem
+kubectl create secret generic opsmanager-cert --from-file="server.pem"
+kubectl create configmap opsmanager-cert-ca --from-file="mms-ca.crt"
+
 #  Deploy OpsManager resources
 ## kubectl apply -f ops-mgr-resource-ext-np.yaml
 kubectl apply -f ops-mgr-resource-ext-lb.yaml
+#kubectl apply -f ops-mgr-resource-ext-lb-tls.yaml
 
 # Monitor the progress until the OpsMgr app is ready
 while true
@@ -30,7 +40,13 @@ done
 opsMgrUrl=$( kubectl get om -o json | jq .items[0].status.opsManager.url )
 opsMgrIp=$(  kubectl get pod/opsmanager-0 -o json | jq .status.podIP )
 eval hostname=$( kubectl get svc/opsmanager-svc-ext -o json | jq .status.loadBalancer.ingress[0].hostname ) 
-opsMgrUrlExt=http://${hostname}:$( kubectl get svc/opsmanager-svc-ext -o json | jq .spec.ports[0].port )
+eval ip=$( kubectl get svc/opsmanager-svc-ext -o json | jq .status.loadBalancer.ingress[0].ip ) 
+if [[ $hostname == "null" ]]
+then
+    opsMgrUrlExt=http://${ip}:$( kubectl get svc/opsmanager-svc-ext -o json | jq .spec.ports[0].port )
+else
+    opsMgrUrlExt=http://${hostname}:$( kubectl get svc/opsmanager-svc-ext -o json | jq .spec.ports[0].port )
+fi
 kubectl get svc/opsmanager-svc-ext
 
 # Update init.conf with OpsMgr info

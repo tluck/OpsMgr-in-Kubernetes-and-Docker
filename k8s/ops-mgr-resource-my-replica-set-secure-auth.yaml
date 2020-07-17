@@ -26,12 +26,9 @@ spec:
       enabled : true
       modes: ["SCRAM"]
 
-# replicaSetHorizons consists of a list of maps where each map represents a node within
-# the replica set and maps names of DNS horizons to externally connectable DNS names.
-# The length of the replicaSetHorizons list must be equal to the number of the members in the
-# replica set and each member should have all of the same DNS horizon names specified.connectivity:
-  connectivity:
-    replicaSetHorizons:
-      - "nodeport": "localhost:30058"
-      - "nodeport": "localhost:30435"
-      - "nodeport": "localhost:32537"
+# replica set and each member should have all of the same DNS horizon names specified:
+  # connectivity:
+  #   replicaSetHorizons:
+  #     - "nodeport": "ec2-54-71-34-20.us-west-2.compute.amazonaws.com:32362"
+  #     - "nodeport": "ec2-35-160-8-36.us-west-2.compute.amazonaws.com:32367"
+  #     - "nodeport": "ec2-44-234-85-130.us-west-2.compute.amazonaws.com:32138"

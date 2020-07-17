@@ -1,5 +1,9 @@
 #!/bin/bash
 
+d=$( dirname "$0" )
+cd "${d}"
+PATH=$PATH:"${d}"/Misc
+
 source init.conf
 
 # Optinal - Create the metrics server

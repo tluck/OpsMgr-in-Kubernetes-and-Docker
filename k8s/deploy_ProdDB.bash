@@ -50,7 +50,7 @@ kubectl get configmaps -n mongodb
 
 sleep 10
 # clean out any old nodeport config
-sed -i .bak -e '/nodeport:/d' -e '/connectivity:/d' -e '/replicaSetHorizons:/d' ops-mgr-resource-my-replica-set-secure-auth.yaml
+sed -i .bak -e '/nodeport/d' -e '/connectivity:/d' -e '/replicaSetHorizons:/d' ops-mgr-resource-my-replica-set-secure-auth.yaml
 # Create the DB Resource
 #kubectl apply -f ops-mgr-resource-my-replica-set.yaml
 #kubectl apply -f ops-mgr-resource-my-replica-set-secure.yaml

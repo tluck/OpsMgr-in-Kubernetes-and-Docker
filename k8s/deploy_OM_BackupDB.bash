@@ -18,7 +18,6 @@ kubectl create configmap ops-mgr-backup \
   #--from-literal="sslMMSCAConfigMap=opsmanager-cert-ca" \
   #--from-literal="sslRequireValidMMSServerCertificates=‘true’"
   # --from-literal="orgId={orgId}" #Optional
-kubectl get configmaps -n mongodb
 
 # Create the replica set for the Backing DBs
 kubectl apply -f ops-mgr-resource-ops-mgr-backup.yaml 

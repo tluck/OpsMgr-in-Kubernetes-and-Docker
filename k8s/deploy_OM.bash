@@ -33,7 +33,7 @@ do
     then
         break
     fi
-    sleep 10
+    sleep 15
 done
 
 # get the OpsMgr URL and internal IP

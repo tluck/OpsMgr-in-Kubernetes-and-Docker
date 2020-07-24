@@ -38,6 +38,9 @@ printf "\n%s\n" "_______________________________________________________________
 printf "%s\n" "Create the 1st Production DB ..."
 deploy_ProdDB.bash
 
+printf "%s" "Do you need external access to the DB?"
+read -p " [Y/n] " ans <&0 && if [[ ${ans:0:1} == "n" || ${ans:0:1} == "N" ]]; then exit 0; fi
+
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Update splitHorizon configuration for External access to Production DB ..."
 deploy_ProdDB_splitHorizon.bash

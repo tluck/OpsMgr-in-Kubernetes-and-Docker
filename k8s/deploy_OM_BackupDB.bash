@@ -33,5 +33,5 @@ do
         printf "%s\n" "$status"
         break
     fi
-    sleep 10
+    sleep 15
 done

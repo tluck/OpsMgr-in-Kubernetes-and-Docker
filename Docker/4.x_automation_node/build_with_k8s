@@ -7,7 +7,7 @@ docker build \
         --build-arg MONGO_PACKAGE=mongodb-enterprise \
         --network mongonet \
         --add-host opsmanager-svc.mongodb.svc.cluster.local:${opsMgrIp} \
-        --build-arg DOWNLOAD=$OPSMGR \
+        --build-arg DOWNLOAD=$OPSMGR_K8S \
         --build-arg PACKAGE=$AGENTPACKAGE \
         --build-arg MONGO_VERSION=$MONGO_VERSION \
         --build-arg MONGO_REPO=repo.mongodb.com \

@@ -6,8 +6,8 @@ metadata:
 
 spec:
   replicas: 1
-  version: 4.2.14
-  jvmParameters: ["-Xms2048m", "-Xmx2048m"] # only for demo mode
+  version: 4.2.15
+  jvmParameters: ["-Xms2560m", "-Xmx2560m"] # only for demo mode
   adminCredentials: admin-user-credentials # Should match metadata.name in the Kubernetes secret for the admin user
   statefulSet:
     spec:
@@ -20,7 +20,7 @@ spec:
             - name: mongodb-ops-manager
               resources:
                 limits:
-                  cpu: "1.0"
+                  cpu: "2.0"
                   memory: 3G # only for demo mode - 5GB or more is best
 
   security: # enables TLS for Ops Manager allowing it to serve traffic over HTTPS
@@ -31,16 +31,23 @@ spec:
         name: opsmanager-cert
 
   externalConnectivity:
-      type: LoadBalancer
-      #port: 32080
+    type: LoadBalancer
+    #type: NodePort
+    #port: 32080
 
   applicationDatabase:
     members: 3
     version: 4.2.8-ent
     persistent: true
+    security:
+      tls:
+        enabled: true
+        ca: "appdb-ca"
+        secretRef:
+          name: "appdb-certs" # Name of the Secret object
     podSpec:
       cpu: "0.5"
-      memory: 250Mi
+      memory: 400Mi
       storage: 1Gi
  
   configuration:
@@ -48,9 +55,9 @@ spec:
     automation.versions.source: mongodb
     mms.adminEmailAddr: thomas.luckenbach@mongodb.com
     mms.fromEmailAddr: thomas.luckenbach@mongodb.com
-    mms.mail.hostname: smtp.fake.com
+    mms.mail.hostname: smtp-svc.mongodb.svc.cluster.local
     mms.mail.port: "25"
-    mms.mail.ssl: "true"
+    mms.mail.ssl: "false"
     mms.mail.transport: smtp
     mms.replyToEmailAddr: thomas.luckenbach@mongodb.com
     mms.user.bypassInviteForExistingUsers: "true"
@@ -76,4 +83,4 @@ spec:
                 resources:
                   requests:
                     cpu: "0.5"
-                    memory: 1.5Gi  
+                    memory: 1.2Gi  

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source docker_id
+source docker.conf
 
 data="$(pwd)/data"
 

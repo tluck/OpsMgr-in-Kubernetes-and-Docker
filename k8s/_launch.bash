@@ -22,6 +22,7 @@ printf "\n%s\n" "_______________________________________________________________
 printf "%s\n" "Deploy the Operator ..."
 deploy_Operator.bash
 
+
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Deploy OM and wait until Running status..."
 deploy_OM.bash

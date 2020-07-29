@@ -1,0 +1,18 @@
+#!/bin/bash
+
+source docker.conf
+source ../../k8s/init.conf
+
+data="$(pwd)/data"
+
+docker run \
+        --network mongonet \
+        --add-host opsmanager-svc.mongodb.svc.cluster.local:${opsMgrIp} \
+        --name mail -h mysmtp \
+        -e RELAY_HOST=smtp.gmail.com \
+        -e RELAY_PORT=587 \
+        -e RELAY_USERNAME=thomas.luckenbach@mongodb.com \
+        -e RELAY_PASSWORD=T06160l$ \
+        -itd --restart always bytemark/smtp
+
+

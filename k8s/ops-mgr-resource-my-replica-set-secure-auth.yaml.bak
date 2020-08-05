@@ -27,8 +27,3 @@ spec:
       modes: ["SCRAM"]
 
 # replica set and each member should have all of the same DNS horizon names specified:
-  connectivity:
-    replicaSetHorizons:
-      - "nodeport": "localhost:30680"
-      - "nodeport": "localhost:32746"
-      - "nodeport": "localhost:30449"

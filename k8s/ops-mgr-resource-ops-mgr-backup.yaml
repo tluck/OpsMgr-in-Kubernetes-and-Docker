@@ -6,7 +6,7 @@ metadata:
   namespace: mongodb
 spec:
   members: 3
-  version: 4.2.8-ent
+  version: 3.6.19 # 4.2.8-ent
   type: ReplicaSet
   project: ops-mgr-backup
   #credentials: admin-public-api-key
@@ -16,5 +16,13 @@ spec:
     cpu: "0.5"
     # note: it's important to always specify memory otherwise wired tiger cache will be calculated incorrectly and
     # monitoring tools will report the size of Kubernetes node instead of the real size of the container
-    memory: 250Mi
-    storage: 1Gi
+    memory: 300Mi
+    storage: 2Gi
+  security:
+    tls:
+      enabled: false
+      # ca: ca-pem
+    authentication:
+      enabled : true
+      modes: ["SCRAM"]
+      

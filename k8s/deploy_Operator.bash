@@ -16,6 +16,3 @@ kubectl config set-context $(kubectl config current-context) --namespace=mongodb
 # Deploy the MongoDB Enterprise Operator
 kubectl apply -f crds.yaml
 kubectl apply -f mongodb-enterprise.yaml
-
-# Deploy simple SMTP forwarder 
-mail/deploy_SMTP.bash

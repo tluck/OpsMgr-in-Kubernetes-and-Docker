@@ -5,7 +5,7 @@
 curl --user "${publicKey}:${privateKey}" --digest \
  --header 'Accept: application/json' \
  --header 'Content-Type: application/json' \
- --request POST "http://opsmgr:32080/api/public/v1.0/orgs?pretty=true" \
+ --request POST "http://opsmgr:8080/api/public/v1.0/orgs?pretty=true" \
  --data '{ "name" : "Demo" }' \
  -o org.json > /dev/null 2>&1
 

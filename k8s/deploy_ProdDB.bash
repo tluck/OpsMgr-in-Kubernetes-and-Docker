@@ -17,8 +17,8 @@ kubectl delete svc my-replica-set-0 > /dev/null 2>&1
 kubectl delete svc my-replica-set-1 > /dev/null 2>&1
 kubectl delete svc my-replica-set-2 > /dev/null 2>&1
 
-# # clean out any old nodeport config
-#  sed -i .bak -e '/nodeport/d' -e '/connectivity:/d' -e '/replicaSetHorizons:/d' ops-mgr-resource-my-replica-set-secure-auth.yaml
+# clean out any old nodeport config
+sed -i .bak -e '/nodeport/d' -e '/connectivity:/d' -e '/replicaSetHorizons:/d' ops-mgr-resource-my-replica-set-secure-auth.yaml
 
 # Create map for OM and the Org/Project
 kubectl delete configmap my-replica-set > /dev/null 2>&1
@@ -28,7 +28,7 @@ kubectl create configmap my-replica-set \
  # --from-literal="orgId={$orgId}>" #Optional
 
 # # Create a secret for the member certs for TLS
-# kubectl delete secret my-replica-set-cert > /dev/null 2>&1
+# kubectl delete secret         my-replica-set-cert > /dev/null 2>&1
 # kubectl create secret generic my-replica-set-cert \
 #   --from-file=my-replica-set-0-pem \
 #   --from-file=my-replica-set-1-pem \

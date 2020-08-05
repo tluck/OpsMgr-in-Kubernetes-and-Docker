@@ -14,7 +14,7 @@ mv new init.conf
 curl --user "${user}:${publicApiKey}" --digest \
   --header "Accept: application/json" \
   --header "Content-Type: application/json" \
-  --request POST "http://opsmgr:32080/api/public/v1.0/admin/apiKeys?pretty=true" \
+  --request POST "http://opsmgr:8080/api/public/v1.0/admin/apiKeys?pretty=true" \
   --data '{
     "desc" : "New API key for Global Testing",
     "roles" : [ "GLOBAL_OWNER" ]

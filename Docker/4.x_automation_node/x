@@ -5,27 +5,20 @@ source ../../k8s/init.conf
 
 data="$(pwd)/data"
 
-if [[ $1 == "" || $1 > 9 ]]
-then 
-    echo Need server number - from 1 to 6
-    exit
-fi
+h=opsmanager-svc.mongodb.svc.cluster.local
+ip=52.10.136.233
 
 n=$1
-ports=(27017 27018 27019 27020 27021 27022 27023 27024 27025 20726)
+ports=(27017 27018 27019 27020 27021 27022 27023 27024 27025 27026)
 
-docker network ls|grep mongonet >/dev/null 2>&1
-if [[ $? != 0 ]]
-then
-docker network create mongonet
-fi
-
+for n in 0 1 2 3 4 5 6 7 8 9
+do
 docker run \
         --init \
         --network mongonet \
-        --add-host opsmanager-svc.mongodb.svc.cluster.local:${opsMgrIp} \
+        --add-host ${h}:${ip} \
         --name mongodb${n} -h mongodb${n} -p ${ports[$n]}:27017 \
         --mount type=bind,source=${data},target=/shareddata  \
         -itd --privileged $DOCKER_USERNAME/mongodb:node_$MONGO_VERSION
-
+done
 

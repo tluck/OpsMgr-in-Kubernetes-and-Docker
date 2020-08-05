@@ -7,23 +7,12 @@ PATH=$PATH:"${d}"/Misc
 source init.conf
 
 # Create the credentials for main admin user
-kubectl delete secret admin-user-credentials > /dev/null 2>&1
+kubectl delete secret         admin-user-credentials > /dev/null 2>&1
 kubectl create secret generic admin-user-credentials \
   --from-literal=Username="${user}" \
   --from-literal=Password="${password}" \
   --from-literal=FirstName="${firstName}" \
   --from-literal=LastName="${lastName}"
-
-# # for enablement of TLS (https)
-
-# kubectl create secret generic opsmanager-cert --from-file="opsmanager-pem"
-# kubectl create configmap opsmanager-cert-ca --from-file="mms-ca.crt"
-
-# kubectl create secret generic appdb-certs \
-#         --from-file=opsmanager-db-0-pem \
-#         --from-file=opsmanager-db-1-pem \
-#         --from-file=opsmanager-db-2-pem
-# kubectl create configmap appdb-ca --from-file="ca-pem"
 
 #  Deploy OpsManager resources
 ## kubectl apply -f ops-mgr-resource-ext-np.yaml

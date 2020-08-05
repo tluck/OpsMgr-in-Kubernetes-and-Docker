@@ -6,7 +6,7 @@ metadata:
 
 spec:
   replicas: 1
-  version: 4.2.15
+  version: 4.4.0 # 4.2.15
   jvmParameters: ["-Xms2560m", "-Xmx2560m"] # only for demo mode
   adminCredentials: admin-user-credentials # Should match metadata.name in the Kubernetes secret for the admin user
   statefulSet:
@@ -47,12 +47,11 @@ spec:
           name: "appdb-certs" # Name of the Secret object
     podSpec:
       cpu: "0.5"
-      memory: 400Mi
+      memory: 500Mi
       storage: 1Gi
  
   configuration:
     mms.ignoreInitialUiSetup: "true"
-    automation.versions.source: mongodb
     mms.adminEmailAddr: thomas.luckenbach@mongodb.com
     mms.fromEmailAddr: thomas.luckenbach@mongodb.com
     mms.mail.hostname: smtp-svc.mongodb.svc.cluster.local
@@ -62,6 +61,7 @@ spec:
     mms.replyToEmailAddr: thomas.luckenbach@mongodb.com
     mms.user.bypassInviteForExistingUsers: "true"
     mms.publicApi.whitelistEnabled: "false"
+    automation.versions.source: hybrid # mongodb
 
   backup:
     enabled: true
@@ -70,10 +70,14 @@ spec:
       - name: oplog1
         mongodbResourceRef:
           name: ops-mgr-backup
+        mongodbUserRef:
+          name: dbadmin-backup
     blockStores:
       - name: blockStore1
         mongodbResourceRef:
           name: ops-mgr-backup
+        mongodbUserRef:
+          name: dbadmin-backup
     statefulSet:
       spec:
         template:

@@ -7,28 +7,32 @@ PATH=$PATH:"${d}"/Misc
 source init.conf
 
 # Create the credentials for main admin user
-kubectl delete secret admin-user-credentials > /dev/null 2>&1
+kubectl delete secret         admin-user-credentials > /dev/null 2>&1
 kubectl create secret generic admin-user-credentials \
   --from-literal=Username="${user}" \
   --from-literal=Password="${password}" \
   --from-literal=FirstName="${firstName}" \
   --from-literal=LastName="${lastName}"
 
-# # for enablement of TLS (https)
-
+# for enablement of TLS (https)
+kubectl delete secret         opsmanager-cert > /dev/null 2>&1
 kubectl create secret generic opsmanager-cert --from-file="server.pem"
-kubectl create configmap opsmanager-cert-ca --from-file="mms-ca.crt"
+kubectl delete configmap opsmanager-cert-ca > /dev/null 2>&1
+kubectl create configmap opsmanager-cert-ca --from-file="mms-ca.crt" # seems to need this filename
 
+# for enablement of TLS on the appdb
+kubectl delete secret         appdb-certs > /dev/null 2>&1
 kubectl create secret generic appdb-certs \
         --from-file="opsmanager-db-0-pem" \
         --from-file="opsmanager-db-1-pem" \
         --from-file="opsmanager-db-2-pem"
-kubectl create configmap appdb-ca --from-file="ca-pem"
+kubectl delete configmap appdb-ca > /dev/null 2>&1
+kubectl create configmap appdb-ca --from-file="ca-pem" # seems to need this filename
 
 #  Deploy OpsManager resources
 ## kubectl apply -f ops-mgr-resource-ext-np.yaml
-kubectl apply -f ops-mgr-resource-ext-lb.yaml
-#kubectl apply -f ops-mgr-resource-ext-lb-tls.yaml
+#kubectl apply -f ops-mgr-resource-ext-lb.yaml
+kubectl apply -f ops-mgr-resource-ext-lb-tls.yaml
 
 # Monitor the progress until the OpsMgr app is ready
 while true

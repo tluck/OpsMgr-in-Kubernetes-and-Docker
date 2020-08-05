@@ -24,9 +24,8 @@ kubectl delete configmap ops-mgr-backup > /dev/null 2>&1
 kubectl create configmap ops-mgr-backup \
   --from-literal="baseUrl=${opsMgrUrl}" \
   --from-literal="projectName=OpsMgrBackup" \
-  
-  #--from-literal="sslMMSCAConfigMap=opsmanager-cert-ca" \
-  #--from-literal="sslRequireValidMMSServerCertificates=‘true’"
+  --from-literal="sslMMSCAConfigMap=opsmanager-cert-ca" \
+  --from-literal="sslRequireValidMMSServerCertificates=‘true’"
   # --from-literal="orgId={orgId}" #Optional
 
 # Create a a secret for db user credentials

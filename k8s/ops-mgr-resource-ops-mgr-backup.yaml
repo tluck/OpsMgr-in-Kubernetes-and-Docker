@@ -20,9 +20,14 @@ spec:
     storage: 2Gi
   security:
     tls:
-      enabled: false
+      enabled: true # false
       # ca: ca-pem
     authentication:
       enabled : true
       modes: ["SCRAM"]
+  additionalMongodConfig:
+    net:
+      ssl:
+        mode: "preferSSL"
+
       

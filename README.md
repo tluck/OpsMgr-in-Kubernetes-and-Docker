@@ -48,24 +48,26 @@ Runs OpsManager 4.3 with severval agent-ready "empty nodes" to demo Automation a
 - Restart to enable new settings
 
 ### Step 2. Launch the Services
-the _launch.bash script has 3 sections:
+the _launch.bash script has serveral sections:
 
-- Script 1: deploy_OM.bas - Setup the OM enviroment
+- Script 1: deploy_Operator.bash - Setup the OM enviroment
 	- Defines the name space
 	- Deploys the Mongodb Enterprise K8s Operator
+
+- Script 2: deploy_Operator.bash - Setup the OM enviroment
   	- Deploy the OM Resources
   		- OpsManager
   		- App DB 
   	- Monitors the progress
 
-- Script 2: deploy_OM_BackupDB.bash - Deploy the OM Backing DBs
+- Script 3: deploy_OM_BackupDB.bash - Deploy the OM Backing DBs
 	- Completes the Backup setup for OM
 	- Monitors the progress until the pods are ready
 
-- Script3: deploy_ProdDB.bash -  Deploy a Production DB
+- Script 4: deploy_ProdDB.bash -  Deploy a Production DB
 	- Deploy a secure 3 node replica set (with TLS and Auth)
 	- Note: use a down-rev verions to show automation later on
 	- Monitors the progress until the replica set is ready
 	
 ### Step 3. Login to OM
-- login to localhost:32080 with the credentials from init.conf
+- login to OM at localhost:8080 with the credentials from init.conf

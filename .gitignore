@@ -3,4 +3,3 @@
 *pem
 *.pem
 *.crt
-k8s/ops-mgr-resource-my-replica-set-secure-auth.yaml

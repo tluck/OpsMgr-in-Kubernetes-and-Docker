@@ -24,7 +24,7 @@ while true
 do
     kubectl get om 
     eval status=$( kubectl get om -o json | jq .items[0].status.opsManager.phase )
-    if [[ $status == "Running" ]];
+    if [[ "$status" == "Running" ]];
     then
         break
     fi

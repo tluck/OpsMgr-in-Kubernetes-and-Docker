@@ -58,7 +58,7 @@ do
         kubectl certificate approve ops-mgr-backup-2.mongodb
     fi
     #if [[ $status == "Pending" || $status == "Running" ]];
-    if [[ $status == "Running" ]];
+    if [[ "$status" == "Running" ]];
     then
         printf "%s\n" "$status"
         break

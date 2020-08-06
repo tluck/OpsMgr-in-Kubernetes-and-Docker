@@ -1,5 +1,8 @@
 #!/bin/bash
 
+d=$( dirname "$0" )
+cd "${d}"
+
 # opsmanager
 i=svc
 name=opsmanager-${i}
@@ -47,7 +50,7 @@ kubectl certificate approve ${name}.mongodb
 eval c=$( kubectl get csr ${name}.mongodb -o json|jq .status.certificate)
 echo $c |base64 -D> ${name}.crt
 cat ${name}.crt ${name}.key > ${name}-pem
-cp ${name}-pem server.pem
+ln -sf ${name}-pem server.pem
 # clean up
 rm ${name}.key
 rm ${name}.crt

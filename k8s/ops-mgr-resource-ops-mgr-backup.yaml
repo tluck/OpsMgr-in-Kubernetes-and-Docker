@@ -6,7 +6,7 @@ metadata:
   namespace: mongodb
 spec:
   members: 3
-  version: 3.6.19 # 4.2.8-ent
+  version: 4.2.8
   type: ReplicaSet
   project: ops-mgr-backup
   #credentials: admin-public-api-key

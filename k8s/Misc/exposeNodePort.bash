@@ -16,8 +16,8 @@ kubectl expose pod my-replica-set-0 --type="NodePort" --port 27017 -n mongodb
 kubectl expose pod my-replica-set-1 --type="NodePort" --port 27017 -n mongodb
 kubectl expose pod my-replica-set-2 --type="NodePort" --port 27017 -n mongodb
 
+printf "%s\n" "Sleeping 20 seconds to allow IP/Hostnames to be created"
 sleep 20
-printf "%s\n" "Sleeping 20 seconds to allow IP/Host=names to get created"
 
 np0=( $(kubectl get svc/my-replica-set-0 -o jsonpath='{.spec.ports[0].nodePort}') )
 np1=( $(kubectl get svc/my-replica-set-1 -o jsonpath='{.spec.ports[0].nodePort}') )

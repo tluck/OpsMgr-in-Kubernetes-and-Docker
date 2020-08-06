@@ -6,7 +6,7 @@ metadata:
   namespace: mongodb
 spec:
   members: 3
-  version: 4.2.6-ent
+  version: 4.2.8-ent
   type: ReplicaSet
   project: my-replica-set
   #credentials: admin-public-api-key
@@ -29,6 +29,6 @@ spec:
 # replica set and each member should have all of the same DNS horizon names specified:
   connectivity:
     replicaSetHorizons:
-      - "nodeport": "localhost:30680"
-      - "nodeport": "localhost:32746"
-      - "nodeport": "localhost:30449"
+      - "nodeport": "localhost:31140"
+      - "nodeport": "localhost:30001"
+      - "nodeport": "localhost:30516"

@@ -6,20 +6,21 @@ PATH=$PATH:"${d}"/Misc
 
 source init.conf
 
+# create new certs if the service does not exist
+#kubectl get svc my-replica-set-0 > /dev/null 2>&1
+#if [[ $? != 0 ]]
+#then
 # clean up any previous certs and services
 kubectl delete csr my-replica-set-0.mongodb > /dev/null 2>&1
 kubectl delete csr my-replica-set-1.mongodb > /dev/null 2>&1
 kubectl delete csr my-replica-set-2.mongodb > /dev/null 2>&1
-
-
-
-
-
 # expose nodeports - creates nodeport service for each pod of member set
 # add the nodeport map for splitHorizon
 ###Misc/exposeNodePort.bash ops-mgr-resource-my-replica-set-secure-auth.yaml >/dev/null 2>&1
 Misc/exposeNodePort.bash ops-mgr-resource-my-replica-set-secure-auth.yaml
 source init.conf
+#fi
+
 # Create map for OM Org/Project
 #kubectl delete configmap my-replica-set > /dev/null 2>&1
 kubectl create configmap my-replica-set \
@@ -72,7 +73,7 @@ do
         kubectl certificate approve my-replica-set-2.mongodb
     fi
     #if [[ $status == "Pending" || $status == "Running" ]];
-    if [[ $status == "Running" ]];
+    if [[ "$status" == "Running" ]];
     then
         printf "%s\n" "$status"
         break

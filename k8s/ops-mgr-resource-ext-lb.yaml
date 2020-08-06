@@ -61,7 +61,7 @@ spec:
     mms.replyToEmailAddr: thomas.luckenbach@mongodb.com
     mms.user.bypassInviteForExistingUsers: "true"
     mms.publicApi.whitelistEnabled: "false"
-    automation.versions.source: hybrid # mongodb
+    automation.versions.source: mongodb # hybrid
 
   backup:
     enabled: true

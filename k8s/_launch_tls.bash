@@ -32,7 +32,7 @@ printf "%s\n" "Getting Certs status..."
 # Get ca.crt and create certs for OM and App-db 
 certs/get_ca.crt.bash
 certs/make_opsmanger_certs.bash
-ls -1 *pem *crt 
+ls -1 certs/*pem certs/*crt 
 
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Deploy OM and wait until Running status..."

@@ -16,18 +16,18 @@ kubectl create secret generic admin-user-credentials \
 
 # for enablement of TLS (https)
 kubectl delete secret         opsmanager-cert > /dev/null 2>&1
-kubectl create secret generic opsmanager-cert --from-file="server.pem"
+kubectl create secret generic opsmanager-cert --from-file="certs/server.pem"
 kubectl delete configmap opsmanager-cert-ca > /dev/null 2>&1
-kubectl create configmap opsmanager-cert-ca --from-file="mms-ca.crt" # seems to need this filename
+kubectl create configmap opsmanager-cert-ca --from-file="certs/mms-ca.crt" # seems to need this filename
 
 # for enablement of TLS on the appdb
 kubectl delete secret         appdb-certs > /dev/null 2>&1
 kubectl create secret generic appdb-certs \
-        --from-file="opsmanager-db-0-pem" \
-        --from-file="opsmanager-db-1-pem" \
-        --from-file="opsmanager-db-2-pem"
+        --from-file="certs/opsmanager-db-0-pem" \
+        --from-file="certs/opsmanager-db-1-pem" \
+        --from-file="certs/opsmanager-db-2-pem"
 kubectl delete configmap appdb-ca > /dev/null 2>&1
-kubectl create configmap appdb-ca --from-file="ca-pem" # seems to need this filename
+kubectl create configmap appdb-ca --from-file="certs/ca-pem" # seems to need this filename
 
 #  Deploy OpsManager resources
 ## kubectl apply -f ops-mgr-resource-ext-np.yaml
@@ -39,7 +39,7 @@ while true
 do
     kubectl get om 
     eval status=$( kubectl get om -o json | jq .items[0].status.opsManager.phase )
-    if [[ $status == "Running" ]];
+    if [[ "$status" == "Running" ]];
     then
         break
     fi

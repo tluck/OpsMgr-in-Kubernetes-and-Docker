@@ -17,15 +17,25 @@ kubectl delete svc my-replica-set-0 > /dev/null 2>&1
 kubectl delete svc my-replica-set-1 > /dev/null 2>&1
 kubectl delete svc my-replica-set-2 > /dev/null 2>&1
 
-# clean out any old nodeport config
-sed -i .bak -e '/nodeport/d' -e '/connectivity:/d' -e '/replicaSetHorizons:/d' ops-mgr-resource-my-replica-set-secure-auth.yaml
+# clean out any old horizon from the config
+#sed -i .bak -e '/horizon/d' -e '/connectivity:/d' -e '/replicaSetHorizons:/d' ops-mgr-resource-my-replica-set-secure-auth.yaml
 
 # Create map for OM and the Org/Project
+if [[ ${tls} == 1 ]]
+then
 kubectl delete configmap my-replica-set > /dev/null 2>&1
 kubectl create configmap my-replica-set \
   --from-literal="baseUrl=${opsMgrUrl}" \
-  --from-literal="projectName=MyReplicaSet"  #Optional
- # --from-literal="orgId={$orgId}>" #Optional
+  --from-literal="projectName=MyReplicaSet" \
+  --from-literal="sslMMSCAConfigMap=opsmanager-cert-ca" \
+  --from-literal="sslRequireValidMMSServerCertificates=‘true’"
+else
+kubectl delete configmap my-replica-set > /dev/null 2>&1
+kubectl create configmap my-replica-set \
+  --from-literal="baseUrl=${opsMgrUrl}" \
+  --from-literal="projectName=MyReplicaSet"
+fi
+   # --from-literal="orgId={$orgId}>" #Optional
 
 # # Create a secret for the member certs for TLS
 # kubectl delete secret         my-replica-set-cert > /dev/null 2>&1
@@ -53,7 +63,7 @@ kubectl apply -f ops-mgr-resource-my-replica-set-secure-auth.yaml
 
 # Monitor the progress
 notapproved="Not all certificates have been approved"
-certifcate="Certificate"
+certificate="Certificate"
 while true
 do
     kubectl get mongodb/my-replica-set
@@ -79,16 +89,5 @@ done
 printf "\n"
 printf "%s\n" "Wait a minute for the reconfiguration and then connect by running: Misc/kub_connect_to_my-replica-set.bash"
 printf "\n"
-exit
 
-# Alternate way to monitor - wait for last pod in the set
-while true
-do
-    status=$( kubectl wait --for condition=ready pod/my-replica-set-2 )
-    if [[ $? == 0 ]];
-    then
-        printf "%s\n" "$status"
-        break
-    fi
-    sleep 15
-done
+exit 0

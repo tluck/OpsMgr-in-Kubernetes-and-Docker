@@ -29,6 +29,6 @@ spec:
 # replica set and each member should have all of the same DNS horizon names specified:
   connectivity:
     replicaSetHorizons:
-      - "nodeport": "localhost:31140"
-      - "nodeport": "localhost:30001"
-      - "nodeport": "localhost:30516"
+      - "nodeport": "ec2-52-33-253-184.us-west-2.compute.amazonaws.com:31800"
+      - "nodeport": "ec2-54-202-231-226.us-west-2.compute.amazonaws.com:31327"
+      - "nodeport": "ec2-54-244-179-125.us-west-2.compute.amazonaws.com:30842"

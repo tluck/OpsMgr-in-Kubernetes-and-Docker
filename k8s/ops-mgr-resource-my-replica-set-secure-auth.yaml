@@ -20,15 +20,14 @@ spec:
     storage: 2Gi
   security:
     tls:
-      enabled: true
+      enabled: true # true
       # ca: ca-pem
     authentication:
-      enabled : true
+      enabled : true # true
       modes: ["SCRAM"]
 
-# replica set and each member should have all of the same DNS horizon names specified:
   connectivity:
     replicaSetHorizons:
-      - "nodeport": "localhost:32221"
-      - "nodeport": "localhost:32503"
-      - "nodeport": "localhost:32562"
+      - "horizon-1": "ac2d6cf5adf8b4ac282c1d44e1d3b00c-1550054797.us-west-2.elb.amazonaws.com:27017"
+      - "horizon-1": "a467afbe955e14c2db56e32345012721-1263480511.us-west-2.elb.amazonaws.com:27017"
+      - "horizon-1": "a77ce229a41d944209a6917cbef7b53d-1621567810.us-west-2.elb.amazonaws.com:27017"

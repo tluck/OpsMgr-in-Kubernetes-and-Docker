@@ -7,28 +7,37 @@ PATH=$PATH:"${d}"/Misc
 source init.conf
 
 # create new certs if the service does not exist
-#kubectl get svc my-replica-set-0 > /dev/null 2>&1
-#if [[ $? != 0 ]]
-#then
+kubectl get svc my-replica-set-0 > /dev/null 2>&1
+if [[ $? != 0 ]]
+then
 # clean up any previous certs and services
 kubectl delete csr my-replica-set-0.mongodb > /dev/null 2>&1
 kubectl delete csr my-replica-set-1.mongodb > /dev/null 2>&1
 kubectl delete csr my-replica-set-2.mongodb > /dev/null 2>&1
 # expose nodeports - creates nodeport service for each pod of member set
 # add the nodeport map for splitHorizon
-###Misc/exposeNodePort.bash ops-mgr-resource-my-replica-set-secure-auth.yaml >/dev/null 2>&1
-Misc/exposeNodePort.bash ops-mgr-resource-my-replica-set-secure-auth.yaml
+printf "%s\n" "Generating Service ports..."
+
+Misc/expose_service.bash ops-mgr-resource-my-replica-set-secure-auth.yaml
+
 source init.conf
-#fi
+fi
 
 # Create map for OM Org/Project
-#kubectl delete configmap my-replica-set > /dev/null 2>&1
+if [[ ${tls} == 1 ]]
+then
+kubectl delete configmap my-replica-set > /dev/null 2>&1
 kubectl create configmap my-replica-set \
   --from-literal="baseUrl=${opsMgrUrl}" \
-  --from-literal="projectName=MyReplicaSet"  #Optional
- # --from-literal="orgId={$orgId}>" #Optional
-
-# Create a 3 member replica set
+  --from-literal="projectName=MyReplicaSet" \
+  --from-literal="sslMMSCAConfigMap=opsmanager-cert-ca" \
+  --from-literal="sslRequireValidMMSServerCertificates=‘true’"
+else
+kubectl delete configmap my-replica-set > /dev/null 2>&1
+kubectl create configmap my-replica-set \
+  --from-literal="baseUrl=${opsMgrUrl}" \
+  --from-literal="projectName=MyReplicaSet"
+fi
 
 # Create a secret for the member certs for TLS
 # kubectl delete secret my-replica-set-cert
@@ -55,10 +64,13 @@ kubectl apply -f ops-mgr-resource-database-user-conf.yaml
 
 kubectl apply -f ops-mgr-resource-my-replica-set-secure-auth.yaml
 
+kubectl delete csr my-replica-set-0.mongodb > /dev/null 2>&1
+kubectl delete csr my-replica-set-1.mongodb > /dev/null 2>&1
+kubectl delete csr my-replica-set-2.mongodb > /dev/null 2>&1
 
 # Monitor the progress
 notapproved="Not all certificates have been approved"
-certifcate="Certificate"
+certificate="Certificate"
 while true
 do
     kubectl get mongodb/my-replica-set
@@ -86,16 +98,4 @@ printf "%s\n" "Wait a minute for the reconfiguration and then connect by running
 printf "%s\n" "Connect String: ${myReplicaSetConnect}"
 printf "\n"
 
-exit
-
-# Alternate way to monitor - wait for last pod in the set
-while true
-do
-    status=$( kubectl wait --for condition=ready pod/my-replica-set-2 )
-    if [[ $? == 0 ]];
-    then
-        printf "%s\n" "$status"
-        break
-    fi
-    sleep 15
-done
+exit 0

@@ -8,7 +8,7 @@ i=svc
 name=opsmanager-${i}
 if [[ ! -e ${name}-pem ]]
 then
-kubectl delete csr ${name}.mongodb
+kubectl delete csr ${name}.mongodb > /dev/null 2>&1
 
 # generate request
 
@@ -63,7 +63,7 @@ then
 for i in 0 1 2;
 do
 name=opsmanager-db-${i}
-kubectl delete csr ${name}.mongodb
+kubectl delete csr ${name}.mongodb > /dev/null 2>&1
 
 host=${name}.opsmanager-db-svc.mongodb.svc.cluster.local
 

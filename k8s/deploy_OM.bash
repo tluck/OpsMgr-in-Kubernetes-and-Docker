@@ -13,11 +13,29 @@ kubectl create secret generic admin-user-credentials \
   --from-literal=Password="${password}" \
   --from-literal=FirstName="${firstName}" \
   --from-literal=LastName="${lastName}"
+  
+if [[ "${tls}" == 1 ]]
+then
+# for enablement of TLS (https)
+kubectl delete secret         opsmanager-cert > /dev/null 2>&1
+kubectl create secret generic opsmanager-cert --from-file="certs/server.pem"
+kubectl delete configmap opsmanager-cert-ca > /dev/null 2>&1
+kubectl create configmap opsmanager-cert-ca --from-file="certs/mms-ca.crt" # seems to need this filename
+
+# for enablement of TLS on the appdb
+kubectl delete secret         appdb-certs > /dev/null 2>&1
+kubectl create secret generic appdb-certs \
+        --from-file="certs/opsmanager-db-0-pem" \
+        --from-file="certs/opsmanager-db-1-pem" \
+        --from-file="certs/opsmanager-db-2-pem"
+kubectl delete configmap appdb-ca > /dev/null 2>&1
+kubectl create configmap appdb-ca --from-file="certs/ca-pem" # seems to need this filename
 
 #  Deploy OpsManager resources
-## kubectl apply -f ops-mgr-resource-ext-np.yaml
+kubectl apply -f ops-mgr-resource-ext-lb-tls.yaml
+else
 kubectl apply -f ops-mgr-resource-ext-lb.yaml
-#kubectl apply -f ops-mgr-resource-ext-lb-tls.yaml
+fi
 
 # Monitor the progress until the OpsMgr app is ready
 while true
@@ -58,3 +76,6 @@ echo  opsMgrUrl="$opsMgrUrl"           | tee -a new
 echo  opsMgrIp="$opsMgrIp"             | tee -a new
 echo  opsMgrUrlExt=\""$opsMgrUrlExt"\" | tee -a new
 mv new init.conf
+
+open $opsMgrUrlExt
+exit 0

@@ -4,6 +4,8 @@ d=$( dirname "$0" )
 cd "${d}"
 PATH=$PATH:"${d}"/Misc
 
+source init.conf
+
 which jq > /dev/null
 if [[ $? != 0 ]]
 then
@@ -27,6 +29,17 @@ printf "%s\n" "Deploy SMTP relay and until Running status..."
 # Deploy simple SMTP forwarder 
 mail/deploy_SMTP.bash
 
+if [[ "${tls}" == 1 ]]
+then
+    printf "\n%s\n" "__________________________________________________________________________________________"
+    printf "%s\n" "Getting Certs status..."
+    # Get ca.crt and create certs for OM and App-db
+    rm certs/ops*pem
+    certs/get_ca.crt.bash
+    certs/make_opsmanger_certs.bash
+    ls -1 certs/*pem certs/*crt 
+fi
+
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Deploy OM and wait until Running status..."
 deploy_OM.bash
@@ -41,12 +54,11 @@ deploy_OM_BackupDB.bash
 
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Create the 1st Production DB ..."
-deploy_ProdDB.bash
-
-printf "%s" "Do you need external access to the DB?"
-read -p " [Y/n] " ans <&0 && if [[ ${ans:0:1} == "n" || ${ans:0:1} == "N" ]]; then exit 0; fi
+# deploy_ProdDB.bash
+# printf "%s" "Do you need external access to the DB?"
+# read -p " [Y/n] " ans <&0 && if [[ ${ans:0:1} == "n" || ${ans:0:1} == "N" ]]; then exit 0; fi
 
 printf "\n%s\n" "__________________________________________________________________________________________"
-printf "%s\n" "Update splitHorizon configuration for External access to Production DB ..."
-deploy_ProdDB_splitHorizon.bash > /dev/null 2>&1
+printf "%s\n" "Generate splitHorizon configuration for External access to Production DB ..."
 deploy_ProdDB_splitHorizon.bash
+

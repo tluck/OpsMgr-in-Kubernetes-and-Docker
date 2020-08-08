@@ -20,14 +20,21 @@ kubectl delete svc ops-mgr-backup-2 > /dev/null 2>&1
 #sed -e "s|ORGID|${orgId}|g" -e "s|OPSMGRURL|${opsMgrUrl}|g"  ops-mgr-operator-configmap-ops-mgr-backup.yaml | kubectl apply -f -
 
 # Create a map for OM Org/Project
+if [[ ${tls} == 1 ]]
+then
 kubectl delete configmap ops-mgr-backup > /dev/null 2>&1
 kubectl create configmap ops-mgr-backup \
   --from-literal="baseUrl=${opsMgrUrl}" \
   --from-literal="projectName=OpsMgrBackup" \
-  
-  #--from-literal="sslMMSCAConfigMap=opsmanager-cert-ca" \
-  #--from-literal="sslRequireValidMMSServerCertificates=‘true’"
+  --from-literal="sslMMSCAConfigMap=opsmanager-cert-ca" \
+  --from-literal="sslRequireValidMMSServerCertificates=‘true’"
   # --from-literal="orgId={orgId}" #Optional
+else
+kubectl delete configmap ops-mgr-backup > /dev/null 2>&1
+kubectl create configmap ops-mgr-backup \
+  --from-literal="baseUrl=${opsMgrUrl}" \
+  --from-literal="projectName=OpsMgrBackup"
+fi
 
 # Create a a secret for db user credentials
 kubectl delete secret         backup-dbadmin-credentials > /dev/null 2>&1
@@ -43,7 +50,7 @@ kubectl apply -f ops-mgr-resource-ops-mgr-backup.yaml
 
 # Monitor the progress
 notapproved="Not all certificates have been approved"
-certifcate="Certificate"
+certificate="Certificate"
 while true
 do
     kubectl get mongodb/ops-mgr-backup

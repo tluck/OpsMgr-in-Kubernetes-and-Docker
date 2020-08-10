@@ -62,6 +62,7 @@ spec:
     mms.user.bypassInviteForExistingUsers: "true"
     mms.publicApi.whitelistEnabled: "false"
     automation.versions.source: mongodb # hybrid
+    #brs.queryable.pem: /mongodb-ops-manager/conf/opsmanager-proxy-server-pem
 
   backup:
     enabled: true
@@ -71,13 +72,13 @@ spec:
         mongodbResourceRef:
           name: ops-mgr-backup
         mongodbUserRef:
-          name: dbadmin-backup
+          name: dbadmin-ops-mgr-backup
     blockStores:
       - name: blockStore1
         mongodbResourceRef:
           name: ops-mgr-backup
         mongodbUserRef:
-          name: dbadmin-backup
+          name: dbadmin-ops-mgr-backup
     statefulSet:
       spec:
         template:

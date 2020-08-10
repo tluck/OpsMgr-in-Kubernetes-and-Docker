@@ -9,17 +9,18 @@ then
     printf "%s\n" "Exit - need resource name"
     exit 1
 fi
+cname="$2"
 
-# get the Root CA - got to be better way
-def_token=( $( kubectl get secrets | grep default-token ) )
-kubectl get secret ${def_token} -o jsonpath='{.data.ca\.crt}' | base64 -D > ca.crt 
+# # get the Root CA - got to be better way
+# def_token=( $( kubectl get secrets | grep default-token ) )
+# kubectl get secret ${def_token} -o jsonpath='{.data.ca\.crt}' | base64 -D > ca.crt 
 
-# concatenate MongoDB downloads and the K8s ca.crt
-# OM and AppDB need these 2 items
-cat downloads.crt ca.crt > ca-pem
-cat downloads.crt ca.crt > mms-ca.crt 
+# # concatenate MongoDB downloads and the K8s ca.crt
+# # OM and AppDB need these 2 items
+# cat downloads.crt ca.crt > ca-pem
+# cat downloads.crt ca.crt > mms-ca.crt 
 
-# generate $name-pem
+# generate $name.pem
 
 if [[ ! -e ${name}.pem ]]
 then
@@ -32,10 +33,10 @@ kubectl delete csr ${name}.mongodb > /dev/null 2>&1
 cat <<EOF | cfssl genkey - | cfssljson -bare server
 {
   "hosts": [
-    "${name}.mongodb.svc.cluster.local",
+    "${cname}",
     "${name}"
   ],
-  "CN": "${name}.mongodb.svc.cluster.local",
+  "CN": "${cname}",
   "key": {
     "algo": "rsa",
     "size": 4096
@@ -76,5 +77,5 @@ fi
 
 if [[ -e ${name}.pem ]]
 then
-  printf "%s\n\n" "Made ${name}.pem ..."
+  printf "%s\n\n" "Made ${name}.pem"
 fi

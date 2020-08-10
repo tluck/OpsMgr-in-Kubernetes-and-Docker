@@ -25,6 +25,7 @@ spec:
 
   security: # enables TLS for Ops Manager allowing it to serve traffic over HTTPS
     tls:
+      enabled: true
       # secret containing the TLS certificate signed by known or custom CA. The secret must have a key "server.pem"
       # and value of .pem file containing private key and TLS certificate
       secretRef: 
@@ -62,6 +63,7 @@ spec:
     mms.user.bypassInviteForExistingUsers: "true"
     mms.publicApi.whitelistEnabled: "false"
     automation.versions.source: mongodb # hybrid
+   #brs.queryable.pem: /mongodb-ops-manager/conf/opsmanager-proxy-server-pem
 
   backup:
     enabled: true
@@ -71,13 +73,13 @@ spec:
         mongodbResourceRef:
           name: ops-mgr-backup
         mongodbUserRef:
-          name: dbadmin-backup
+          name: dbadmin-ops-mgr-backup
     blockStores:
       - name: blockStore1
         mongodbResourceRef:
           name: ops-mgr-backup
         mongodbUserRef:
-          name: dbadmin-backup
+          name: dbadmin-ops-mgr-backup
     statefulSet:
       spec:
         template:

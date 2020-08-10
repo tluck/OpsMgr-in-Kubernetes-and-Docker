@@ -2,32 +2,31 @@
 apiVersion: mongodb.com/v1
 kind: MongoDB
 metadata:
-  name: ops-mgr-backup
+  name: my-replica-set
   namespace: mongodb
 spec:
   members: 3
-  version: 4.2.8
+  version: 4.2.8-ent
   type: ReplicaSet
-  project: ops-mgr-backup
-  #credentials: admin-public-api-key
+  project: my-replica-set
   credentials: opsmanager-admin-key
   persistent: true
   podSpec:
     cpu: "0.5"
     # note: it's important to always specify memory otherwise wired tiger cache will be calculated incorrectly and
     # monitoring tools will report the size of Kubernetes node instead of the real size of the container
-    memory: 300Mi
+    memory: 400Mi
     storage: 2Gi
   security:
     tls:
       enabled: true # false
       # ca: ca-pem
     authentication:
-      enabled : true
+      enabled : true # false
       modes: ["SCRAM"]
-  additionalMongodConfig:
-    net:
-      ssl:
-        mode: "preferSSL"
 
-      
+  connectivity:
+    replicaSetHorizons:
+      - "horizon-1": "a25b6667ebef04f2c98213b515ac5755-195358923.us-west-2.elb.amazonaws.com:27017"
+      - "horizon-1": "acf3cfdb752bd4f76b780cdb63a7e195-1408773359.us-west-2.elb.amazonaws.com:27017"
+      - "horizon-1": "ae237ddb2895f4b02af514510959528b-197930211.us-west-2.elb.amazonaws.com:27017"

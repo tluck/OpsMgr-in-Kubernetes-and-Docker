@@ -2,17 +2,15 @@
 apiVersion: mongodb.com/v1
 kind: MongoDBUser
 metadata:
-  name: dbadmin-backup
+  name: dbadmin-my-replica-set
 spec:
   passwordSecretKeyRef:
-    name: backup-dbadmin-credentials
-    # Match to metadata.name of the User Secret
+    name: dbadmin-my-replica-set # Match to metadata.name of the User Secret
     key: password
   username: "dbAdmin"
   db: "admin" #
   mongodbResourceRef:
-    name: "ops-mgr-backup"
-    # Match to MongoDB resource using authenticaiton
+    name: "my-replica-set" # Match to MongoDB resource using authenticaiton
   roles:
     - db: "admin"
       name: "clusterAdmin"

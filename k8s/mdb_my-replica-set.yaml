@@ -29,6 +29,6 @@ spec:
 
   connectivity:
     replicaSetHorizons:
-      - "horizon-1": "a8208a320092844ad8a14c5ed13ccdd8-1026494394.us-west-2.elb.amazonaws.com:27017"
-      - "horizon-1": "ad5386194f1524592ad7f0688076cbfb-1588054373.us-west-2.elb.amazonaws.com:27017"
-      - "horizon-1": "a69a1e9c2ccd943a988958eaa21b9235-275288408.us-west-2.elb.amazonaws.com:27017"
+      - "horizon-1": "localhost:31000"
+      - "horizon-1": "localhost:31001"
+      - "horizon-1": "localhost:31002"

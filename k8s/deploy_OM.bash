@@ -51,6 +51,7 @@ do
     fi
     sleep 15
 done
+sleep 10
 
 # get the OpsMgr URL and internal IP
 opsMgrUrl=$( kubectl get om -o json | jq .items[0].status.opsManager.url )

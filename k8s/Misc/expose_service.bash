@@ -67,7 +67,7 @@ then
     echo "      -" \"horizon-1\": \"${sn2}:27017\" | tee -a new
     mv new "$fn"
 
-    cat init.conf | sed -e '/${name}_URI/d' > new
+    cat init.conf | sed -e "/${name//-/}_URI/d" > new
     echo
     echo "${name//-/}_URI=\"mongodb://${sn0}:27017,${sn1}:27017,$sn2}:27017/?replicaSet=${name} -u \$dbadmin -p \$dbpassword --authenticationDatabase admin \" " | tee -a new
     echo
@@ -81,7 +81,7 @@ else
     echo "      -" \"horizon-1\": \"${hn2}:$np2\" | tee -a new
     mv new "$fn"
 
-    cat init.conf | sed -e '/${name}_URI/d' > new
+    cat init.conf | sed -e "/${name//-/}_URI/d" > new
     echo
     echo "${name//-/}_URI=\"mongodb://${hn0}:${np0},${hn1}:${np1},${hn2}:${np2}/?replicaSet=${name} -u \$dbadmin -p \$dbpassword --authenticationDatabase admin \" " | tee -a new
     echo

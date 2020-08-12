@@ -17,4 +17,4 @@ ln -f ${name}-db-${i}.pem ${name}-db-${i}-pem
 done
 
 # proxy server for backups
-generate_cert.bash ${name}-proxy ${name}-proxy.mongodb.svc.cluster.local
+generate_cert.bash ${name}-backup-daemon-0 ${name}-backup-daemon-0.mongodb.svc.cluster.local

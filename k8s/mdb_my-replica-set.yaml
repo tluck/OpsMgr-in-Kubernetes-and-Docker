@@ -5,10 +5,12 @@ metadata:
   name: my-replica-set
   namespace: mongodb
 spec:
-  members: 3
   version: 4.2.8-ent
   type: ReplicaSet
-  project: my-replica-set
+  members: 3 
+  opsManager:
+    configMapRef:
+      name: my-replica-set # Must match metadata.name in ConfigMap file
   credentials: opsmanager-admin-key
   persistent: true
   podSpec:
@@ -27,6 +29,6 @@ spec:
 
   connectivity:
     replicaSetHorizons:
-      - "horizon-1": "a25b6667ebef04f2c98213b515ac5755-195358923.us-west-2.elb.amazonaws.com:27017"
-      - "horizon-1": "acf3cfdb752bd4f76b780cdb63a7e195-1408773359.us-west-2.elb.amazonaws.com:27017"
-      - "horizon-1": "ae237ddb2895f4b02af514510959528b-197930211.us-west-2.elb.amazonaws.com:27017"
+      - "horizon-1": "a8208a320092844ad8a14c5ed13ccdd8-1026494394.us-west-2.elb.amazonaws.com:27017"
+      - "horizon-1": "ad5386194f1524592ad7f0688076cbfb-1588054373.us-west-2.elb.amazonaws.com:27017"
+      - "horizon-1": "a69a1e9c2ccd943a988958eaa21b9235-275288408.us-west-2.elb.amazonaws.com:27017"

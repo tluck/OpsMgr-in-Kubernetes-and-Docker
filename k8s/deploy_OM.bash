@@ -49,12 +49,6 @@ do
     then
         break
     fi
-    kubectl get pods/${name} > /dev/null 2>&1
-    if [[ $? == 0 ]]
-    then
-    # copy queryiable backup pem file to pod
-    kubectl cp certs/${name}-proxy-pem mongodb/${name}-0:/mongodb-ops-manager/conf/${name}-proxy-pem
-    fi
     sleep 15
 done
 
@@ -80,7 +74,8 @@ fi
 kubectl get svc/${name}-svc-ext
 
 # copy queryiable backup pem file to pod
-kubectl cp certs/${name}-proxy-server-pem mongodb/${name}-0:/mongodb-ops-manager/conf/${name}-proxy-server-pem
+# kubectl cp certs/${name}-backup-daemon-0.pem mongodb/${name}-0:/opt/${name}-proxy.pem
+# kubectl cp certs/${name}-backup-daemon-0.pem  mongodb/${name}-backup-daemon-0:/opt/${name}-proxy.pem
 
 # Update init.conf with OpsMgr info
 cat init.conf | sed -e '/opsMgrUrl/d' -e '/opsMgrIp/d' -e '/opsMgrUrlExt/d' > new

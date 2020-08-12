@@ -2,33 +2,30 @@
 apiVersion: mongodb.com/v1
 kind: MongoDB
 metadata:
-  name: ops-mgr-backup
+  name: my-sharded
   namespace: mongodb
 spec:
-  members: 3
-  version: 4.2.8
-  type: ReplicaSet
+  version: 4.2.8-ent
+  type: ShardedCluster
+  shardCount: 2
+  mongodsPerShardCount: 3
+  mongosCount: 1
+  configServerCount: 3
   opsManager:
     configMapRef:
-      name: ops-mgr-backup # Must match metadata.name in ConfigMap file
+      name: my-sharded # Must match metadata.name in ConfigMap file
   credentials: opsmanager-admin-key
   persistent: true
   podSpec:
     cpu: "0.5"
     # note: it's important to always specify memory otherwise wired tiger cache will be calculated incorrectly and
     # monitoring tools will report the size of Kubernetes node instead of the real size of the container
-    memory: 300Mi
+    memory: 400Mi
     storage: 2Gi
   security:
     tls:
       enabled: true # false
       # ca: ca-pem
     authentication:
-      enabled : true
+      enabled : true # false
       modes: ["SCRAM"]
-  additionalMongodConfig:
-    net:
-      ssl:
-        mode: "preferSSL"
-
-      

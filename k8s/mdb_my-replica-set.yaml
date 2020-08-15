@@ -29,6 +29,6 @@ spec:
 
   connectivity:
     replicaSetHorizons:
-      - "horizon-1": "localhost:31000"
-      - "horizon-1": "localhost:31001"
-      - "horizon-1": "localhost:31002"
+      - "horizon-1": "ec2-35-166-47-5.us-west-2.compute.amazonaws.com:31000"
+      - "horizon-1": "ec2-35-163-77-244.us-west-2.compute.amazonaws.com:31001"
+      - "horizon-1": "ec2-44-234-65-183.us-west-2.compute.amazonaws.com:31002"

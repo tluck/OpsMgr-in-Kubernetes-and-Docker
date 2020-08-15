@@ -50,12 +50,19 @@ else
         dnlist=( $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="ExternalIP")].address}' ) )
     fi
 fi
-
-hn0=${dnlist[0]}
-hn1=${dnlist[1]}
-hn2=${dnlist[2]}
-
 num=${#dnlist[@]}
+
+if [[ $num = 1 ]]
+then
+# single node cluster
+    hn0=${dnlist[0]}
+    hn1=${dnlist[0]}
+    hn2=${dnlist[0]}
+else
+    hn0=${dnlist[0]}
+    hn1=${dnlist[1]}
+    hn2=${dnlist[2]}
+fi
 
 if [[ "$horizon" == "LoadBalancer" ]]
 then
@@ -82,7 +89,8 @@ else
     mv new "$fn"
 
     cat init.conf | sed -e "/${name//-/}_URI/d" > new
-    echo
+    echo 
+    echo "Adding this variable to init.conf:"
     echo "${name//-/}_URI=\"mongodb://${hn0}:${np0},${hn1}:${np1},${hn2}:${np2}/?replicaSet=${name} -u \$dbadmin -p \$dbpassword --authenticationDatabase admin \" " | tee -a new
     echo
     mv new init.conf

@@ -1,0 +1,14 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: opsmanager-backup
+spec:
+  ports:
+  - nodePort: 31999
+    port: 25999
+    protocol: TCP
+    targetPort: 25999
+  selector:
+    statefulset.kubernetes.io/pod-name: opsmanager-0
+  type: LoadBalancer

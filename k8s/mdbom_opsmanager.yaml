@@ -62,7 +62,10 @@ spec:
     mms.user.bypassInviteForExistingUsers: "true"
     mms.publicApi.whitelistEnabled: "false"
     automation.versions.source: mongodb # hybrid
-    #brs.queryable.pem: /mongodb-ops-manager/conf/opsmanager-proxy-server-pem
+    # brs.queryable.pem: /opt/mongodb/mms/secrets/queryable-backup.pem # stored in a secret
+    brs.queryable.expiration: "3600000"
+    mongodb.release.autoDownload.enterprise: "true"
+    mongodb.release.modulePreference: enterpriseRequired
 
   backup:
     enabled: true

@@ -2,10 +2,11 @@
 
 source docker.conf
 
+AGENTPACKAGE=$AGENTPACKAGE42
+MONGO_VERSION=$MONGO_VERSION42
+
 docker build \
         --build-arg MONGO_PACKAGE=mongodb-enterprise \
-        --network mongonet \
-        --build-arg DOWNLOAD=$OPSMGR \
         --build-arg PACKAGE=$AGENTPACKAGE \
         --build-arg MONGO_VERSION=$MONGO_VERSION \
         --build-arg MONGO_REPO=repo.mongodb.com \

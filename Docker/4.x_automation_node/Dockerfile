@@ -62,42 +62,41 @@ RUN mkdir /docker-entrypoint-initdb.d
 
 ENV GPG_KEYS E162F504A20CDF15827F718D4B7C549A058F8B6B
 RUN set -ex; \
-    export GNUPGHOME="$(mktemp -d)"; \
-    for key in $GPG_KEYS; do \
-        gpg --batch --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
-    done; \
-    gpg --batch --export $GPG_KEYS > /etc/apt/trusted.gpg.d/mongodb.gpg; \
-    command -v gpgconf && gpgconf --kill all || :; \
-    rm -r "$GNUPGHOME"; \
-    apt-key list
+	export GNUPGHOME="$(mktemp -d)"; \
+	for key in $GPG_KEYS; do \
+		gpg --batch --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
+	done; \
+	gpg --batch --export $GPG_KEYS > /etc/apt/trusted.gpg.d/mongodb.gpg; \
+	command -v gpgconf && gpgconf --kill all || :; \
+	rm -r "$GNUPGHOME"; \
+	apt-key list
 
 # Allow build-time overrides (eg. to build image with MongoDB Enterprise version)
 # Options for MONGO_PACKAGE: mongodb-org OR mongodb-enterprise
 # Options for MONGO_REPO: repo.mongodb.org OR repo.mongodb.com
 # Example: docker build --build-arg MONGO_PACKAGE=mongodb-enterprise --build-arg MONGO_REPO=repo.mongodb.com .
-ARG MONGO_PACKAGE=mongodb-enterprise
-ARG MONGO_REPO=repo.mongodb.com
+ARG MONGO_PACKAGE=mongodb-org
+ARG MONGO_REPO=repo.mongodb.org
 ENV MONGO_PACKAGE=${MONGO_PACKAGE} MONGO_REPO=${MONGO_REPO}
 
 ENV MONGO_MAJOR 4.2
-ARG MONGO_VERSION
-ENV MONGO_VERSION ${MONGO_VERSION:-4.2.8}
+ENV MONGO_VERSION 4.2.8
 # bashbrew-architectures:amd64 arm64v8 s390x
 RUN echo "deb http://$MONGO_REPO/apt/ubuntu bionic/${MONGO_PACKAGE%-unstable}/$MONGO_MAJOR multiverse" | tee "/etc/apt/sources.list.d/${MONGO_PACKAGE%-unstable}.list"
 
-# installing "mongodb-enterprise" pulls in "tzdata" which prompts for input
 RUN set -x \
-    && export DEBIAN_FRONTEND=noninteractive \
-    && apt-get update \
-    && apt-get install -y \
-        ${MONGO_PACKAGE}=$MONGO_VERSION \
-        ${MONGO_PACKAGE}-server=$MONGO_VERSION \
-        ${MONGO_PACKAGE}-shell=$MONGO_VERSION \
-        ${MONGO_PACKAGE}-mongos=$MONGO_VERSION \
-        ${MONGO_PACKAGE}-tools=$MONGO_VERSION \
-    && rm -rf /var/lib/apt/lists/* \
-    && rm -rf /var/lib/mongodb \
-    && mv /etc/mongod.conf /etc/mongod.conf.orig
+# installing "mongodb-enterprise" pulls in "tzdata" which prompts for input
+	&& export DEBIAN_FRONTEND=noninteractive \
+	&& apt-get update \
+	&& apt-get install -y \
+		${MONGO_PACKAGE}=$MONGO_VERSION \
+		${MONGO_PACKAGE}-server=$MONGO_VERSION \
+		${MONGO_PACKAGE}-shell=$MONGO_VERSION \
+		${MONGO_PACKAGE}-mongos=$MONGO_VERSION \
+		${MONGO_PACKAGE}-tools=$MONGO_VERSION \
+	&& rm -rf /var/lib/apt/lists/* \
+	&& rm -rf /var/lib/mongodb \
+	&& mv /etc/mongod.conf /etc/mongod.conf.orig
 
 # remove it now but keep dependency
 RUN set -x \
@@ -108,12 +107,16 @@ RUN set -x \
         ${MONGO_PACKAGE}-tools=$MONGO_VERSION \
     && apt-get clean
 
-ARG DOWNLOAD
+#ARG DOWNLOAD
 ARG PACKAGE
 
-RUN set -x \
-    && curl -OL ${DOWNLOAD}/${PACKAGE} \
-    && dpkg --install ${PACKAGE}
+#RUN set -x \
+#    && curl -OL ${DOWNLOAD}/${PACKAGE} \
+#    && dpkg --install ${PACKAGE}
+COPY ${PACKAGE} /tmp/${PACKAGE}
+RUN  dpkg --install /tmp/${PACKAGE}
+RUN  rm /tmp/${PACKAGE}
+RUN  apt-get clean
 
 RUN mkdir -p /data/db /data/configdb \
     && chown -R mongodb:mongodb /data/db /data/configdb
@@ -121,7 +124,7 @@ RUN mkdir -p /data/db /data/configdb \
 VOLUME /data/db /data/configdb
 
 COPY docker-entrypoint.sh /usr/local/bin/
-ENTRYPOINT ["docker-entrypoint.sh"]
+#ENTRYPOINT ["docker-entrypoint.sh"]
 
 EXPOSE 27017
 CMD ["/bin/bash"]

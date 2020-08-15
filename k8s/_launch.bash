@@ -29,18 +29,6 @@ printf "%s\n" "Deploy SMTP relay and until Running status..."
 # Deploy simple SMTP forwarder 
 mail/deploy_SMTP.bash
 
-if [[ ${tls} == 1 ]]
-then
-    printf "\n%s\n" "__________________________________________________________________________________________"
-    printf "%s\n" "Getting Certs status..."
-    # Get ca.crt and create certs for OM and App-db
-    rm certs/ops*pem
-    certs/get_ca.crt.bash
-    #certs/make_opsmanger_certs.bash
-    certs/make_certs.bash opsmanager
-    ls -1 certs/*pem certs/*crt 
-fi
-
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Deploy OM and wait until Running status..."
 deploy_OM.bash opsmanager

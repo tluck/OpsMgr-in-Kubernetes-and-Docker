@@ -11,15 +11,6 @@ then
 fi
 cname="$2"
 
-# # get the Root CA - got to be better way
-# def_token=( $( kubectl get secrets | grep default-token ) )
-# kubectl get secret ${def_token} -o jsonpath='{.data.ca\.crt}' | base64 -D > ca.crt 
-
-# # concatenate MongoDB downloads and the K8s ca.crt
-# # OM and AppDB need these 2 items
-# cat downloads.crt ca.crt > ca-pem
-# cat downloads.crt ca.crt > mms-ca.crt 
-
 # generate $name.pem
 
 if [[ ! -e ${name}.pem ]]
@@ -67,15 +58,12 @@ kubectl certificate approve ${name}.mongodb
 # get certs and build pem
 eval c=$( kubectl get csr ${name}.mongodb -o json|jq .status.certificate)
 echo $c |base64 -D> ${name}.crt
-cat ${name}.crt ${name}.key > ${name}.pem
+cat ${name}.key ${name}.crt > ${name}.pem
 
 # clean up
 rm ${name}.key
 rm ${name}.crt
 rm ${name}.csr
-fi
 
-if [[ -e ${name}.pem ]]
-then
-  printf "%s\n\n" "Made ${name}.pem"
+printf "%s\n\n" "Made ${name}.pem"
 fi

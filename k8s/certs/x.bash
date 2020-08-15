@@ -2,7 +2,7 @@
 
 d=$( dirname "$0" )
 cd "${d}"
-name="opsmanager-backup-daemon-0"
+name="x"
 sname0="opsmanager-svc"
 cname0="opsmanager-svc.mongodb.svc.cluster.local"
 sname1="opsmanager-0"
@@ -21,8 +21,6 @@ cname2="opsmanager-backup-daemon-0.mongodb.svc.cluster.local"
 
 # generate $name.pem
 
-if [[ ! -e ${name}.pem ]]
-then
 printf "%s\n" "Making ${name}.pem ..."
 
 kubectl delete csr ${name}.mongodb > /dev/null 2>&1
@@ -70,15 +68,15 @@ kubectl certificate approve ${name}.mongodb
 # get certs and build pem
 eval c=$( kubectl get csr ${name}.mongodb -o json|jq .status.certificate)
 echo $c |base64 -D> ${name}.crt
-cat ${name}.crt ${name}.key > ${name}.pem
-
+cat ${name}.key ${name}.crt > ${name}.pem
+cat ${name}.pem ca.key ca.crt > queryable-backup.pem
 # clean up
 rm ${name}.key
 rm ${name}.crt
 rm ${name}.csr
-fi
 
-if [[ -e ${name}.pem ]]
+
+if [[ -e queryable-backup.pem ]]
 then
-  printf "%s\n\n" "Made ${name}.pem"
+  printf "%s\n\n" "Made queryable-backup.pem"
 fi

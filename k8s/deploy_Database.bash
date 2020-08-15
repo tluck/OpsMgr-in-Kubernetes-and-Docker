@@ -12,15 +12,15 @@ mdbuser="mdbuser_${name}.yaml"
 # clean up any previous certs and services
 if [[ ${cleanup} ]]
 then
-kubectl delete secret ${name}-cert > /dev/null 2>&1
+  kubectl delete secret ${name}-cert > /dev/null 2>&1
 
-kubectl delete csr ${name}-0.mongodb > /dev/null 2>&1
-kubectl delete csr ${name}-1.mongodb > /dev/null 2>&1
-kubectl delete csr ${name}-2.mongodb > /dev/null 2>&1
+  kubectl delete csr ${name}-0.mongodb > /dev/null 2>&1
+  kubectl delete csr ${name}-1.mongodb > /dev/null 2>&1
+  kubectl delete csr ${name}-2.mongodb > /dev/null 2>&1
 
-kubectl delete svc ${name}-0 > /dev/null 2>&1
-kubectl delete svc ${name}-1 > /dev/null 2>&1
-kubectl delete svc ${name}-2 > /dev/null 2>&1
+  kubectl delete svc ${name}-0 > /dev/null 2>&1
+  kubectl delete svc ${name}-1 > /dev/null 2>&1
+  kubectl delete svc ${name}-2 > /dev/null 2>&1
 fi
 
 # create new certs if the service does not exist
@@ -113,10 +113,15 @@ do
     sleep 15
 done
 
+if [[ "$( kubectl get mdb/${name} -o jsonpath='{.spec.security.tls}' )" == "map[enabled:true]" ]]
+then
+    tls_options="--tls --tlsCAFile ca.pem --tlsCertificateKeyFile server.pem "
+fi
+
 printf "\n"
 printf "%s\n" "Wait a minute for the reconfiguration and then connect by running: Misc/connect_external.bash ${name}"
 eval cs=\$${name//-/}_URI
-printf "%s\n" "Connect String: $cs" 
+printf "%s\n" "Connect String: ${cs} ${tls_options}" 
 printf "\n"
 
 exit 0

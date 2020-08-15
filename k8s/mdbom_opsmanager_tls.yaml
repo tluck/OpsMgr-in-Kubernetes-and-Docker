@@ -6,7 +6,7 @@ metadata:
 
 spec:
   replicas: 1
-  version: 4.4.0 # 4.2.15
+  version: 4.2.15 #4.4.1 
   jvmParameters: ["-Xms2560m", "-Xmx2560m"] # only for demo mode
   adminCredentials: admin-user-credentials # Should match metadata.name in the Kubernetes secret for the admin user
   statefulSet:
@@ -63,7 +63,10 @@ spec:
     mms.user.bypassInviteForExistingUsers: "true"
     mms.publicApi.whitelistEnabled: "false"
     automation.versions.source: mongodb # hybrid
-   #brs.queryable.pem: /mongodb-ops-manager/conf/opsmanager-proxy-server-pem
+    brs.queryable.pem: /opt/mongodb/mms/secrets/queryable-backup.pem # stored in a secret
+    brs.queryable.expiration: "3600000"
+    mongodb.release.autoDownload.enterprise: "true"
+    mongodb.release.modulePreference: enterpriseRequired
 
   backup:
     enabled: true

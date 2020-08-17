@@ -4,6 +4,8 @@ d=$( dirname "$0" )
 cd "${d}"
 PATH=$PATH:"${d}"/Misc:"${d}"/certs:
 
+skipcerts=${1-0}
+
 source init.conf
 
 which jq > /dev/null
@@ -31,16 +33,20 @@ mail/deploy_SMTP.bash
 
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Deploy OM and wait until Running status..."
-deploy_OM.bash opsmanager
+deploy_OM.bash opsmanager ${skipcerts}
 
 #printf "\n%s\n" "__________________________________________________________________________________________"
 #printf "%s\n" "Create the first Org in OM ..."
 #deploy_org.bash
 
 printf "\n%s\n" "__________________________________________________________________________________________"
-printf "%s\n" "Create the Backup Oplog1/BlockStore1 DB for OM ..."
-deploy_Database.bash ops-mgr-backup
+printf "%s\n" "Create the Backup Oplog1 DB for OM ..."
+deploy_Database.bash ops-mgr-oplog
 
+printf "\n%s\n" "__________________________________________________________________________________________"
+printf "%s\n" "Create the Backup BlockStore1 DB for OM ..."
+deploy_Database.bash ops-mgr-blockstore
+exit
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Create the 1st Production DB ..."
 # deploy_ProdDB.bash

@@ -1,3 +1,5 @@
+#!/bin/bash
+
 source init.conf
 
 TAB=$'\t'

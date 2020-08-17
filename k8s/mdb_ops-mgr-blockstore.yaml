@@ -2,33 +2,33 @@
 apiVersion: mongodb.com/v1
 kind: MongoDB
 metadata:
-  name: my-replica-set
+  name: ops-mgr-blockstore
   namespace: mongodb
 spec:
-  version: 4.2.8-ent
+  members: 3
+  version: 3.6.19 # 4.2.8 # (works with OM 4.4.1)
   type: ReplicaSet
-  members: 3 
   opsManager:
     configMapRef:
-      name: my-replica-set # Must match metadata.name in ConfigMap file
+      name: ops-mgr-blockstore # Must match metadata.name in ConfigMap file
   credentials: opsmanager-admin-key
   persistent: true
   podSpec:
     cpu: "0.5"
     # note: it's important to always specify memory otherwise wired tiger cache will be calculated incorrectly and
     # monitoring tools will report the size of Kubernetes node instead of the real size of the container
-    memory: 400Mi
+    memory: 300Mi
     storage: 2Gi
   security:
     tls:
-      enabled: true # false
+      enabled: false # false - with 4.2 opsmgr this does not work - set true with OM 4.4.x
       # ca: ca-pem
     authentication:
-      enabled : true # false
+      enabled : true
       modes: ["SCRAM"]
+  # additionalMongodConfig: # use for 4.4 OM
+  #   net:
+  #     ssl:
+  #       mode: "allowSSL" # "preferTLS"
 
-  connectivity:
-    replicaSetHorizons:
-      - "horizon-1": "ec2-34-219-115-12.us-west-2.compute.amazonaws.com:31000"
-      - "horizon-1": "ec2-52-32-61-99.us-west-2.compute.amazonaws.com:31001"
-      - "horizon-1": "ec2-44-229-14-96.us-west-2.compute.amazonaws.com:31002"
+      

@@ -6,10 +6,11 @@ PATH=$PATH:"${d}"/Misc
 
 source init.conf
 name=${1:-opsmanager}
+skipcerts=${2:-0}
 mdbom="mdbom_${name}.yaml"
 mdbom_tls="mdbom_${name}_tls.yaml"
 
-if [[ ${tls} == 1 ]]
+if [[ ${tls} == 1 && ${skipcerts} == 0 ]]
 then
     printf "\n%s\n" "__________________________________________________________________________________________"
     printf "%s\n" "Getting Certs status..."

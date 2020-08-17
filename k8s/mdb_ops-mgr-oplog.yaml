@@ -2,15 +2,15 @@
 apiVersion: mongodb.com/v1
 kind: MongoDB
 metadata:
-  name: ops-mgr-backup
+  name: ops-mgr-oplog
   namespace: mongodb
 spec:
   members: 3
-  version: 3.6.19 # 4.2.8 (works with OM 4.4.1)
+  version: 3.6.19 # 4.2.8 # (works with OM 4.4.1)
   type: ReplicaSet
   opsManager:
     configMapRef:
-      name: ops-mgr-backup # Must match metadata.name in ConfigMap file
+      name: ops-mgr-oplog # Must match metadata.name in ConfigMap file
   credentials: opsmanager-admin-key
   persistent: true
   podSpec:
@@ -18,7 +18,7 @@ spec:
     # note: it's important to always specify memory otherwise wired tiger cache will be calculated incorrectly and
     # monitoring tools will report the size of Kubernetes node instead of the real size of the container
     memory: 300Mi
-    storage: 2Gi
+    storage: 1Gi
   security:
     tls:
       enabled: false # false - with 4.2 opsmgr this does not work - set true with OM 4.4.x
@@ -29,6 +29,6 @@ spec:
   # additionalMongodConfig: # use for 4.4 OM
   #   net:
   #     ssl:
-  #       mode: "preferTLS"
+  #       mode: "allowSSL" # "preferTLS"
 
       

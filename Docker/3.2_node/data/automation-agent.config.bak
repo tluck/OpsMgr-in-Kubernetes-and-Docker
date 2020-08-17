@@ -6,8 +6,8 @@
 #
 #
 
-mmsGroupId=5f3a313a1aea96007d4c6e12
-mmsApiKey=5f3a2e2c1aea96007d4c5b94ebb720035fd8905ccd433c11e234faae
+mmsGroupId=5f3b0c53f3d5aa007f234d9b
+mmsApiKey=5f3a313a1aea96007d4c6e1ad94eb70d6a927f83ca5c98e5552653ed
 
 # Hostname of the Ops Manager web server. The hostname will match what is used
 # to access the Ops Manager UI. The default port for an Ops Manager install

@@ -6,7 +6,7 @@ metadata:
   namespace: mongodb
 spec:
   members: 3
-  version: 4.2.8
+  version: 3.6.19 # 4.2.8 (works with OM 4.4.1)
   type: ReplicaSet
   opsManager:
     configMapRef:
@@ -21,14 +21,14 @@ spec:
     storage: 2Gi
   security:
     tls:
-      enabled: true # false
+      enabled: false # false - with 4.2 opsmgr this does not work - set true with OM 4.4.x
       # ca: ca-pem
     authentication:
       enabled : true
       modes: ["SCRAM"]
-  additionalMongodConfig:
-    net:
-      ssl:
-        mode: "preferSSL"
+  # additionalMongodConfig: # use for 4.4 OM
+  #   net:
+  #     ssl:
+  #       mode: "preferTLS"
 
       

@@ -1,0 +1,23 @@
+#!/bin/bash
+
+source docker.conf
+
+data="$(pwd)/data"
+
+if [[ $1 == "" || $1 > 6 ]]
+then 
+    echo Need server number - from 1 to 6
+    exit
+fi
+
+n=$1
+ports=(27017 27018 27019 27020 27021 27022 27023)
+
+docker run \
+        --init \
+        --network mongonet \
+        --name mongodb${n} -h mongodb${n} -p ${ports[$n]}:27017 \
+        --mount type=bind,source=${data},target=/shareddata  \
+        -itd --privileged $DOCKER_USERNAME/mongodb:node_$MONGO_VERSION
+
+

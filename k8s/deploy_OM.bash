@@ -67,11 +67,10 @@ done
 sleep 10
 
 # get the OpsMgr URL and internal IP
-opsMgrUrl=$( kubectl get om -o json | jq .items[0].status.opsManager.url )
-opsMgrIp=$(  kubectl get pod/${name}-0 -o json | jq .status.podIP )
+opsMgrUrl=$(     kubectl get om -o json | jq .items[0].status.opsManager.url )
 eval hostname=$( kubectl get svc/${name}-svc-ext -o json | jq .status.loadBalancer.ingress[0].hostname ) 
-eval ip=$( kubectl get svc/${name}-svc-ext -o json | jq .status.loadBalancer.ingress[0].ip ) 
-eval port=$( kubectl get svc/${name}-svc-ext -o json | jq .spec.ports[0].port )
+eval opsMgrIp=$( kubectl get svc/${name}-svc-ext -o json | jq .status.loadBalancer.ingress[0].ip ) 
+eval port=$(     kubectl get svc/${name}-svc-ext -o json | jq .spec.ports[0].port )
 
 http="http"
 if [[ $port == "8443" ]]
@@ -81,9 +80,11 @@ fi
 
 if [[ $hostname == "null" ]]
 then
-    opsMgrUrlExt=${http}://${ip}:${port}
+    opsMgrExtUrl=${http}://${ip}:${port}
 else
-    opsMgrUrlExt=${http}://${hostname}:${port}
+    opsMgrExtUrl=${http}://${hostname}:${port}
+    eval list=( $( nslookup ${hostname} | grep Address ) )
+    opsMgrIp=${list[3]}
 fi
 
 # expose port 25999 for queryable backup
@@ -95,11 +96,13 @@ kubectl get svc/${name}-svc-ext svc/${name}-backup
 # kubectl cp certs/${name}-backup-daemon-0.pem  mongodb/${name}-backup-daemon-0:/opt/${name}-proxy.pem
 
 # Update init.conf with OpsMgr info
-cat init.conf | sed -e '/opsMgrUrl/d' -e '/opsMgrIp/d' -e '/opsMgrUrlExt/d' > new
+cat init.conf | sed -e '/opsMgrUrl/d' -e '/opsMgrExt/d'  > new
 echo  opsMgrUrl="$opsMgrUrl"           | tee -a new
-echo  opsMgrIp="$opsMgrIp"             | tee -a new
-echo  opsMgrUrlExt=\""$opsMgrUrlExt"\" | tee -a new
+echo  opsMgrExtIp="$opsMgrIp"          | tee -a new
+echo  opsMgrExtUrl=\""$opsMgrExtUrl"\" | tee -a new
 mv new init.conf
 
-open "$opsMgrUrlExt"
+# put internal name in /etc/hosts with externalIP
+Misc/update_opsmgr_hostname.bash
+
 exit 0

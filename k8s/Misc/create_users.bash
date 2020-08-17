@@ -1,32 +1,32 @@
-#!/bin/bash -x
+#!/bin/bash
 
 . init.conf
 
 echo '{
-        "username": "ted.doe@mongodb.com",
+        "username": "thomas.luckenbach@mongodb.com",
         "emailAddress": "ted.doe@mongodb.com",
         "firstName": "ted",
         "lastName": "Doe",
-        "password": "M0ng0D8!:)",
+        "password": "",
         "roles": [
         {
           "orgId" : "ORGID",
-          "roleName" : "ORG_MEMBER"
+          "roleName" : "ORG_OWNER"
         }]
       }' | sed -e"s/ORGID/${orgId}/" > data.json
 
 curl --user "${publicKey}:${privateKey}" --digest \
   --header "Accept: application/json" \
   --header "Content-Type: application/json" \
-  --request POST "http://opsmgr:32080/api/public/v1.0/users" \
-  --data @data.json
+  --request POST "${opMgrUrl}/api/public/v1.0/users" \
+  --data @data.json 
+  -o user.json > /dev/null 2>&1
 
 exit
 
 curl --user "${publicKey}:${privateKey}" --digest \
   --header "Accept: application/json" \
   --header "Content-Type: application/json" \
-  --include \
   --request POST "http://opsmgr:32080/api/public/v1.0/users" \
   --data \"
     {

@@ -6,8 +6,8 @@ metadata:
 
 spec:
   replicas: 1
-  version: 4.2.15 #4.4.1 
-  jvmParameters: ["-Xms2560m", "-Xmx2560m"] # only for demo mode
+  version: 4.2.15 # 4.4.1 
+  #jvmParameters: ["-Xms2560m", "-Xmx2560m"] # good size for docker-desktop
   adminCredentials: admin-user-credentials # Should match metadata.name in the Kubernetes secret for the admin user
   statefulSet:
     spec:
@@ -21,7 +21,7 @@ spec:
               resources:
                 limits:
                   cpu: "2.0"
-                  memory: 3G # only for demo mode - 5GB or more is best
+                  memory: 5G # 3G good size for docker-desktop - 5GB or more is best
 
   security: # enables TLS for Ops Manager allowing it to serve traffic over HTTPS
     tls:
@@ -70,19 +70,19 @@ spec:
 
   backup:
     enabled: true
-    jvmParameters: ["-Xms1024m", "-Xmx1024m"] 
+    # jvmParameters: ["-Xms1024m", "-Xmx1024m"] # good size for docker-desktop
     opLogStores:
       - name: oplog1
         mongodbResourceRef:
           name: ops-mgr-backup
-        mongodbUserRef:
-          name: dbadmin-ops-mgr-backup
+        # mongodbUserRef:
+        #   name: dbadmin-ops-mgr-backup
     blockStores:
       - name: blockStore1
         mongodbResourceRef:
           name: ops-mgr-backup
-        mongodbUserRef:
-          name: dbadmin-ops-mgr-backup
+        # mongodbUserRef:
+        #   name: dbadmin-ops-mgr-backup
     statefulSet:
       spec:
         template:

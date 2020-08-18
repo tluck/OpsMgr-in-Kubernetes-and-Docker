@@ -21,14 +21,14 @@ spec:
     storage: 1Gi
   security:
     tls:
-      enabled: false # false - with 4.2 opsmgr this does not work - set true with OM 4.4.x
+      enabled: true # false - with 4.2 opsmgr this does not work - set true with OM 4.4.x
       # ca: ca-pem
     authentication:
       enabled : true
       modes: ["SCRAM"]
-  # additionalMongodConfig: # use for 4.4 OM
-  #   net:
-  #     ssl:
-  #       mode: "allowSSL" # "preferTLS"
+  additionalMongodConfig: # use for 4.4 OM
+    net:
+      ssl:
+        mode: "allowSSL" # "preferTLS"
 
       

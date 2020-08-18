@@ -14,13 +14,9 @@ if [[ ${cleanup} ]]
 then
   kubectl delete secret ${name}-cert > /dev/null 2>&1
 
-  kubectl delete csr ${name}-0.mongodb > /dev/null 2>&1
-  kubectl delete csr ${name}-1.mongodb > /dev/null 2>&1
-  kubectl delete csr ${name}-2.mongodb > /dev/null 2>&1
+  #kubectl delete csr $( kubectl get csr | grep "${name}" | awk '{print $1}' )
 
-  kubectl delete svc ${name}-0 > /dev/null 2>&1
-  kubectl delete svc ${name}-1 > /dev/null 2>&1
-  kubectl delete svc ${name}-2 > /dev/null 2>&1
+  kubectl delete svc $( kubectl get svc | grep "${name}" | awk '{print $1}' )
 fi
 
 # create new certs if the service does not exist
@@ -81,11 +77,12 @@ kubectl apply -f "${mdbuser}"
 
 # Create the DB Resource
 
+list=( $( kubectl get csr | grep "${name}" | awk '{print $1}' ) )
+if [[ ${#list[@]} > 0 ]]
+then
+kubectl delete csr ${list[@]}
+fi
 kubectl apply -f "${mdb}"
-
-kubectl delete csr ${name}-0.mongodb > /dev/null 2>&1
-kubectl delete csr ${name}-1.mongodb > /dev/null 2>&1
-kubectl delete csr ${name}-2.mongodb > /dev/null 2>&1
 
 # Monitor the progress
 notapproved="Not all certificates have been approved"

@@ -20,15 +20,8 @@ spec:
             - name: mongodb-ops-manager
               resources:
                 limits:
-                  cpu: "2.0"
-                  memory: 5G # 3G # good size for docker-desktop - 5GB or more is best
-
-  # security: # enables TLS for Ops Manager allowing it to serve traffic over HTTPS
-  #   tls:
-  #     # secret containing the TLS certificate signed by known or custom CA. The secret must have a key "server.pem"
-  #     # and value of .pem file containing private key and TLS certificate
-  #     secretRef: 
-  #       name: opsmanager-cert
+                  cpu: "1.0"  # "2.0"
+                  memory: 3Gi # 3 good size for docker-desktop - 5GB or more is best
 
   externalConnectivity:
     type: LoadBalancer
@@ -39,16 +32,10 @@ spec:
     members: 3
     version: 4.2.8-ent
     persistent: true
-    # security:
-    #   tls:
-    #     enabled: true
-    #     ca: "appdb-ca"
-    #     secretRef:
-    #       name: "appdb-certs" # Name of the Secret object
     podSpec:
       cpu: "0.5"
-      memory: 500Mi
-      storage: 1Gi
+      memory: 500Mi # 1Gi
+      storage: 1Gi  # 2Gi
  
   configuration:
     mms.ignoreInitialUiSetup: "true"
@@ -91,4 +78,4 @@ spec:
                 resources:
                   requests:
                     cpu: "0.5"
-                    memory: 5Gi # good size for docker-desktop
+                    memory: 1.2Gi # 5.0 # 1.2 is good size for docker-desktop

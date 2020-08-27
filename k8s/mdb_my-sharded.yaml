@@ -20,7 +20,7 @@ spec:
     cpu: "0.5"
     # note: it's important to always specify memory otherwise wired tiger cache will be calculated incorrectly and
     # monitoring tools will report the size of Kubernetes node instead of the real size of the container
-    memory: 400Mi
+    memory: 400Mi # 1Gi
     storage: 1Gi
   exposedExternally: true # create NodePorts
   security:

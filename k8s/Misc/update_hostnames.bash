@@ -22,6 +22,13 @@ dnslist=(  $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type
 iplist=(   $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="ExternalIP")].address}' ) )
 names=( mongodb1 mongodb2 mongodb3 )
 
+if [[ ${hostname} == "docker-desktop" ]]
+then
+hostname=(docker-desktop docker-desktop docker-desktop)
+dnslist=(docker-desktop docker-desktop docker-desktop)
+iplist=(127.0.0.1 127.0.0.1 127.0.0.1)
+fi
+
 for n in 0 1 2
 do
 

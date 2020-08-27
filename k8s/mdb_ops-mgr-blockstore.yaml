@@ -14,11 +14,11 @@ spec:
   credentials: opsmanager-admin-key
   persistent: true
   podSpec:
-    cpu: "0.5"
+    cpu: "0.33"
     # note: it's important to always specify memory otherwise wired tiger cache will be calculated incorrectly and
     # monitoring tools will report the size of Kubernetes node instead of the real size of the container
-    memory: 1000Mi
-    storage: 2Gi
+    memory: 300Mi # 1Gi
+    storage: 1Gi  # 2Gi
   security:
     tls:
       enabled: true # false - with 4.2 opsmgr this does not work - set true with OM 4.4.x

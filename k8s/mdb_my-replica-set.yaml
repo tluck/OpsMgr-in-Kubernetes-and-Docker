@@ -17,8 +17,8 @@ spec:
     cpu: "0.5"
     # note: it's important to always specify memory otherwise wired tiger cache will be calculated incorrectly and
     # monitoring tools will report the size of Kubernetes node instead of the real size of the container
-    memory: 2000Mi
-    storage: 2Gi
+    memory: 500 Mi  # 2Gi
+    storage: 1Gi    # 2Gi
   security:
     tls:
       enabled: true # false
@@ -29,6 +29,6 @@ spec:
 
   connectivity:
     replicaSetHorizons:
-      - "horizon-1": "ec2-44-228-131-187.us-west-2.compute.amazonaws.com:31000"
-      - "horizon-1": "ec2-34-222-48-40.us-west-2.compute.amazonaws.com:31001"
-      - "horizon-1": "ec2-34-219-188-55.us-west-2.compute.amazonaws.com:31002"
+      - "horizon-1": "localhost:31000"
+      - "horizon-1": "localhost:31001"
+      - "horizon-1": "localhost:31002"

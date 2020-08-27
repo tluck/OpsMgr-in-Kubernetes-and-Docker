@@ -12,11 +12,11 @@ spec:
     name: mongodb
     resources:
       limits:
-        cpu: "0.5"
-        memory: "500Mi"
+        cpu: "2"
+        memory: "2000Mi"
       requests:
-        cpu: "0.25"
-        memory: "300Mi"
+        cpu: "1"
+        memory: "2000Mi"
     ports:
     - containerPort: 27017
     volumeMounts:

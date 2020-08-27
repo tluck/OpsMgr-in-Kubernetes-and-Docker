@@ -76,7 +76,8 @@ then
 
     cat init.conf | sed -e "/${name//-/}_URI/d" > new
     echo
-    echo "${name//-/}_URI=\"mongodb://${sn0}:27017,${sn1}:27017,$sn2}:27017/?replicaSet=${name} -u \$dbadmin -p \$dbpassword --authenticationDatabase admin \" " | tee -a new
+    #echo "${name//-/}_URI=\"mongodb://${sn0}:27017,${sn1}:27017,$sn2}:27017/?replicaSet=${name} -u \$dbadmin -p \$dbpassword --authenticationDatabase admin \" " | tee -a new
+    echo "${name//-/}_URI=\"mongodb://${dbadmin}:${dbpassword}@${sn0}:27017,${sn1}:27017,$sn2}:27017/admin?replicaSet=${name}&authMechanism=SCRAM-SHA-256&authSource=admin\"" | tee -a new
     echo
     mv new init.conf
 else
@@ -91,7 +92,8 @@ else
     cat init.conf | sed -e "/${name//-/}_URI/d" > new
     echo 
     echo "Adding this variable to init.conf:"
-    echo "${name//-/}_URI=\"mongodb://${hn0}:${np0},${hn1}:${np1},${hn2}:${np2}/?replicaSet=${name} -u \$dbadmin -p \$dbpassword --authenticationDatabase admin \" " | tee -a new
+    #echo "${name//-/}_URI=\"mongodb://${hn0}:${np0},${hn1}:${np1},${hn2}:${np2}/?replicaSet=${name} -u \$dbadmin -p \$dbpassword --authenticationDatabase admin \" " | tee -a new
+    echo "${name//-/}_URI=\"mongodb://${dbadmin}:${dbpassword}@${hn0}:${np0},${hn1}:${np1},${hn2}:${np2}/?replicaSet=${name}&authMechanism=SCRAM-SHA-256&authSource=admin\"" | tee -a new
     echo
     mv new init.conf
 fi

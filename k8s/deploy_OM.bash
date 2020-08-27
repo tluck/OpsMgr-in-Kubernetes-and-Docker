@@ -74,18 +74,23 @@ eval opsMgrIp=$( kubectl get svc/${name}-svc-ext -o json | jq .status.loadBalanc
 eval port=$(     kubectl get svc/${name}-svc-ext -o json | jq .spec.ports[0].port )
 
 http="http"
-if [[ $port == "8443" ]]
+if [[ ${port} == "8443" ]]
 then
     http="https"
 fi
 
-if [[ $hostname == "null" ]]
+if [[ ${hostname} == "null" ]]
 then
     opsMgrExtUrl=${http}://${ip}:${port}
 else
     opsMgrExtUrl=${http}://${hostname}:${port}
-    eval list=( $( nslookup ${hostname} | grep Address ) )
-    opsMgrIp=${list[3]}
+    if [[ "${hostname}" != "localhost" ]]
+    then
+        eval list=( $( nslookup ${hostname} | grep Address ) )
+        opsMgrIp=${list[3]}
+    else
+        opsMgrIp=127.0.0.1
+    fi
 fi
 
 # expose port 25999 for queryable backup
@@ -104,6 +109,6 @@ echo  opsMgrExtUrl=\""$opsMgrExtUrl"\" | tee -a new
 mv new init.conf
 
 # put internal name in /etc/hosts with externalIP
-Misc/update_opsmgr_hostname.bash
+Misc/update_hostnames.bash
 
 exit 0

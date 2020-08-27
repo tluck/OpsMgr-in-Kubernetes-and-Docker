@@ -2,25 +2,20 @@
 
 . init.conf
 
-echo '{
-        "username": "thomas.luckenbach@mongodb.com",
-        "emailAddress": "ted.doe@mongodb.com",
-        "firstName": "ted",
-        "lastName": "Doe",
-        "password": "",
-        "roles": [
-        {
-          "orgId" : "ORGID",
-          "roleName" : "ORG_OWNER"
-        }]
+echo '{ "username":     "sharath.rao@mongodb.com",
+        "emailAddress": "sharath.rao@mongodb.com",
+        "firstName":    "Sharath",
+        "lastName":     "Rao",
+        "password":     "Mongodb1$",
+        "roles": [ { "orgId": "ORGID", "roleName": "ORG_OWNER" } ]
       }' | sed -e"s/ORGID/${orgId}/" > data.json
 
-curl --user "${publicKey}:${privateKey}" --digest \
+curl -s --user "${publicKey}:${privateKey}" --digest \
   --header "Accept: application/json" \
   --header "Content-Type: application/json" \
-  --request POST "${opMgrUrl}/api/public/v1.0/users" \
-  --data @data.json 
-  -o user.json > /dev/null 2>&1
+  --request POST "${opsMgrUrl}/api/public/v1.0/users" \
+  --data @data.json \
+  -o newuser.json > /dev/null 2>&1
 
 exit
 

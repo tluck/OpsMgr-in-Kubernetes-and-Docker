@@ -46,7 +46,7 @@ deploy_Database.bash ops-mgr-oplog
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Create the Backup BlockStore1 DB for OM ..."
 deploy_Database.bash ops-mgr-blockstore
-exit
+
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Create the 1st Production DB ..."
 # deploy_ProdDB.bash

@@ -21,7 +21,7 @@ spec:
               resources:
                 limits:
                   cpu: "2.0"
-                  memory: 5G # 3G # good size for docker-desktop - 5GB or more is best
+                  memory: 5Gi # 3Gi # good size for docker-desktop - 5GB or more is best
 
   security: # enables TLS for Ops Manager allowing it to serve traffic over HTTPS
     tls:
@@ -48,7 +48,7 @@ spec:
           name: "appdb-certs" # Name of the Secret object
     podSpec:
       cpu: "0.5"
-      memory: 500Mi
+      memory: 1Gi # 300Mi
       storage: 1Gi
  
   configuration:
@@ -70,7 +70,7 @@ spec:
 
   backup:
     enabled: true
-    jvmParameters: ["-Xms1024m", "-Xmx1024m"] # good size for docker-desktop
+    #jvmParameters: ["-Xms1024m", "-Xmx1024m"] # good size for docker-desktop
     opLogStores:
       - name: oplog
         mongodbResourceRef:
@@ -92,4 +92,4 @@ spec:
                 resources:
                   requests:
                     cpu: "0.5"
-                    memory: 1.2Gi # good size for docker-desktop
+                    memory: 5Gi #1.2Gi # good size for docker-desktop

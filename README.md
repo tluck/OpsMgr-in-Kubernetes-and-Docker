@@ -30,7 +30,7 @@ Runs OpsManager 4.3 with severval agent-ready "empty nodes" to demo Automation a
     - run these commands: run 1; run 2; run 3
 
 ### Step 5.
-- Login in to opsmgr:8080
+- Login in to http://opsmgr:8080 (localhost)
 - Provision a cluster on the 3 nodes
 
 
@@ -43,31 +43,39 @@ Runs OpsManager 4.3 with severval agent-ready "empty nodes" to demo Automation a
 		* Configure 8 Cores
 		* Configure 10GB of Memory
 		* Configure 1GB of swap
-		* Disk Image size (~30GB)
+		* Disk Image size (~40GB)
 		
 - Restart to enable new settings
 
 ### Step 2. Launch the Services
-the _launch.bash script has serveral sections:
+the **_launch.bash** script has several script for each of these steps:
 
-- Script 1: deploy_Operator.bash - Setup the OM enviroment
-	- Defines the name space
-	- Deploys the Mongodb Enterprise K8s Operator
+- Script 1: **deploy_Operator.bash**
+	- Setup the OM enviroment
+	- Defines the namespace
+	- Deploys the MongoDB Enterprise K8s Operator
 
-- Script 2: deploy_Operator.bash - Setup the OM enviroment
+- Script 2: **deploy_OM.bash**
+	- Setup the Ops Manager enviroment
   	- Deploy the OM Resources
   		- OpsManager
-  		- App DB 
-  	- Monitors the progress
+  		- AppDB 
+  	- Monitors the progress of OM for Readiness
 
-- Script 3: deploy_OM_BackupDB.bash - Deploy the OM Backing DBs
-	- Completes the Backup setup for OM
+- Script 3: **deploy_Database.bash**
+	- Deploy a DB - three more are created
+	- Oplog1 and Blockstore1 dbs complete the Backup setup for OM
+	- My-replica-set is a "Production" DB and has a splitHorizon configuration for external cluster access
+		- connect via ```Misc/connect_external.bash``` script
 	- Monitors the progress until the pods are ready
 
-- Script 4: deploy_ProdDB.bash -  Deploy a Production DB
-	- Deploy a secure 3 node replica set (with TLS and Auth)
-	- Note: use a down-rev verions to show automation later on
-	- Monitors the progress until the replica set is ready
+- Script 4: **mail/deploy_SMTP.bash**
+	- starts a mail relay to send alerts and user invitations
 	
 ### Step 3. Login to OM
-- login to OM at localhost:8080 with the credentials from init.conf
+- login to OM at https://localhost:8443 with the admin credentials set in ```init.conf```
+- or put:
+	```127.0.0.1       opsmanager-svc.mongodb.svc.cluster.local # opsmgr```
+	into
+	```/etc/hosts```
+- and add the certifice for K8s (certs/ca.crt) to your keystore to allow secure https without challenge

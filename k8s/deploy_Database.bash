@@ -44,7 +44,7 @@ kubectl delete configmap ${name} > /dev/null 2>&1
 kubectl create configmap ${name} \
   --from-literal="baseUrl=${opsMgrUrl}" \
   --from-literal="projectName=${name}" \
-  --from-literal="sslMMSCAConfigMap=opsmanager-cert-ca" \
+  --from-literal="sslMMSCAConfigMap=opsmanager-ca" \
   --from-literal="sslRequireValidMMSServerCertificates='true'"
 
 else
@@ -53,6 +53,8 @@ kubectl create configmap ${name} \
   --from-literal="baseUrl=${opsMgrUrl}" \
   --from-literal="projectName=${name}"
 fi
+
+# kubernetes is managing TLS
 
 # Create a secret for the member certs for TLS
 # kubectl delete secret ${name}-cert

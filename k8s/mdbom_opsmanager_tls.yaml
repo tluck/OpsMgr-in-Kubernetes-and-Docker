@@ -26,10 +26,9 @@ spec:
   security: # enables TLS for Ops Manager allowing it to serve traffic over HTTPS
     tls:
       enabled: true
-      # secret containing the TLS certificate signed by known or custom CA. The secret must have a key "server.pem"
-      # and value of .pem file containing private key and TLS certificate
-      secretRef: 
-        name: opsmanager-cert
+      ca: "opsmanager-ca" 
+      secretRef: # secret containing the TLS certificate signed by known or custom CA. The secret must have a key "server.pem"
+        name: "opsmanager-cert"
 
   externalConnectivity:
     type: LoadBalancer
@@ -43,9 +42,9 @@ spec:
     security:
       tls:
         enabled: true
-        ca: "appdb-ca"
+        ca: "opsmanager-ca" # needs mms-ca.crt
         secretRef:
-          name: "appdb-certs" # Name of the Secret object
+          name: "appdb-certs" # secret containing the TLS certificate signed by known or custom CA. The secret must have a key "server.pem"
     podSpec:
       cpu: "0.5"
       memory: 500Mi # 1Gi

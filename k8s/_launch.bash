@@ -2,11 +2,11 @@
 
 d=$( dirname "$0" )
 cd "${d}"
-PATH=$PATH:"${d}"/Misc:"${d}"/certs:
-
-skipcerts=${1-0}
+curdir=$( pwd )
 
 source init.conf
+export PATH=$PATH:"${curdir}"/Misc:"${curdir}"/certs/:.
+skipcerts=${1-0}
 
 which jq > /dev/null
 if [[ $? != 0 ]]
@@ -14,6 +14,14 @@ then
     printf "%s\n" "Exiting - Missing jq tool - run: brew install jq"
     exit 1
 fi
+
+which cfssl > /dev/null
+if [[ $? != 0 ]]
+then
+    printf "%s\n" "Exiting - Missing cfssl tool - run: brew install cfssl"
+    exit 1
+fi
+
 
 kubectl api-resources > /dev/null 2>&1
 if [[ $? != 0 ]]
@@ -28,7 +36,7 @@ deploy_Operator.bash
 
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Deploy SMTP relay and until Running status..."
-# Deploy simple SMTP forwarder 
+# Deploy simple SMTP forwarder to a gmail account.
 mail/deploy_SMTP.bash
 
 printf "\n%s\n" "__________________________________________________________________________________________"
@@ -48,12 +56,5 @@ printf "%s\n" "Create the Backup BlockStore1 DB for OM ..."
 deploy_Database.bash ops-mgr-blockstore
 
 printf "\n%s\n" "__________________________________________________________________________________________"
-printf "%s\n" "Create the 1st Production DB ..."
-# deploy_ProdDB.bash
-# printf "%s" "Do you need external access to the DB?"
-# read -p " [Y/n] " ans <&0 && if [[ ${ans:0:1} == "n" || ${ans:0:1} == "N" ]]; then exit 0; fi
-
-printf "\n%s\n" "__________________________________________________________________________________________"
-printf "%s\n" "Generate splitHorizon configuration for External access to Production DB ..."
+printf "%s\n" "Generate splitHorizon configuration for External access to a Production DB ..."
 deploy_Database.bash my-replica-set
-

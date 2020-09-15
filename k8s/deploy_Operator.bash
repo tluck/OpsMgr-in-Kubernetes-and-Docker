@@ -2,7 +2,8 @@
 
 d=$( dirname "$0" )
 cd "${d}"
-PATH=$PATH:"${d}"/Misc
+curdir=$( pwd )
+export PATH=$PATH:"${curdir}"/Misc:"${curdir}"/certs/:.
 
 source init.conf
 

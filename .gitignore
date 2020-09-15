@@ -1,6 +1,5 @@
 .DS_Store
 *.json
-*pem
-*.pem
-*.crt
 *.deb
+#*pem
+#*crt

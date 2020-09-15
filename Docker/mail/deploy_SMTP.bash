@@ -2,9 +2,6 @@
 
 d=$( dirname "$0" )
 cd "${d}"
-PATH=$PATH:"${d}"/Misc
-
-#source ../init.conf
 
 kubectl delete pod/smtp > /dev/null 2>&1
 kubectl run --image=bytemark/smtp --port=25 \

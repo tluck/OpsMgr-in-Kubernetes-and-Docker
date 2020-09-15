@@ -111,9 +111,10 @@ do
     sleep 15
 done
 
-if [[ "$( kubectl get mdb/${name} -o jsonpath='{.spec.security.tls}' )" == "map[enabled:true]" ]]
+tls=$( kubectl get mdb/${name} -o jsonpath='{.spec.security.tls}' )
+if [[ "${tls}" == "map[enabled:true]" || "${tls}" == "{\"enabled\":true}" ]]
 then
-    tls_options="--tls --tlsCAFile ca.pem --tlsCertificateKeyFile server.pem "
+    tls_options="&tls=true"
 fi
 
 eval cs=\$${name//-/}_URI
@@ -122,7 +123,7 @@ then
   printf "\n"
   printf "%s\n" "Wait a minute for the reconfiguration and then connect by running: Misc/connect_external.bash ${name}"
   eval cs=\$${name//-/}_URI
-  printf "%s\n" "Connect String: ${cs} ${tls_options}" 
+  printf "%s\n" "Connect String: ${cs}${tls_options}" 
   printf "\n"
 else
   printf "\n"

@@ -69,7 +69,6 @@ do
     fi
     sleep 15
 done
-sleep 10
 
 # expose port 25999 for queryable backup
 kubectl apply -f svc_${name}-backup.yaml
@@ -79,6 +78,7 @@ kubectl apply -f svc_${name}-backup-daemon.yaml
 kubectl get svc/${name}-svc-ext svc/${name}-backup svc/${name}-backup-daemon-0
 
 # update init.conf and put internal hostnames in /etc/hosts
+sleep 10
 Misc/update_initconf_hostnames.bash
 
 exit 0

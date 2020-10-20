@@ -75,10 +75,10 @@ kubectl apply -f svc_${name}-backup.yaml
 # hack to get a DNS name for the backup-daemon pod
 kubectl apply -f svc_${name}-backup-daemon.yaml
 # list services for OM and QB
+sleep 10
 kubectl get svc/${name}-svc-ext svc/${name}-backup svc/${name}-backup-daemon-0
 
 # update init.conf and put internal hostnames in /etc/hosts
-sleep 10
-Misc/update_initconf_hostnames.bash
+#Misc/update_initconf_hostnames.bash
 
 exit 0

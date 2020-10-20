@@ -63,6 +63,7 @@ echo  opsMgrExtIp=\""$opsMgrIp"\"          | tee -a new
 echo  opsMgrExtUrl=\""$opsMgrExtUrl"\" | tee -a new
 mv new init.conf
 
+printf "%s\n" 
 # put the internal name opsmanager-svc.mongodb.svc.cluster.local in /etc/hosts
 grep "^[0-9].*opsmanager-svc.mongodb.svc.cluster.local" /etc/hosts > /dev/null 2>&1
 if [[ $? == 0 ]]
@@ -91,33 +92,37 @@ else
     printf "%s\n" "${queryableBackup}${TAB}opsmanager-svc " | sudo tee -a /etc/hosts
 fi
 
-# get the nodes for creating custom clusters via agent automation
+# get the node info for creating custom clusters via agent automation
 hostname=( $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="Hostname")].address}') )
 dnslist=(  $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="ExternalDNS")].address}' ) )
 iplist=(   $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="ExternalIP")].address}' ) )
-names=( mongodb1 mongodb2 mongodb3 )
 
 if [[ ${hostname} == "docker-desktop" ]]
 then
-hostname=(docker-desktop docker-desktop docker-desktop)
-dnslist=(docker-desktop docker-desktop docker-desktop)
-iplist=(127.0.0.1 127.0.0.1 127.0.0.1)
+hostname=(docker-desktop)
+dnslist=(docker-desktop)
+iplist=(127.0.0.1)
 fi
 
+names=( mongodb1 mongodb2 mongodb3 )
+num=${#iplist[@]}
+num=$(( $num-1 ))
+
+printf "\n" 
 for n in 0 1 2
 do
-
+  m=$n;  if [[ $m > $num ]]; then m=$num; fi;
   grep "^[0-9].*${names[$n]}" /etc/hosts > /dev/null 2>&1
   if [[ $? == 0 ]]
   then
     # replace host entry
     printf "%s\n" "Replacing host entry:"
-    printf "%s\n"                                   "${iplist[$n]}${TAB}${names[$n]} ${dnslist[$n]} ${hostname[$n]}" 
-    sudo sed -E -i .bak -e "s|^[0-9].*${names[$n]}.*|${iplist[$n]}${TAB}${names[$n]} ${dnslist[$n]} ${hostname[$n]}|" /etc/hosts
+    printf "%s\n"                                   "${iplist[$m]}${TAB}${names[$n]} ${dnslist[$m]} ${hostname[$m]}" 
+    sudo sed -E -i .bak -e "s|^[0-9].*${names[$n]}.*|${iplist[$m]}${TAB}${names[$n]} ${dnslist[$m]} ${hostname[$m]}|" /etc/hosts
   else
     # add host entry
     printf "%s\n" "Adding host entry:"
-    printf "%s\n"                                   "${iplist[$n]}${TAB}${names[$n]} ${dnslist[$n]} ${hostname[$n]}" | sudo tee -a /etc/hosts
+    printf "%s\n"                                   "${iplist[$m]}${TAB}${names[$n]} ${dnslist[$m]} ${hostname[$m]}" | sudo tee -a /etc/hosts
   fi
 
 done

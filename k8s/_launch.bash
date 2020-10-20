@@ -58,3 +58,7 @@ deploy_Database.bash ops-mgr-blockstore
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Generate splitHorizon configuration for External access to a Production DB ..."
 deploy_Database.bash my-replica-set
+
+printf "\n%s\n" "__________________________________________________________________________________________"
+printf "%s\n" "Update init.conf with IPs and put k8s internal hostnames in /etc/hosts ..."
+Misc/update_initconf_hostnames.bash

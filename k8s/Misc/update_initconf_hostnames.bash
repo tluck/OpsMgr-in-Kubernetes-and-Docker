@@ -82,12 +82,12 @@ if [[ $? == 0 ]]
 then
     # replace host entry
     printf "%s\n" "Replacing /etc/hosts entry:"
-    printf "%s\n" "${queryableBackup}${TAB}opsmanager-svc " 
-    sudo sed -E -i .bak -e "s|^[0-9].*(opsmanager-svc .*)|${queryableBackup}${TAB}\1|" /etc/hosts
+    printf "%s\n" "${queryableBackupIp}${TAB}opsmanager-svc " 
+    sudo sed -E -i .bak -e "s|^[0-9].*(opsmanager-svc .*)|${queryableBackupIp}${TAB}\1|" /etc/hosts
 else
     # add host entry
     printf "%s\n" "Adding /etc/hosts entry:"
-    printf "%s\n" "${queryableBackup}${TAB}opsmanager-svc " | sudo tee -a /etc/hosts
+    printf "%s\n" "${queryableBackupIp}${TAB}opsmanager-svc " | sudo tee -a /etc/hosts
 fi
 
 # get the node info for creating custom clusters via agent automation

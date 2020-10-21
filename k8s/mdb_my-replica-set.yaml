@@ -29,6 +29,6 @@ spec:
 
   connectivity:
     replicaSetHorizons:
-      - "horizon-1": "ec2-52-37-198-157.us-west-2.compute.amazonaws.com:31000"
-      - "horizon-1": "ec2-52-37-198-157.us-west-2.compute.amazonaws.com:31001"
-      - "horizon-1": "ec2-52-37-198-157.us-west-2.compute.amazonaws.com:31002"
+      - "horizon-1": "ec2-44-234-67-234.us-west-2.compute.amazonaws.com:31000"
+      - "horizon-1": "ec2-34-209-150-75.us-west-2.compute.amazonaws.com:31001"
+      - "horizon-1": "ec2-54-214-219-51.us-west-2.compute.amazonaws.com:31002"

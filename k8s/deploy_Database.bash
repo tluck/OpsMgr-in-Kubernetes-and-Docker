@@ -3,7 +3,7 @@
 d=$( dirname "$0" )
 cd "${d}"
 curdir=$( pwd )
-export PATH=$PATH:"${curdir}"/Misc:"${curdir}"/certs/:.
+export PATH=.:$PATH:"${curdir}"/Misc:"${curdir}"/certs
 
 source init.conf
 name="${1:-my-replica-set}"
@@ -111,10 +111,12 @@ do
     sleep 15
 done
 
+# get keys for TLS
 tls=$( kubectl get mdb/${name} -o jsonpath='{.spec.security.tls}' )
 if [[ "${tls}" == "map[enabled:true]" || "${tls}" == "{\"enabled\":true}" ]]
 then
-    tls_options="&tls=true"
+    tls_options=" --tls --tlsCAFile ca.pem --tlsCertificateKeyFile server.pem "
+    tls_enabled="&tls=true"
 fi
 
 eval cs=\$${name//-/}_URI
@@ -122,9 +124,8 @@ if [[ "$cs" != "" ]]
 then
   printf "\n"
   printf "%s\n" "Wait a minute for the reconfiguration and then connect by running: Misc/connect_external.bash ${name}"
-  eval cs=\$${name//-/}_URI
-  printf "%s\n" "Connect String: ${cs}${tls_options}" 
-  printf "\n"
+  fcs=\'${cs}${tls_enabled}\'
+  printf "\n%s %s\n\n" "Connect String: ${fcs} ${tls_options}"
 else
   printf "\n"
   printf "%s\n" "Wait a minute for the reconfiguration and then connect by running: Misc/kub_connect_to_pod.bash ${name}"

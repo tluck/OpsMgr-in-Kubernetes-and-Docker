@@ -5,7 +5,7 @@ cd "${d}"
 curdir=$( pwd )
 
 source init.conf
-export PATH=$PATH:"${curdir}"/Misc:"${curdir}"/certs/:.
+export PATH=.:$PATH:"${curdir}"/Misc:"${curdir}"/certs
 skipcerts=${1-0}
 
 which jq > /dev/null

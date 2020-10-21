@@ -38,16 +38,16 @@ fi
 
 # get the internal IP
 eval hostname=$( kubectl get svc/${name}-backup -o json | jq .status.loadBalancer.ingress[0].hostname ) 
-eval qbip=$( kubectl get svc/${name}-backup -o json | jq .status.loadBalancer.ingress[0].ip ) 
+eval queryableBackupIp=$( kubectl get svc/${name}-backup -o json | jq .status.loadBalancer.ingress[0].ip ) 
 
 if [[ ${hostname} != "null" ]]
 then
     if [[ "${hostname}" != "localhost" ]]
     then
         eval list=( $( nslookup ${hostname} | grep Address ) )
-        qbip=${list[3]}
+        queryableBackupIp=${list[3]}
     else
-        qbip=127.0.0.1
+        queryableBackupIp=127.0.0.1
     fi
 fi
 
@@ -58,7 +58,7 @@ echo  opsMgrUrl="$opsMgrUrl"           | tee -a new
 echo  opsMgrExtUrl=\""$opsMgrExtUrl"\" | tee -a new
 echo  ""
 echo  opsMgrExtIp=\""$opsMgrExtIp"\"   | tee -a new
-echo  queryableBackupIp=\""$qbip"\"    | tee -a new
+echo  queryableBackupIp=\""$queryableBackupIp"\"    | tee -a new
 mv new init.conf
 
 printf "\n%s\n\n" "*** Note: sudo may ask for your password" 

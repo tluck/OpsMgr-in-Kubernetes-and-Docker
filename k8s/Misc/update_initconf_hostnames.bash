@@ -67,12 +67,12 @@ grep "^[0-9].*opsmanager-svc.mongodb.svc.cluster.local" /etc/hosts > /dev/null 2
 if [[ $? == 0 ]]
 then
     # replace host entry
-    printf "%s\n" "Replacing /etc/hosts entry:"
+    printf "%s" "Replacing /etc/hosts entry: "
     printf "%s\n" "${opsMgrExtIp}${TAB}opsmanager-svc.mongodb.svc.cluster.local" 
     sudo sed -E -i .bak -e "s|^[0-9].*(opsmanager-svc.mongodb.svc.cluster.local.*)|${opsMgrExtIp}${TAB}\1|" /etc/hosts
 else
     # add host entry
-    printf "%s\n" "Adding /etc/hosts entry:"
+    printf "%s" "Adding /etc/hosts entry: "
     printf "%s\n" "${opsMgrExtIp}${TAB}opsmanager-svc.mongodb.svc.cluster.local" | sudo tee -a /etc/hosts
 fi
 
@@ -81,12 +81,12 @@ grep "^[0-9].*opsmanager-svc " /etc/hosts > /dev/null 2>&1
 if [[ $? == 0 ]]
 then
     # replace host entry
-    printf "%s\n" "Replacing /etc/hosts entry:"
+    printf "%s" "Replacing /etc/hosts entry: "
     printf "%s\n" "${queryableBackupIp}${TAB}opsmanager-svc " 
     sudo sed -E -i .bak -e "s|^[0-9].*(opsmanager-svc .*)|${queryableBackupIp}${TAB}\1|" /etc/hosts
 else
     # add host entry
-    printf "%s\n" "Adding /etc/hosts entry:"
+    printf "%s" "Adding /etc/hosts entry: "
     printf "%s\n" "${queryableBackupIp}${TAB}opsmanager-svc " | sudo tee -a /etc/hosts
 fi
 
@@ -114,12 +114,12 @@ do
   if [[ $? == 0 ]]
   then
     # replace host entry
-    printf "%s\n" "Replacing host entry:"
+    printf "%s" "Replacing /etc/hosts entry: "
     printf "%s\n"                                   "${iplist[$m]}${TAB}${names[$n]} ${dnslist[$m]} ${hostname[$m]}" 
     sudo sed -E -i .bak -e "s|^[0-9].*${names[$n]}.*|${iplist[$m]}${TAB}${names[$n]} ${dnslist[$m]} ${hostname[$m]}|" /etc/hosts
   else
     # add host entry
-    printf "%s\n" "Adding host entry:"
+    printf "%s" "Adding /etc/hosts entry: "
     printf "%s\n"                                   "${iplist[$m]}${TAB}${names[$n]} ${dnslist[$m]} ${hostname[$m]}" | sudo tee -a /etc/hosts
   fi
 

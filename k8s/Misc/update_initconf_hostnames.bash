@@ -11,10 +11,10 @@ name="${1-opsmanager}"
 #fi
 
 # get the OpsMgr URL and internal IP
-opsMgrUrl=$(     kubectl get om -o json | jq .items[0].status.opsManager.url )
-eval hostname=$( kubectl get svc/${name}-svc-ext -o json | jq .status.loadBalancer.ingress[0].hostname ) 
-eval opsMgrIp=$( kubectl get svc/${name}-svc-ext -o json | jq .status.loadBalancer.ingress[0].ip ) 
-eval port=$(     kubectl get svc/${name}-svc-ext -o json | jq .spec.ports[0].port )
+opsMgrUrl=$(        kubectl get om                  -o json | jq .items[0].status.opsManager.url )
+eval hostname=$(    kubectl get svc/${name}-svc-ext -o json | jq .status.loadBalancer.ingress[0].hostname ) 
+eval opsMgrExtIp=$( kubectl get svc/${name}-svc-ext -o json | jq .status.loadBalancer.ingress[0].ip ) 
+eval port=$(        kubectl get svc/${name}-svc-ext -o json | jq .spec.ports[0].port )
 
 http="http"
 if [[ ${port} == "8443" ]]
@@ -24,15 +24,15 @@ fi
 
 if [[ ${hostname} == "null" ]]
 then
-    opsMgrExtUrl=${http}://${ip}:${port}
+    opsMgrExtUrl=${http}://${opsMgrExtIp}:${port}
 else
     opsMgrExtUrl=${http}://${hostname}:${port}
     if [[ "${hostname}" != "localhost" ]]
     then
         eval list=( $( nslookup ${hostname} | grep Address ) )
-        opsMgrIp=${list[3]}
+        opsMgrExtIp=${list[3]}
     else
-        opsMgrIp=127.0.0.1
+        opsMgrExtIp=127.0.0.1
     fi
 fi
 
@@ -51,30 +51,28 @@ then
     fi
 fi
 
-# Update init.conf with QB IP
-cat init.conf | sed -e '/queryableBackup/d' > new
-echo  queryableBackup=\""$qbip"\" | tee -a new
-mv new init.conf
-
 # Update init.conf with OpsMgr info
-cat init.conf | sed -e '/opsMgrUrl/d' -e '/opsMgrExt/d'  > new
+cat init.conf | sed -e '/opsMgrUrl/d' -e '/opsMgrExt/d' -e '/queryableBackupIp/d'  > new
+echo ""
 echo  opsMgrUrl="$opsMgrUrl"           | tee -a new
-echo  opsMgrExtIp=\""$opsMgrIp"\"          | tee -a new
 echo  opsMgrExtUrl=\""$opsMgrExtUrl"\" | tee -a new
+echo  ""
+echo  opsMgrExtIp=\""$opsMgrExtIp"\"   | tee -a new
+echo  queryableBackupIp=\""$qbip"\"    | tee -a new
 mv new init.conf
 
-printf "%s\n" 
+printf "\n%s\n\n" "*** Note: sudo may ask for your password" 
 # put the internal name opsmanager-svc.mongodb.svc.cluster.local in /etc/hosts
 grep "^[0-9].*opsmanager-svc.mongodb.svc.cluster.local" /etc/hosts > /dev/null 2>&1
 if [[ $? == 0 ]]
 then
     # replace host entry
-    printf "%s\n" "Replacing host entry:"
+    printf "%s\n" "Replacing /etc/hosts entry:"
     printf "%s\n" "${opsMgrExtIp}${TAB}opsmanager-svc.mongodb.svc.cluster.local" 
     sudo sed -E -i .bak -e "s|^[0-9].*(opsmanager-svc.mongodb.svc.cluster.local.*)|${opsMgrExtIp}${TAB}\1|" /etc/hosts
 else
     # add host entry
-    printf "%s\n" "Adding host entry:"
+    printf "%s\n" "Adding /etc/hosts entry:"
     printf "%s\n" "${opsMgrExtIp}${TAB}opsmanager-svc.mongodb.svc.cluster.local" | sudo tee -a /etc/hosts
 fi
 
@@ -83,12 +81,12 @@ grep "^[0-9].*opsmanager-svc " /etc/hosts > /dev/null 2>&1
 if [[ $? == 0 ]]
 then
     # replace host entry
-    printf "%s\n" "Replacing host entry:"
+    printf "%s\n" "Replacing /etc/hosts entry:"
     printf "%s\n" "${queryableBackup}${TAB}opsmanager-svc " 
     sudo sed -E -i .bak -e "s|^[0-9].*(opsmanager-svc .*)|${queryableBackup}${TAB}\1|" /etc/hosts
 else
     # add host entry
-    printf "%s\n" "Adding host entry:"
+    printf "%s\n" "Adding /etc/hosts entry:"
     printf "%s\n" "${queryableBackup}${TAB}opsmanager-svc " | sudo tee -a /etc/hosts
 fi
 

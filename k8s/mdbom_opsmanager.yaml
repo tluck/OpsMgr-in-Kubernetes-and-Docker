@@ -7,7 +7,7 @@ metadata:
 spec:
   replicas: 1
   version: 4.4.4 # 4.2.15
-  jvmParameters: ["-Xms2560m", "-Xmx2560m"] # good size for docker-desktop
+  jvmParameters: ["-Xms2560m", "-Xmx2560m"] # 2.5M is a good size for docker-desktop -- comment out for larger clusters in production
   adminCredentials: admin-user-credentials # Should match metadata.name in the Kubernetes secret for the admin user
   statefulSet:
     spec:
@@ -21,7 +21,7 @@ spec:
               resources:
                 limits:
                   cpu: "1.0"  # "2.0"
-                  memory: 3Gi # 3 good size for docker-desktop - 5GB or more is best
+                  memory: 3Gi # 3Gi a good size for docker-desktop - 5GB or more is better for larger clusters in production
 
   externalConnectivity:
     type: LoadBalancer
@@ -56,7 +56,7 @@ spec:
 
   backup:
     enabled: true
-    jvmParameters: ["-Xms1024m", "-Xmx1024m"] # good size for docker-desktop
+    jvmParameters: ["-Xms1024m", "-Xmx1024m"] # 1M is a good size for docker-desktop -- comment out for larger clusters in production
     opLogStores:
       - name: oplog
         mongodbResourceRef:
@@ -78,4 +78,4 @@ spec:
                 resources:
                   requests:
                     cpu: "0.5"
-                    memory: 1.2Gi # 5.0 # 1.2 is good size for docker-desktop
+                    memory: 1.2Gi # 1.2Gi is good size for docker-desktop -- use 5.0Gi is better for larger clusters in production

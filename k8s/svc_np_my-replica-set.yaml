@@ -5,7 +5,7 @@ metadata:
   name: my-replica-set-0
 spec:
   ports:
-  - nodePort: 31000
+  - nodePort:
     port: 27017
     protocol: TCP
     targetPort: 27017
@@ -19,7 +19,7 @@ metadata:
   name: my-replica-set-1
 spec:
   ports:
-  - nodePort: 31001
+  - nodePort:
     port: 27017
     protocol: TCP
     targetPort: 27017
@@ -33,7 +33,7 @@ metadata:
   name: my-replica-set-2
 spec:
   ports:
-  - nodePort: 31002
+  - nodePort: 
     port: 27017
     protocol: TCP
     targetPort: 27017

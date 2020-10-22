@@ -62,7 +62,9 @@ fi
 while true
 do
     kubectl get om 
-    eval status=$( kubectl get om -o json | jq .items[0].status.opsManager.phase )
+    eval status=$(  kubectl get om -o json | jq .items[0].status.opsManager.phase )
+    eval message=$( kubectl get om -o json | jq .items[0].status.opsManager.message )
+    printf "%s\n" "status.opsManager.message: $message"
     if [[ "$status" == "Running" ]];
     then
         break
@@ -70,9 +72,9 @@ do
     sleep 15
 done
 
-# expose port 25999 for queryable backup
+# fix to expose port 25999 for queryable backup
 kubectl apply -f svc_${name}-backup.yaml
-# hack to get a DNS name for the backup-daemon pod
+# fix to get a DNS name for the backup-daemon pod
 kubectl apply -f svc_${name}-backup-daemon.yaml
 # list services for OM and QB
 sleep 10

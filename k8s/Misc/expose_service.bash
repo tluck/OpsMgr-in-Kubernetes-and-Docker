@@ -1,6 +1,8 @@
 #!/bin/bash
 
 fn="$1"
+shift;
+clean="$1"
 if [[ "${fn}" == "" ]]
 then
     printf "%s\n" "Exit - need yaml file argument"
@@ -13,7 +15,11 @@ name="${s[1]}"
 source init.conf
 
 # remove any old services
-kubectl delete svc ${name}-0 ${name}-1 ${name}-2 > /dev/null 2>&1
+if [[ $clean = 1 ]]
+then
+    printf "%s\n" "Deleting existing svc ${name}-0 ${name}-1 ${name}-2"
+    kubectl delete svc ${name}-0 ${name}-1 ${name}-2 > /dev/null 2>&1
+fi
 #create nodeport service
 if [[ "${horizon}" == "LoadBalancer" ]]
 then
@@ -26,74 +32,83 @@ fi
 # kubectl expose pod ${name}-1 --type="LoadBalancer" --port 27017 -n mongodb
 # kubectl expose pod ${name}-2 --type="LoadBalancer" --port 27017 -n mongodb
 
-printf "%s\n" "Sleeping 20 seconds to allow IP/Hostnames to be created"
-sleep 20
-kubectl get svc ${name}-0 ${name}-1 ${name}-2
+while true
+do
+    kubectl get svc ${name}-0 ${name}-1 ${name}-2 |grep pending
+    if [[ $? = 1 ]]
+    then
+        kubectl get svc ${name}-0 ${name}-1 ${name}-2 
+        break
+    fi
+    printf "%s\n" "Sleeping 15 seconds to allow IP/Hostnames to be created"
+    sleep 15
+done
 
-np0=$( kubectl get svc/${name}-0 -o jsonpath='{.spec.ports[0].nodePort}' )
-np1=$( kubectl get svc/${name}-1 -o jsonpath='{.spec.ports[0].nodePort}' )
-np2=$( kubectl get svc/${name}-2 -o jsonpath='{.spec.ports[0].nodePort}' )
+if [[ "$horizon" == "LoadBalancer" ]]
+then
+    np0=$( kubectl get svc/${name}-0 -o jsonpath='{.spec.ports[0].port}' )
+    np1=$( kubectl get svc/${name}-1 -o jsonpath='{.spec.ports[0].port}' )
+    np2=$( kubectl get svc/${name}-2 -o jsonpath='{.spec.ports[0].port}' )
 
-sn0=$( kubectl get svc/${name}-0 -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' )
-sn1=$( kubectl get svc/${name}-1 -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' )
-sn2=$( kubectl get svc/${name}-2 -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' )
+    slist=( $( kubectl get svc ${name}-0 ${name}-1 ${name}-2 -o jsonpath='{.items[*].status.loadBalancer.ingress[0].hostname}' ) )
+    if [[ ${#slist[@]} == 0 ]]
+    then
+        slist=( $(kubectl get svc ${name}-0 ${name}-1 ${name}-2 -o jsonpath='{.items[*].status.loadBalancer.ingress[*].ip }' ) )
+    fi
+else
+    np0=$( kubectl get svc/${name}-0 -o jsonpath='{.spec.ports[0].nodePort}' )
+    np1=$( kubectl get svc/${name}-1 -o jsonpath='{.spec.ports[0].nodePort}' )
+    np2=$( kubectl get svc/${name}-2 -o jsonpath='{.spec.ports[0].nodePort}' )
 
 # get IP/DNS names
-hostname=( $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="Hostname")].address}') )
-if [[ ${hostname[0]} == "docker-desktop" ]]
-then
-    dnlist=( "localhost" "localhost" "localhost" )
-else
-    dnlist=( $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="ExternalDNS")].address}' ) )
-    if [[ ${#dnlist[@]} == 0 ]] 
+    hostname=( $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="Hostname")].address}') )
+    if [[ ${hostname[0]} == "docker-desktop" ]]
     then
-        dnlist=( $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="ExternalIP")].address}' ) )
+        slist=( "localhost" "localhost" "localhost" )
+    else
+        slist=( $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="ExternalDNS")].address}' ) )
+        # get node external IPs
+       if [[ ${#slist[@]} == 0 ]] 
+        then
+            slist=( $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="ExternalIP")].address}' ) )
+        fi
     fi
+
 fi
-num=${#dnlist[@]}
+
+num=${#slist[@]}
+
+if [[ $num = 0 ]]
+then
+    printf "%s\n" -- "Can't create split horizon map - exiting"
+    exit 1
+fi
 
 if [[ $num = 1 ]]
 then
 # single node cluster
-    hn0=${dnlist[0]}
-    hn1=${dnlist[0]}
-    hn2=${dnlist[0]}
+    hn0=${slist[0]}
+    hn1=${slist[0]}
+    hn2=${slist[0]}
 else
-    hn0=${dnlist[0]}
-    hn1=${dnlist[1]}
-    hn2=${dnlist[2]}
+    hn0=${slist[0]}
+    hn1=${slist[1]}
+    hn2=${slist[2]}
 fi
 
-if [[ "$horizon" == "LoadBalancer" ]]
-then
-    cat "$fn" | sed -e '/horizon/d' -e '/connectivity:/d' -e '/replicaSetHorizons:/d' > new
-    echo "  connectivity:"                         | tee -a new
-    echo "    replicaSetHorizons:"                 | tee -a new
-    echo "      -" \"horizon-1\": \"${sn0}:27017\" | tee -a new
-    echo "      -" \"horizon-1\": \"${sn1}:27017\" | tee -a new
-    echo "      -" \"horizon-1\": \"${sn2}:27017\" | tee -a new
-    mv new "$fn"
+cat "$fn" | sed -e '/horizon/d' -e '/connectivity:/d' -e '/replicaSetHorizons:/d' > new
+echo "  connectivity:"                        | tee -a new
+echo "    replicaSetHorizons:"                | tee -a new
+echo "      -" \"horizon-1\": \"${hn0}:$np0\" | tee -a new
+echo "      -" \"horizon-1\": \"${hn1}:$np1\" | tee -a new
+echo "      -" \"horizon-1\": \"${hn2}:$np2\" | tee -a new
+mv new "$fn"
 
-    cat init.conf | sed -e "/${name//-/}_URI/d" > new
-    echo
-    #echo "${name//-/}_URI=\"mongodb://${sn0}:27017,${sn1}:27017,$sn2}:27017/?replicaSet=${name} -u \$dbadmin -p \$dbpassword --authenticationDatabase admin \" " | tee -a new
-    echo "${name//-/}_URI=\"mongodb://${dbadmin}:${dbpassword}@${sn0}:27017,${sn1}:27017,$sn2}:27017/admin?replicaSet=${name}&authMechanism=SCRAM-SHA-256&authSource=admin\"" | tee -a new
-    echo
-    mv new init.conf
-else
-    cat "$fn" | sed -e '/horizon/d' -e '/connectivity:/d' -e '/replicaSetHorizons:/d' > new
-    echo "  connectivity:"                        | tee -a new
-    echo "    replicaSetHorizons:"                | tee -a new
-    echo "      -" \"horizon-1\": \"${hn0}:$np0\" | tee -a new
-    echo "      -" \"horizon-1\": \"${hn1}:$np1\" | tee -a new
-    echo "      -" \"horizon-1\": \"${hn2}:$np2\" | tee -a new
-    mv new "$fn"
-
-    cat init.conf | sed -e "/${name//-/}_URI/d" > new
-    echo 
-    echo "Adding this variable to init.conf:"
-    #echo "${name//-/}_URI=\"mongodb://${hn0}:${np0},${hn1}:${np1},${hn2}:${np2}/?replicaSet=${name} -u \$dbadmin -p \$dbpassword --authenticationDatabase admin \" " | tee -a new
-    echo "${name//-/}_URI=\"mongodb://${dbadmin}:${dbpassword}@${hn0}:${np0},${hn1}:${np1},${hn2}:${np2}/?replicaSet=${name}&authMechanism=SCRAM-SHA-256&authSource=admin\"" | tee -a new
-    echo
-    mv new init.conf
-fi
+cat init.conf | sed -e "/${name//-/}_URI/d" > new
+echo 
+echo "Adding the connection string variable to init.conf:"
+#echo "${name//-/}_URI=\"mongodb://${hn0}:${np0},${hn1}:${np1},${hn2}:${np2}/?replicaSet=${name} -u \$dbadmin -p \$dbpassword --authenticationDatabase admin \" " | tee -a new
+#echo "${name//-/}_URI=\"mongodb://${dbadmin}:${dbpassword}@${hn0}:${np0},${hn1}:${np1},${hn2}:${np2}/?replicaSet=${name}&authMechanism=SCRAM-SHA-256&authSource=admin\"" | tee -a new
+echo "${name//-/}_URI=\"mongodb://${dbadmin}:${dbpassword}@${hn0}:${np0},${hn1}:${np1},${hn2}:${np2}/?replicaSet=${name}&authSource=admin\"" | tee -a new
+echo
+mv new init.conf

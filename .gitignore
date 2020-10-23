@@ -3,3 +3,17 @@
 *.deb
 #*pem
 #*crt
+k8s/ca.pem
+k8s/certs/ca-pem
+k8s/certs/ca.crt
+k8s/certs/ca.key
+k8s/certs/mms-ca.crt
+k8s/certs/opsmanager-db-0-pem
+k8s/certs/opsmanager-db-0.pem
+k8s/certs/opsmanager-db-1-pem
+k8s/certs/opsmanager-db-1.pem
+k8s/certs/opsmanager-db-2-pem
+k8s/certs/opsmanager-db-2.pem
+k8s/certs/opsmanager-svc.pem
+k8s/certs/server.pem
+k8s/server.pem

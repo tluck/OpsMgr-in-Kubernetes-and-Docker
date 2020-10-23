@@ -116,8 +116,15 @@ done
 tls=$( kubectl get mdb/${name} -o jsonpath='{.spec.security.tls}' )
 if [[ "${tls}" == "map[enabled:true]" || "${tls}" == "{\"enabled\":true}" ]]
 then
-    tls_options=" --tls --tlsCAFile ca.pem --tlsCertificateKeyFile server.pem "
-    tls_enabled="&tls=true"
+    eval version=$( kubectl get mdb ${name} -o jsonpath={.spec.version} )
+    if [[ ${version%%.*} = 3 ]]
+    then
+        ssltls_options=" --ssl --sslCAFile ca.pem --sslPEMKeyFile server.pem "
+        ssltls_enabled="&ssl=true"
+    else
+        ssltls_options=" --tls --tlsCAFile ca.pem --tlsCertificateKeyFile server.pem "
+        ssltls_enabled="&tls=true"
+    fi
 fi
 
 eval cs=\$${name//-/}_URI
@@ -125,8 +132,8 @@ if [[ "$cs" != "" ]]
 then
   printf "\n"
   printf "%s\n" "Wait a minute for the reconfiguration and then connect by running: Misc/connect_external.bash ${name}"
-  fcs=\'${cs}${tls_enabled}\'
-  printf "\n%s %s\n\n" "Connect String: ${fcs} ${tls_options}"
+  fcs=\'${cs}${ssltls_enabled}\'
+  printf "\n%s %s\n\n" "Connect String: ${fcs} ${ssltls_options}"
 else
   printf "\n"
   printf "%s\n" "Wait a minute for the reconfiguration and then connect by running: Misc/kub_connect_to_pod.bash ${name}"

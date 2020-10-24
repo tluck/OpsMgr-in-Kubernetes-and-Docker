@@ -97,14 +97,20 @@ iplist=(   $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type
 
 if [[ ${hostname} == "docker-desktop" ]]
 then
-hostname=(docker-desktop)
-dnslist=(docker-desktop)
-iplist=(127.0.0.1)
+    hostname=(docker-desktop)
+    dnslist=(docker-desktop)
+    iplist=(127.0.0.1)
 fi
 
+# add 3 nodes to the /etc/hosts
 names=( mongodb1 mongodb2 mongodb3 )
 num=${#iplist[@]}
-num=$(( $num-1 ))
+if [[ ${num} > 0 ]]
+then
+    num=$(( $num-1 ))
+else
+    exit
+fi
 
 printf "\n" 
 for n in 0 1 2

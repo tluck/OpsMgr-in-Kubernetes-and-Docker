@@ -37,7 +37,11 @@ deploy_Operator.bash
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Deploy SMTP relay and until Running status..."
 # Deploy simple SMTP forwarder to a gmail account.
-mail/deploy_SMTP.bash
+kubectl get pod smtp 2>&1 > /dev/null
+if [[ $? = 1 ]]
+then
+    mail/deploy_SMTP.bash
+fi
 
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Deploy OM and wait until Running status..."

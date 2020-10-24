@@ -77,10 +77,19 @@ kubectl apply -f svc_${name}-backup.yaml
 # fix to get a DNS name for the backup-daemon pod
 kubectl apply -f svc_${name}-backup-daemon.yaml
 # list services for OM and QB
-sleep 10
-kubectl get svc/${name}-svc-ext svc/${name}-backup svc/${name}-backup-daemon-0
 
 # update init.conf and put internal hostnames in /etc/hosts
-#Misc/update_initconf_hostnames.bash
+while true
+do
+    kubectl get svc | grep ${name} | grep pending
+    if [[ $? = 1 ]]
+    then
+        kubectl get svc/${name}-svc-ext svc/${name}-backup svc/${name}-backup-daemon-0
+        break
+    fi
+    printf "%s\n" "Sleeping 15 seconds to allow IP/Hostnames to be created"
+    sleep 15
+done
+Misc/update_initconf_hostnames.bash
 
 exit 0

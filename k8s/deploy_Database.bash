@@ -133,7 +133,7 @@ then
   printf "\n"
   printf "%s\n" "Wait a minute for the reconfiguration and then connect by running: Misc/connect_external.bash ${name}"
   fcs=\'${cs}${ssltls_enabled}\'
-  printf "\n%s %s\n\n" "Connect String: ${fcs} ${ssltls_options}"
+  printf "\n%s\n\n" "Connect String: ${fcs} ${ssltls_options}"
 else
   printf "\n"
   printf "%s\n" "Wait a minute for the reconfiguration and then connect by running: Misc/kub_connect_to_pod.bash ${name}"

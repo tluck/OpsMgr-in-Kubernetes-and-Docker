@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. init.conf
+source ./init.conf
 
 orgname=$1
 

@@ -2,15 +2,13 @@
 
 d=$( dirname "$0" )
 cd "${d}"
-curdir=$( pwd )
-export PATH=.:$PATH:"${curdir}"/Misc:"${curdir}"/certs
-
 source init.conf
+
 name="${1:-my-replica-set}"
 mdb="mdb_${name}.yaml"
 mdbuser="mdbuser_${name}.yaml"
 shift
-cleanup=$1
+cleanup=${1:-0}
 
 # clean up any previous certs and services
 if [[ ${cleanup} = 1 ]]

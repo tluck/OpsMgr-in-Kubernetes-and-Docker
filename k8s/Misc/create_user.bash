@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. init.conf
+source ./init.conf
 
 echo '{ "username":     "sharath.rao@mongodb.com",
         "emailAddress": "sharath.rao@mongodb.com",

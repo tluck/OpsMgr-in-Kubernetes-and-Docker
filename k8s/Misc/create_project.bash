@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. init.conf
+source ./init.conf
 
 project=${1-Project}
 

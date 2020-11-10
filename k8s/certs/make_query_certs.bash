@@ -4,14 +4,15 @@ d=$( dirname "$0" )
 cd "${d}"
 
 context=$( kubectl config current-context )
+test -e ca.crt && rm ca.crt
+test -e ca.key && rm ca.key
 if [[ $context == docker-desktop ]]
 then
 # docker-desktop
-    kubectl cp kube-system/kube-apiserver-docker-desktop:/run/config/pki/ca.crt ca.crt
-    kubectl cp kube-system/kube-apiserver-docker-desktop:/run/config/pki/ca.key ca.key
+    kubectl cp kube-system/etcd-docker-desktop:run/config/pki/etcd/ca.crt ca.crt
+    kubectl cp kube-system/etcd-docker-desktop:run/config/pki/etcd/ca.key ca.key
 else
 # need the ca.key
-    test -e ca.key && rm ca.key
     kubectl get secret -n default -o jsonpath="{.items[?(@.type==\"kubernetes.io/service-account-token\")].data['ca\.crt']}" | base64 --decode > ca.crt
 fi
 

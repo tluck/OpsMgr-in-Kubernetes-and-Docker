@@ -1,18 +1,18 @@
 #!/bin/bash
 
-cat init.conf |sed -e '/publicApiKey/d' -e '/user/d' > new
-user="$(         kubectl get secret opsmanager-admin-key -o json | jq .data.user |         sed -e's/"//g'| base64 --decode )"
+cat init.conf |sed -e '/publicApiKey/d' -e '/keyUser/d' > new
+keyUser="$(         kubectl get secret opsmanager-admin-key -o json | jq .data.user |         sed -e's/"//g'| base64 --decode )"
 publicApiKey="$( kubectl get secret opsmanager-admin-key -o json | jq .data.publicApiKey | sed -e's/"//g'| base64 --decode )"
-echo user="\"${user}\"" 
+echo keyUser="\"${keyrUser}\"" 
 echo publicApiKey="\"${publicApiKey}\""
-echo user="\"${user}\""  >> new
+echo keyUser="\"${keyUser}\""  >> new
 echo publicApiKey="\"${publicApiKey}\"" >> new
 mv new init.conf
 
-. init.conf
+source ./init.conf
 
 rm key.json > /dev/null 2>&1
-curl --user "${user}:${publicApiKey}" --digest \
+curl --insecure --user "${keyUser}:${publicApiKey}" --digest \
   --header "Accept: application/json" \
   --header "Content-Type: application/json" \
   --request POST "${opsMgrUrl}/api/public/v1.0/admin/apiKeys?pretty=true" \

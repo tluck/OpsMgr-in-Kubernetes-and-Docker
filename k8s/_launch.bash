@@ -1,12 +1,12 @@
 #!/bin/bash
 
+# argument if set to 1 will skip creating new certs for OM and the App DB
+skipcerts=${1:-0} 
+
 d=$( dirname "$0" )
 cd "${d}"
-curdir=$( pwd )
 
 source init.conf
-export PATH=.:$PATH:"${curdir}"/Misc:"${curdir}"/certs
-skipcerts=${1-0}
 
 which jq > /dev/null
 if [[ $? != 0 ]]
@@ -21,7 +21,6 @@ then
     printf "%s\n" "Exiting - Missing cfssl tool - run: brew install cfssl"
     exit 1
 fi
-
 
 kubectl api-resources > /dev/null 2>&1
 if [[ $? != 0 ]]

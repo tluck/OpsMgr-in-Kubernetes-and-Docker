@@ -27,11 +27,16 @@ cat <<EOF | cfssl genkey - | cfssljson -bare server
     "${cname}",
     "${name}"
   ],
-  "CN": "${cname}",
+  "CN": "system:node:${cname}",
   "key": {
     "algo": "rsa",
     "size": 4096
-  }
+  },
+  "names": [
+    {
+      "O": "system:nodes"
+    }
+  ]
 }
 EOF
 mv server-key.pem ${name}.key
@@ -45,6 +50,7 @@ metadata:
   name: ${name}.mongodb
 spec:
   request: $(cat ${name}.csr | base64 | tr -d '\n')
+  # signerName: kubernetes.io/kube-apiserver-client
   usages:
   - digital signature
   - key encipherment
@@ -54,6 +60,7 @@ EOF
 
 # approve csr 
 kubectl certificate approve ${name}.mongodb
+kubectl get csr ${name}.mongodb
 
 # get certs and build pem
 eval c=$( kubectl get csr ${name}.mongodb -o json|jq .status.certificate)

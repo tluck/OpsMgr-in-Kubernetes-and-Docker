@@ -6,10 +6,10 @@ echo myNodeIp="${myNodeIp}"
 echo myNodeIp="${myNodeIp}" >> new
 mv new init.conf
 
-. init.conf
+source ./init.conf
 
 printf "%s\n" '{ "cidrBlock": "MYIP", "description": "my IP"}' | sed -e"s?MYIP?${myNodeIp}/1?g" > data.json
-curl --user "${user}:${publicApiKey}" --digest \
+curl --user "${keyUser}:${publicApiKey}" --digest \
 --header 'Accept: application/json' \
 --header 'Content-Type: application/json' \
 --request POST "http://opsmgr:32080/api/public/v1.0/admin/whitelist?pretty=true" \

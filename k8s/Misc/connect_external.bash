@@ -1,6 +1,7 @@
 #!/bin/bash
 
-source init.conf
+source ./init.conf
+
 name=${1:-my-replica-set}
 export PATH=.:Misc:$PATH
 

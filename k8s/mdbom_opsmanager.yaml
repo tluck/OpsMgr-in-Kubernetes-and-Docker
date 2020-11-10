@@ -6,7 +6,7 @@ metadata:
 
 spec:
   replicas: 1
-  version: 4.4.4 # 4.2.15
+  version: 4.4.5 # 4.2.15
   jvmParameters: ["-Xms2560m", "-Xmx2560m"] # 2.5M is a good size for docker-desktop -- comment out for larger clusters in production
   adminCredentials: admin-user-credentials # Should match metadata.name in the Kubernetes secret for the admin user
   statefulSet:

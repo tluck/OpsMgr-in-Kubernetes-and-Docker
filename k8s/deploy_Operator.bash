@@ -2,9 +2,6 @@
 
 d=$( dirname "$0" )
 cd "${d}"
-curdir=$( pwd )
-export PATH=.:$PATH:"${curdir}"/Misc:"${curdir}"/certs
-
 source init.conf
 
 # Optinal - Create the metrics server

@@ -2,10 +2,8 @@
 
 d=$( dirname "$0" )
 cd "${d}"
-curdir=$( pwd )
-export PATH=.:$PATH:"${curdir}"/Misc:"${curdir}"/certs
-
 source init.conf
+
 name=${1:-opsmanager}
 skipcerts=${2:-0}
 mdbom="mdbom_${name}.yaml"
@@ -17,7 +15,7 @@ then
     printf "%s\n" "Getting Certs status..."
     # Get ca.crt and create certs for OM and App-db
     rm certs/${name}*pem > /dev/null 2>&1
-    if [[ ! -e cersts/queryable-backup.pem ]]
+    if [[ ! -e certs/queryable-backup.pem ]]
     then
         certs/make_query_certs.bash
     fi

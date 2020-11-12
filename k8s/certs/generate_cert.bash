@@ -74,4 +74,4 @@ rm ${name}.csr
 
 printf "%s\n\n" "Made ${name}.pem"
 fi
-cd
+

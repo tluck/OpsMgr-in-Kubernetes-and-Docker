@@ -27,7 +27,7 @@ cat <<EOF | cfssl genkey - | cfssljson -bare server
     "${cname}",
     "${name}"
   ],
-  "CN": "system:node:${cname}",
+  "CN": "${cname}",
   "key": {
     "algo": "rsa",
     "size": 4096
@@ -74,3 +74,4 @@ rm ${name}.csr
 
 printf "%s\n\n" "Made ${name}.pem"
 fi
+cd

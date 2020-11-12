@@ -36,8 +36,8 @@ else
     fi
 fi
 
-# get the internal IP
-eval hostname=$( kubectl get svc/${name}-backup -o json | jq .status.loadBalancer.ingress[0].hostname ) 
+# get the internal IP (Hack for access to backup proxy)
+eval hostname=$(          kubectl get svc/${name}-backup -o json | jq .status.loadBalancer.ingress[0].hostname ) 
 eval queryableBackupIp=$( kubectl get svc/${name}-backup -o json | jq .status.loadBalancer.ingress[0].ip ) 
 
 if [[ ${hostname} != "null" ]]
@@ -54,10 +54,10 @@ fi
 # Update init.conf with OpsMgr info
 cat init.conf | sed -e '/opsMgrUrl/d' -e '/opsMgrExt/d' -e '/queryableBackupIp/d'  > new
 echo ""
-echo  opsMgrUrl="$opsMgrUrl"           | tee -a new
-echo  opsMgrExtUrl=\""$opsMgrExtUrl"\" | tee -a new
-echo  ""
-echo  opsMgrExtIp=\""$opsMgrExtIp"\"   | tee -a new
+echo  opsMgrUrl="$opsMgrUrl"                        | tee -a new
+echo  opsMgrExtUrl=\""$opsMgrExtUrl"\"              | tee -a new
+echo ""
+echo  opsMgrExtIp=\""$opsMgrExtIp"\"                | tee -a new
 echo  queryableBackupIp=\""$queryableBackupIp"\"    | tee -a new
 mv new init.conf
 
@@ -77,17 +77,17 @@ else
 fi
 
 # put the internal name opsmanager-svc for queriable backup /etc/hosts
-grep "^[0-9].*opsmanager-svc " /etc/hosts > /dev/null 2>&1
+grep "^[0-9].*opsmanager-svc$" /etc/hosts > /dev/null 2>&1
 if [[ $? == 0 ]]
 then
     # replace host entry
     printf "%s" "Replacing /etc/hosts entry: "
-    printf "%s\n" "${queryableBackupIp}${TAB}opsmanager-svc " 
-    sudo sed -E -i .bak -e "s|^[0-9].*(opsmanager-svc .*)|${queryableBackupIp}${TAB}\1|" /etc/hosts
+    printf "%s\n" "${queryableBackupIp}${TAB}opsmanager-svc" 
+    sudo sed -E -i .bak -e "s|^[0-9].*(opsmanager-svc$)|${queryableBackupIp}${TAB}\1|" /etc/hosts
 else
     # add host entry
     printf "%s" "Adding /etc/hosts entry: "
-    printf "%s\n" "${queryableBackupIp}${TAB}opsmanager-svc " | sudo tee -a /etc/hosts
+    printf "%s\n" "${queryableBackupIp}${TAB}opsmanager-svc" | sudo tee -a /etc/hosts
 fi
 
 # get the node info for creating custom clusters via agent automation

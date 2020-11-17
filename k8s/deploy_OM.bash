@@ -70,10 +70,10 @@ do
     sleep 15
 done
 
-# fix to expose port 25999 for queryable backup
-kubectl apply -f svc_${name}-backup.yaml
-# fix to get a DNS name for the backup-daemon pod
-kubectl apply -f svc_${name}-backup-daemon.yaml
+# pre v1.8.2 - fix to expose port 25999 for queryable backup
+# kubectl apply -f svc_${name}-backup.yaml
+# pre v1.8.2 - fix to get a DNS name for the backup-daemon pod
+# kubectl apply -f svc_${name}-backup-daemon.yaml
 # list services for OM and QB
 
 # update init.conf and put internal hostnames in /etc/hosts
@@ -82,7 +82,7 @@ do
     kubectl get svc | grep ${name} | grep pending
     if [[ $? = 1 ]]
     then
-        kubectl get svc/${name}-svc-ext svc/${name}-backup svc/${name}-backup-daemon-0
+        kubectl get svc/${name}-svc-ext # svc/${name}-backup svc/${name}-backup-daemon-0
         break
     fi
     printf "%s\n" "Sleeping 15 seconds to allow IP/Hostnames to be created"

@@ -27,7 +27,7 @@ then
     opsMgrExtUrl=${http}://${opsMgrExtIp}:${port}
 else
     opsMgrExtUrl=${http}://${hostname}:${port}
-    if [[ "${hostname}" != "localhost" ]]
+    if [[ "${hostname}" != "localhost" && "${hostname}" != "" ]]
     then
         eval list=( $( nslookup ${hostname} | grep Address ) )
         opsMgrExtIp=${list[3]}
@@ -36,61 +36,66 @@ else
     fi
 fi
 
-# get the internal IP (Hack for access to backup proxy)
-eval hostname=$(          kubectl get svc/${name}-backup -o json | jq .status.loadBalancer.ingress[0].hostname ) 
-eval queryableBackupIp=$( kubectl get svc/${name}-backup -o json | jq .status.loadBalancer.ingress[0].ip ) 
-
-if [[ ${hostname} != "null" ]]
-then
-    if [[ "${hostname}" != "localhost" ]]
-    then
-        eval list=( $( nslookup ${hostname} | grep Address ) )
-        queryableBackupIp=${list[3]}
-    else
-        queryableBackupIp=127.0.0.1
-    fi
-fi
-
 # Update init.conf with OpsMgr info
 cat init.conf | sed -e '/opsMgrUrl/d' -e '/opsMgrExt/d' -e '/queryableBackupIp/d'  > new
 echo ""
 echo  opsMgrUrl="$opsMgrUrl"                        | tee -a new
 echo  opsMgrExtUrl=\""$opsMgrExtUrl"\"              | tee -a new
-echo ""
 echo  opsMgrExtIp=\""$opsMgrExtIp"\"                | tee -a new
-echo  queryableBackupIp=\""$queryableBackupIp"\"    | tee -a new
+# echo  queryableBackupIp=\""$queryableBackupIp"\"    | tee -a new
 mv new init.conf
 
+if [[ ${opsMgrExtIp} != "" ]]
+then
 printf "\n%s\n\n" "*** Note: sudo may ask for your password" 
 # put the internal name opsmanager-svc.mongodb.svc.cluster.local in /etc/hosts
-grep "^[0-9].*opsmanager-svc.mongodb.svc.cluster.local" /etc/hosts > /dev/null 2>&1
+grep "^[0-9].*${name}-svc.mongodb.svc.cluster.local" /etc/hosts > /dev/null 2>&1
 if [[ $? == 0 ]]
 then
     # replace host entry
     printf "%s" "Replacing /etc/hosts entry: "
-    printf "%s\n" "${opsMgrExtIp}${TAB}opsmanager-svc.mongodb.svc.cluster.local" 
-    sudo sed -E -i .bak -e "s|^[0-9].*(opsmanager-svc.mongodb.svc.cluster.local.*)|${opsMgrExtIp}${TAB}\1|" /etc/hosts
+    printf "%s\n" "${opsMgrExtIp}${TAB}${name}-svc.mongodb.svc.cluster.local ${name}-svc" 
+    sudo sed -E -i .bak -e "s|^[0-9].*(${name}-svc.mongodb.svc.cluster.local.*)|${opsMgrExtIp}${TAB}\1|" /etc/hosts
 else
     # add host entry
     printf "%s" "Adding /etc/hosts entry: "
-    printf "%s\n" "${opsMgrExtIp}${TAB}opsmanager-svc.mongodb.svc.cluster.local" | sudo tee -a /etc/hosts
+    printf "%s\n" "${opsMgrExtIp}${TAB}${name}-svc.mongodb.svc.cluster.local ${name}-svc" | sudo tee -a /etc/hosts
+fi
 fi
 
-# put the internal name opsmanager-svc for queriable backup /etc/hosts
-grep "^[0-9].*opsmanager-svc$" /etc/hosts > /dev/null 2>&1
-if [[ $? == 0 ]]
-then
-    # replace host entry
-    printf "%s" "Replacing /etc/hosts entry: "
-    printf "%s\n" "${queryableBackupIp}${TAB}opsmanager-svc" 
-    sudo sed -E -i .bak -e "s|^[0-9].*(opsmanager-svc$)|${queryableBackupIp}${TAB}\1|" /etc/hosts
-else
-    # add host entry
-    printf "%s" "Adding /etc/hosts entry: "
-    printf "%s\n" "${queryableBackupIp}${TAB}opsmanager-svc" | sudo tee -a /etc/hosts
-fi
+# # get the internal IP (Hack for access to backup proxy)
+# eval hostname=$(          kubectl get svc/${name}-svc-ext -o json | jq .status.loadBalancer.ingress[0].hostname ) 
+# eval queryableBackupIp=$( kubectl get svc/${name}-svc-ext -o json | jq .status.loadBalancer.ingress[0].ip ) 
 
-# get the node info for creating custom clusters via agent automation
+# if [[ ${hostname} != "null" ]]
+# then
+#     if [[ "${hostname}" != "localhost" && "${hostname}" != "" ]]
+#     then
+#         eval list=( $( nslookup ${hostname} | grep Address ) )
+#         queryableBackupIp=${list[3]}
+#     else
+#         queryableBackupIp=127.0.0.1
+#     fi
+# fi
+
+# if [[ ${queryableBackupIp} != "" ]]
+# then
+# # put the internal name opsmanager-svc for queriable backup /etc/hosts
+# grep "^[0-9].*opsmanager-svc$" /etc/hosts > /dev/null 2>&1
+# if [[ $? == 0 ]]
+# then
+#     # replace host entry
+#     printf "%s" "Replacing /etc/hosts entry: "
+#     printf "%s\n" "${queryableBackupIp}${TAB}opsmanager-svc" 
+#     sudo sed -E -i .bak -e "s|^[0-9].*(opsmanager-svc$)|${queryableBackupIp}${TAB}\1|" /etc/hosts
+# else
+#     # add host entry
+#     printf "%s" "Adding /etc/hosts entry: "
+#     printf "%s\n" "${queryableBackupIp}${TAB}opsmanager-svc" | sudo tee -a /etc/hosts
+# fi
+# fi
+
+# get the node info for creating an external cluster via agent automation
 hostname=( $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="Hostname")].address}') )
 dnslist=(  $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="ExternalDNS")].address}' ) )
 iplist=(   $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="ExternalIP")].address}' ) )

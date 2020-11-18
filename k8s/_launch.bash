@@ -5,7 +5,6 @@ skipcerts=${1:-0}
 
 d=$( dirname "$0" )
 cd "${d}"
-
 source init.conf
 
 which jq > /dev/null
@@ -29,6 +28,8 @@ then
     exit 1
 fi
 
+date
+
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Deploy the Operator ..."
 deploy_Operator.bash
@@ -36,7 +37,7 @@ deploy_Operator.bash
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Deploy SMTP relay and until Running status..."
 # Deploy simple SMTP forwarder to a gmail account.
-kubectl get pod smtp 2>&1 > /dev/null
+kubectl get pod smtp > /dev/null 2>&1
 if [[ $? = 1 ]]
 then
     mail/deploy_SMTP.bash
@@ -65,3 +66,5 @@ deploy_Database.bash my-replica-set
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Update init.conf with IPs and put k8s internal hostnames in /etc/hosts ..."
 Misc/update_initconf_hostnames.bash
+
+date

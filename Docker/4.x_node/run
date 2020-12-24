@@ -18,6 +18,6 @@ docker run \
         --network mongonet \
         --name mongodb${n} -h mongodb${n} -p ${ports[$n]}:27017 \
         --mount type=bind,source=${data},target=/shareddata  \
-        -itd --privileged $DOCKER_USERNAME/mongodb:node_$MONGO_VERSION
+        -itd --privileged $DOCKER_USERNAME/mongodb:node_$MONGO_VERSION44
 
 

@@ -7,7 +7,8 @@ TAB=$'\t'
 #then 
 #    exit 1 -- need opsmanager service name
 #else
-name="${1-opsmanager}"
+
+name="${1:-opsmanager}"
 #fi
 
 # get the OpsMgr URL and internal IP
@@ -15,11 +16,18 @@ opsMgrUrl=$(        kubectl get om                  -o json | jq .items[0].statu
 eval hostname=$(    kubectl get svc/${name}-svc-ext -o json | jq .status.loadBalancer.ingress[0].hostname ) 
 eval opsMgrExtIp=$( kubectl get svc/${name}-svc-ext -o json | jq .status.loadBalancer.ingress[0].ip ) 
 eval port=$(        kubectl get svc/${name}-svc-ext -o json | jq .spec.ports[0].port )
+eval nodePort=$(    kubectl get svc/${name}-svc-ext -o json | jq .spec.ports[0].nodePort )
+eval portType=$(    kubectl get svc/${name}-svc-ext -o json | jq .spec.type )
+
 
 http="http"
 if [[ ${port} == "8443" ]]
 then
     http="https"
+fi
+if [[ ${portType} == "NodePort" ]]
+then
+    port=${nodePort}
 fi
 
 if [[ ${hostname} == "null" ]]

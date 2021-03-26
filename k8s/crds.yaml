@@ -1,1007 +1,2005 @@
+
 ---
-apiVersion: apiextensions.k8s.io/v1beta1
+apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.4.1
+  creationTimestamp: null
   name: mongodb.mongodb.com
 spec:
   group: mongodb.com
-  version: v1
-  scope: Namespaced
   names:
     kind: MongoDB
+    listKind: MongoDBList
     plural: mongodb
     shortNames:
-      - mdb
+    - mdb
     singular: mongodb
-  additionalPrinterColumns:
-    - name: Type
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: Current state of the MongoDB deployment.
+      jsonPath: .status.phase
+      name: Phase
       type: string
-      description: "The type of MongoDB deployment. One of 'ReplicaSet', 'ShardedCluster' and 'Standalone'."
-      JSONPath: .spec.type
-    - name: State
+    - description: Version of MongoDB server.
+      jsonPath: .status.version
+      name: Version
       type: string
-      description: The current state of the MongoDB deployment.
-      JSONPath: .status.phase
-    - name: Version
+    - description: The type of MongoDB deployment. One of 'ReplicaSet', 'ShardedCluster'
+        and 'Standalone'.
+      jsonPath: .spec.type
+      name: Type
       type: string
-      description: The version of MongoDB.
-      JSONPath: .spec.version
-    - name: Age
+    - description: The time since the MongoDB resource was created.
+      jsonPath: .metadata.creationTimestamp
+      name: Age
       type: date
-      description: The time since the MongoDB resource was created.
-      JSONPath: .metadata.creationTimestamp
-  subresources:
-    status: {}
-  validation:
-    openAPIV3Schema:
-      type: object
-      properties:
-        spec:
-          type: object
-          required:
+    name: v1
+    schema:
+      openAPIV3Schema:
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          spec:
+            properties:
+              additionalMongodConfig:
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              agent:
+                properties:
+                  startupOptions:
+                    additionalProperties:
+                      type: string
+                    type: object
+                type: object
+              backup:
+                properties:
+                  mode:
+                    enum:
+                    - enabled
+                    - disabled
+                    - terminated
+                    type: string
+                type: object
+              cloudManager:
+                properties:
+                  configMapRef:
+                    properties:
+                      name:
+                        type: string
+                    type: object
+                type: object
+              clusterDomain:
+                format: hostname
+                type: string
+              clusterName:
+                format: hostname
+                type: string
+              configServerCount:
+                type: integer
+              configSrv:
+                properties:
+                  additionalMongodConfig:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                  agent:
+                    properties:
+                      startupOptions:
+                        additionalProperties:
+                          type: string
+                        type: object
+                    type: object
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              configSrvPodSpec:
+                properties:
+                  cpu:
+                    type: string
+                  cpuRequests:
+                    type: string
+                  memory:
+                    type: string
+                  memoryRequests:
+                    type: string
+                  nodeAffinity:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                  persistence:
+                    properties:
+                      multiple:
+                        properties:
+                          data:
+                            properties:
+                              labelSelector:
+                                properties:
+                                  matchExpressions:
+                                    items:
+                                      properties:
+                                        key:
+                                          type: string
+                                        operator:
+                                          type: string
+                                        values:
+                                          items:
+                                            type: string
+                                          type: array
+                                      required:
+                                      - key
+                                      - operator
+                                      type: object
+                                    type: array
+                                  matchLabels:
+                                    additionalProperties:
+                                      type: string
+                                    type: object
+                                type: object
+                              storage:
+                                type: string
+                              storageClass:
+                                type: string
+                            type: object
+                          journal:
+                            properties:
+                              labelSelector:
+                                properties:
+                                  matchExpressions:
+                                    items:
+                                      properties:
+                                        key:
+                                          type: string
+                                        operator:
+                                          type: string
+                                        values:
+                                          items:
+                                            type: string
+                                          type: array
+                                      required:
+                                      - key
+                                      - operator
+                                      type: object
+                                    type: array
+                                  matchLabels:
+                                    additionalProperties:
+                                      type: string
+                                    type: object
+                                type: object
+                              storage:
+                                type: string
+                              storageClass:
+                                type: string
+                            type: object
+                          logs:
+                            properties:
+                              labelSelector:
+                                properties:
+                                  matchExpressions:
+                                    items:
+                                      properties:
+                                        key:
+                                          type: string
+                                        operator:
+                                          type: string
+                                        values:
+                                          items:
+                                            type: string
+                                          type: array
+                                      required:
+                                      - key
+                                      - operator
+                                      type: object
+                                    type: array
+                                  matchLabels:
+                                    additionalProperties:
+                                      type: string
+                                    type: object
+                                type: object
+                              storage:
+                                type: string
+                              storageClass:
+                                type: string
+                            type: object
+                        type: object
+                      single:
+                        properties:
+                          labelSelector:
+                            properties:
+                              matchExpressions:
+                                items:
+                                  properties:
+                                    key:
+                                      type: string
+                                    operator:
+                                      type: string
+                                    values:
+                                      items:
+                                        type: string
+                                      type: array
+                                  required:
+                                  - key
+                                  - operator
+                                  type: object
+                                type: array
+                              matchLabels:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                            type: object
+                          storage:
+                            type: string
+                          storageClass:
+                            type: string
+                        type: object
+                    type: object
+                  podAffinity:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                  podAntiAffinityTopologyKey:
+                    type: string
+                  podTemplate:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                type: object
+              connectivity:
+                properties:
+                  replicaSetHorizons:
+                    items:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    type: array
+                type: object
+              credentials:
+                type: string
+              exposedExternally:
+                type: boolean
+              featureCompatibilityVersion:
+                type: string
+              logLevel:
+                enum:
+                - DEBUG
+                - INFO
+                - WARN
+                - ERROR
+                - FATAL
+                type: string
+              members:
+                type: integer
+              mongodsPerShardCount:
+                type: integer
+              mongos:
+                properties:
+                  additionalMongodConfig:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                  agent:
+                    properties:
+                      startupOptions:
+                        additionalProperties:
+                          type: string
+                        type: object
+                    type: object
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              mongosCount:
+                type: integer
+              mongosPodSpec:
+                properties:
+                  cpu:
+                    type: string
+                  cpuRequests:
+                    type: string
+                  memory:
+                    type: string
+                  memoryRequests:
+                    type: string
+                  nodeAffinity:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                  persistence:
+                    properties:
+                      multiple:
+                        properties:
+                          data:
+                            properties:
+                              labelSelector:
+                                properties:
+                                  matchExpressions:
+                                    items:
+                                      properties:
+                                        key:
+                                          type: string
+                                        operator:
+                                          type: string
+                                        values:
+                                          items:
+                                            type: string
+                                          type: array
+                                      required:
+                                      - key
+                                      - operator
+                                      type: object
+                                    type: array
+                                  matchLabels:
+                                    additionalProperties:
+                                      type: string
+                                    type: object
+                                type: object
+                              storage:
+                                type: string
+                              storageClass:
+                                type: string
+                            type: object
+                          journal:
+                            properties:
+                              labelSelector:
+                                properties:
+                                  matchExpressions:
+                                    items:
+                                      properties:
+                                        key:
+                                          type: string
+                                        operator:
+                                          type: string
+                                        values:
+                                          items:
+                                            type: string
+                                          type: array
+                                      required:
+                                      - key
+                                      - operator
+                                      type: object
+                                    type: array
+                                  matchLabels:
+                                    additionalProperties:
+                                      type: string
+                                    type: object
+                                type: object
+                              storage:
+                                type: string
+                              storageClass:
+                                type: string
+                            type: object
+                          logs:
+                            properties:
+                              labelSelector:
+                                properties:
+                                  matchExpressions:
+                                    items:
+                                      properties:
+                                        key:
+                                          type: string
+                                        operator:
+                                          type: string
+                                        values:
+                                          items:
+                                            type: string
+                                          type: array
+                                      required:
+                                      - key
+                                      - operator
+                                      type: object
+                                    type: array
+                                  matchLabels:
+                                    additionalProperties:
+                                      type: string
+                                    type: object
+                                type: object
+                              storage:
+                                type: string
+                              storageClass:
+                                type: string
+                            type: object
+                        type: object
+                      single:
+                        properties:
+                          labelSelector:
+                            properties:
+                              matchExpressions:
+                                items:
+                                  properties:
+                                    key:
+                                      type: string
+                                    operator:
+                                      type: string
+                                    values:
+                                      items:
+                                        type: string
+                                      type: array
+                                  required:
+                                  - key
+                                  - operator
+                                  type: object
+                                type: array
+                              matchLabels:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                            type: object
+                          storage:
+                            type: string
+                          storageClass:
+                            type: string
+                        type: object
+                    type: object
+                  podAffinity:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                  podAntiAffinityTopologyKey:
+                    type: string
+                  podTemplate:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                type: object
+              opsManager:
+                properties:
+                  configMapRef:
+                    properties:
+                      name:
+                        type: string
+                    type: object
+                type: object
+              persistent:
+                type: boolean
+              podSpec:
+                properties:
+                  cpu:
+                    type: string
+                  cpuRequests:
+                    type: string
+                  memory:
+                    type: string
+                  memoryRequests:
+                    type: string
+                  nodeAffinity:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                  persistence:
+                    properties:
+                      multiple:
+                        properties:
+                          data:
+                            properties:
+                              labelSelector:
+                                properties:
+                                  matchExpressions:
+                                    items:
+                                      properties:
+                                        key:
+                                          type: string
+                                        operator:
+                                          type: string
+                                        values:
+                                          items:
+                                            type: string
+                                          type: array
+                                      required:
+                                      - key
+                                      - operator
+                                      type: object
+                                    type: array
+                                  matchLabels:
+                                    additionalProperties:
+                                      type: string
+                                    type: object
+                                type: object
+                              storage:
+                                type: string
+                              storageClass:
+                                type: string
+                            type: object
+                          journal:
+                            properties:
+                              labelSelector:
+                                properties:
+                                  matchExpressions:
+                                    items:
+                                      properties:
+                                        key:
+                                          type: string
+                                        operator:
+                                          type: string
+                                        values:
+                                          items:
+                                            type: string
+                                          type: array
+                                      required:
+                                      - key
+                                      - operator
+                                      type: object
+                                    type: array
+                                  matchLabels:
+                                    additionalProperties:
+                                      type: string
+                                    type: object
+                                type: object
+                              storage:
+                                type: string
+                              storageClass:
+                                type: string
+                            type: object
+                          logs:
+                            properties:
+                              labelSelector:
+                                properties:
+                                  matchExpressions:
+                                    items:
+                                      properties:
+                                        key:
+                                          type: string
+                                        operator:
+                                          type: string
+                                        values:
+                                          items:
+                                            type: string
+                                          type: array
+                                      required:
+                                      - key
+                                      - operator
+                                      type: object
+                                    type: array
+                                  matchLabels:
+                                    additionalProperties:
+                                      type: string
+                                    type: object
+                                type: object
+                              storage:
+                                type: string
+                              storageClass:
+                                type: string
+                            type: object
+                        type: object
+                      single:
+                        properties:
+                          labelSelector:
+                            properties:
+                              matchExpressions:
+                                items:
+                                  properties:
+                                    key:
+                                      type: string
+                                    operator:
+                                      type: string
+                                    values:
+                                      items:
+                                        type: string
+                                      type: array
+                                  required:
+                                  - key
+                                  - operator
+                                  type: object
+                                type: array
+                              matchLabels:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                            type: object
+                          storage:
+                            type: string
+                          storageClass:
+                            type: string
+                        type: object
+                    type: object
+                  podAffinity:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                  podAntiAffinityTopologyKey:
+                    type: string
+                  podTemplate:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                type: object
+              project:
+                type: string
+              security:
+                properties:
+                  authentication:
+                    properties:
+                      agents:
+                        properties:
+                          automationLdapGroupDN:
+                            type: string
+                          automationPasswordSecretRef:
+                            properties:
+                              key:
+                                type: string
+                              name:
+                                type: string
+                              optional:
+                                type: boolean
+                            required:
+                            - key
+                            type: object
+                          automationUserName:
+                            type: string
+                          clientCertificateSecretRef:
+                            type: object
+                            x-kubernetes-preserve-unknown-fields: true
+                          mode:
+                            type: string
+                        required:
+                        - mode
+                        type: object
+                      enabled:
+                        type: boolean
+                      ignoreUnknownUsers:
+                        type: boolean
+                      internalCluster:
+                        type: string
+                      ldap:
+                        properties:
+                          authzQueryTemplate:
+                            type: string
+                          bindQueryPasswordSecretRef:
+                            properties:
+                              name:
+                                type: string
+                            required:
+                            - name
+                            type: object
+                          bindQueryUser:
+                            type: string
+                          caConfigMapRef:
+                            properties:
+                              key:
+                                type: string
+                              name:
+                                type: string
+                              optional:
+                                type: boolean
+                            required:
+                            - key
+                            type: object
+                          servers:
+                            items:
+                              type: string
+                            type: array
+                          transportSecurity:
+                            enum:
+                            - tls
+                            - none
+                            type: string
+                          userToDNMapping:
+                            type: string
+                          validateLDAPServerConfig:
+                            type: boolean
+                        type: object
+                      modes:
+                        items:
+                          type: string
+                        type: array
+                      requireClientTLSAuthentication:
+                        type: boolean
+                    required:
+                    - enabled
+                    type: object
+                  clusterAuthenticationMode:
+                    type: string
+                  roles:
+                    items:
+                      properties:
+                        authenticationRestrictions:
+                          items:
+                            properties:
+                              clientSource:
+                                items:
+                                  type: string
+                                type: array
+                              serverAddress:
+                                items:
+                                  type: string
+                                type: array
+                            type: object
+                          type: array
+                        db:
+                          type: string
+                        privileges:
+                          items:
+                            properties:
+                              actions:
+                                items:
+                                  type: string
+                                type: array
+                              resource:
+                                properties:
+                                  cluster:
+                                    type: boolean
+                                  collection:
+                                    type: string
+                                  db:
+                                    type: string
+                                type: object
+                            required:
+                            - actions
+                            - resource
+                            type: object
+                          type: array
+                        role:
+                          type: string
+                        roles:
+                          items:
+                            properties:
+                              db:
+                                type: string
+                              role:
+                                type: string
+                            required:
+                            - db
+                            - role
+                            type: object
+                          type: array
+                      required:
+                      - db
+                      - role
+                      type: object
+                    type: array
+                  tls:
+                    properties:
+                      additionalCertificateDomains:
+                        items:
+                          type: string
+                        type: array
+                      ca:
+                        type: string
+                      enabled:
+                        type: boolean
+                      secretRef:
+                        properties:
+                          name:
+                            type: string
+                        required:
+                        - name
+                        type: object
+                    type: object
+                type: object
+              service:
+                type: string
+              shard:
+                properties:
+                  additionalMongodConfig:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                  agent:
+                    properties:
+                      startupOptions:
+                        additionalProperties:
+                          type: string
+                        type: object
+                    type: object
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              shardCount:
+                type: integer
+              shardPodSpec:
+                properties:
+                  cpu:
+                    type: string
+                  cpuRequests:
+                    type: string
+                  memory:
+                    type: string
+                  memoryRequests:
+                    type: string
+                  nodeAffinity:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                  persistence:
+                    properties:
+                      multiple:
+                        properties:
+                          data:
+                            properties:
+                              labelSelector:
+                                properties:
+                                  matchExpressions:
+                                    items:
+                                      properties:
+                                        key:
+                                          type: string
+                                        operator:
+                                          type: string
+                                        values:
+                                          items:
+                                            type: string
+                                          type: array
+                                      required:
+                                      - key
+                                      - operator
+                                      type: object
+                                    type: array
+                                  matchLabels:
+                                    additionalProperties:
+                                      type: string
+                                    type: object
+                                type: object
+                              storage:
+                                type: string
+                              storageClass:
+                                type: string
+                            type: object
+                          journal:
+                            properties:
+                              labelSelector:
+                                properties:
+                                  matchExpressions:
+                                    items:
+                                      properties:
+                                        key:
+                                          type: string
+                                        operator:
+                                          type: string
+                                        values:
+                                          items:
+                                            type: string
+                                          type: array
+                                      required:
+                                      - key
+                                      - operator
+                                      type: object
+                                    type: array
+                                  matchLabels:
+                                    additionalProperties:
+                                      type: string
+                                    type: object
+                                type: object
+                              storage:
+                                type: string
+                              storageClass:
+                                type: string
+                            type: object
+                          logs:
+                            properties:
+                              labelSelector:
+                                properties:
+                                  matchExpressions:
+                                    items:
+                                      properties:
+                                        key:
+                                          type: string
+                                        operator:
+                                          type: string
+                                        values:
+                                          items:
+                                            type: string
+                                          type: array
+                                      required:
+                                      - key
+                                      - operator
+                                      type: object
+                                    type: array
+                                  matchLabels:
+                                    additionalProperties:
+                                      type: string
+                                    type: object
+                                type: object
+                              storage:
+                                type: string
+                              storageClass:
+                                type: string
+                            type: object
+                        type: object
+                      single:
+                        properties:
+                          labelSelector:
+                            properties:
+                              matchExpressions:
+                                items:
+                                  properties:
+                                    key:
+                                      type: string
+                                    operator:
+                                      type: string
+                                    values:
+                                      items:
+                                        type: string
+                                      type: array
+                                  required:
+                                  - key
+                                  - operator
+                                  type: object
+                                type: array
+                              matchLabels:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                            type: object
+                          storage:
+                            type: string
+                          storageClass:
+                            type: string
+                        type: object
+                    type: object
+                  podAffinity:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                  podAntiAffinityTopologyKey:
+                    type: string
+                  podTemplate:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                type: object
+              type:
+                enum:
+                - Standalone
+                - ReplicaSet
+                - ShardedCluster
+                type: string
+              version:
+                pattern: ^[0-9]+.[0-9]+.[0-9]+(-.+)?$|^$
+                type: string
+            required:
             - credentials
             - type
             - version
-          oneOf:
-            - required: [cloudManager]
-            - required: [opsManager]
-            - required: [project]
-          properties:
-            type:
-              type: string
-              enum: ["Standalone", "ReplicaSet", "ShardedCluster"]
-            credentials:
-              type: string
-            project:
-              type: string
-              description: "DEPRECATED The name of a configMap in the same namespace"
-            opsManager:
-              type: object
-              properties:
-                configMapRef:
-                  type: object
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+          status:
+            properties:
+              backup:
+                properties:
+                  statusName:
+                    type: string
+                required:
+                - statusName
+                type: object
+              configServerCount:
+                type: integer
+              lastTransition:
+                type: string
+              link:
+                type: string
+              members:
+                type: integer
+              message:
+                type: string
+              mongodsPerShardCount:
+                type: integer
+              mongosCount:
+                type: integer
+              observedGeneration:
+                format: int64
+                type: integer
+              phase:
+                type: string
+              resourcesNotReady:
+                items:
                   properties:
+                    errors:
+                      items:
+                        properties:
+                          message:
+                            type: string
+                          reason:
+                            type: string
+                        type: object
+                      type: array
+                    kind:
+                      type: string
+                    message:
+                      type: string
                     name:
                       type: string
-            cloudManager:
-              type: object
-              properties:
-                configMapRef:
+                  required:
+                  - kind
+                  - name
                   type: object
-                  properties:
-                    name:
-                      type: string
+                type: array
+              shardCount:
+                type: integer
+              version:
+                type: string
+              warnings:
+                items:
+                  type: string
+                type: array
+            required:
+            - phase
+            - version
+            type: object
+        required:
+        - spec
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
 
-            version:
-              type: string
-              pattern: "^[0-9]+.[0-9]+.[0-9]+(-.+)?$"
-            logLevel:
-              type: string
-              enum: ["DEBUG", "INFO", "WARN", "ERROR", "FATAL"]
-            persistent:
-              type: boolean
-            clusterName:
-              type: string
-              format: hostname
-              description: "DEPRECATED Use clusterDomain instead"
-            clusterDomain:
-              type: string
-              format: hostname
-
-            additionalMongodConfig:
-              type: object
-            exposedExternally:
-              type: boolean
-
-            agent:
-              type: object
-              properties:
-                startupOptions:
-                  type: object
-
-            backup:
-              type: object
-              properties:
-                mode:
-                  type: string
-                  enum: ["enabled", "disabled", "terminated"]
-            # Generic PodSpec configuration
-            podSpec:
-              type: object
-              properties:
-                podTemplate:
-                  type: object
-                  properties:
-                    metadata:
-                      type: object
-                    spec:
-                      type: object
-                podAntiAffinityTopologyKey:
-                  type: string
-                cpu:
-                  type: string
-                  description: "DEPRECATED. Please set this value using `spec.podTemplate` instead."
-                cpuRequests:
-                  type: string
-                  description: "DEPRECATED. Please set this value using `spec.podTemplate` instead."
-                memory:
-                  type: string
-                  description: "DEPRECATED. Please set this value using `spec.podTemplate` instead."
-                memoryRequests:
-                  type: string
-                  description: "DEPRECATED. Please set this value using `spec.podTemplate` instead."
-                podAffinity:
-                  type: object
-                nodeAffinity:
-                  type: object
-                persistence:
-                  type: object
-                  properties:
-                    single:
-                      type: object
-                      properties:
-                        storage:
-                          type: string
-                        storageClass:
-                          type: string
-                        labelSelector:
-                          type: object
-                    multiple:
-                      type: object
-                      properties:
-                        data:
-                          type: object
-                          properties:
-                            storage:
-                              type: string
-                            storageClass:
-                              type: string
-                            labelSelector:
-                              type: object
-                        journal:
-                          type: object
-                          properties:
-                            storage:
-                              type: string
-                            storageClass:
-                              type: string
-                            labelSelector:
-                              type: object
-                        logs:
-                          type: object
-                          properties:
-                            storage:
-                              type: string
-                            storageClass:
-                              type: string
-                            labelSelector:
-                              type: object
-
-            # TLS & authentication properties
-            security:
-              type: object
-              properties:
-                authentication:
-                  type: object
-                  properties:
-                    agents:
-                      type: object
-                      properties:
-                        mode:
-                          type: string
-                          enum: ["SCRAM", "X509", "LDAP"]
-                        automationUsername:
-                          type: string
-                        automationPasswordSecretRef:
-                          type: object
-                          properties:
-                            name:
-                              type: string
-                            key:
-                              type: string
-                        automationLdapGroupDN:
-                          type: string
-                        clientCertificateSecretRef:
-                          type: object
-                          properties:
-                            name:
-                              type: string
-                      required:
-                        - mode
-                    enabled:
-                      type: boolean
-                    modes:
-                      type: array
-                      items:
-                        type: string
-                        enum: ["SCRAM", "X509", "LDAP"]
-                    ignoreUnknownUsers:
-                      type: boolean
-                    requireClientTLSAuthentication:
-                      type: boolean
-                tls:
-                  type: object
-                  properties:
-                    enabled:
-                      type: boolean
-                    ca:
-                      type: string
-                    secretRef:
-                      type: object
-                      properties:
-                        name:
-                          type: string
-                    additionalCertificateDomains:
-                      type: array
-                      items:
-                        type: string
-
-                ldap:
-                  type: object
-                  properties:
-                    bindQueryUser:
-                      type: string
-                    servers:
-                      type: array
-                      items:
-                        type: string
-                    transportSecurity:
-                      type: string
-                      enum: ["none", "tls"]
-                    bindQueryPasswordSecretRef:
-                      type: object
-                      properties:
-                        name:
-                          type: string
-                    caConfigMapRef:
-                      type: object
-                    authzQueryTemplate:
-                      type: string
-                    userToDNMapping:
-                      type: string
-                roles:
-                  type: array
-                  description: "List of roles not bounded to specific users"
-                  items:
-                    type: object
-                    properties:
-                      role:
-                        type: string
-                        description: "The name of the role"
-                      db:
-                        type: string
-                        description: "The db the role belongs to"
-                      roles:
-                        type: array
-                        description: "List of roles this role inherits from"
-                        items:
-                          type: object
-                          properties:
-                            db:
-                              type: string
-                              description: "The db the role belongs to"
-                            role:
-                              type: string
-                              description: "The name of the role"
-                      authenticationRestrictions:
-                        type: array
-                        description: "List of restriction for users authenticating to this role"
-                        items:
-                          type: object
-                          properties:
-                            clientSource:
-                              type: array
-                              description: "List of IP addresses or CIDR ranges allowed the user can connect from"
-                              items:
-                                type: string
-                            serverAddress:
-                              type: array
-                              description: "List of IP addresses or CIDR ranges allowed the user can connect to"
-                              items:
-                                type: string
-                      privileges:
-                        type: array
-                        description: "List of privileges granted to this role"
-                        items:
-                          type: object
-                          properties:
-                            actions:
-                              type: array
-                              description: "List of actions allowed to this role"
-                              items:
-                                type: string
-                            resource:
-                              type: object
-                              description: "Resource on which the privileges are granted"
-                              properties:
-                                db:
-                                  type: string
-                                  description: "Name of the database"
-                                collection:
-                                  type: string
-                                  description: "Name of the collection"
-                                cluster:
-                                  type: boolean
-                                  description: "True for cluster-wide privileges"
-
-            # Sharded Cluster properties
-            shardPodSpec:
-              type: object
-              properties:
-                podTemplate:
-                  type: object
-                  properties:
-                    metadata:
-                      type: object
-                    spec:
-                      type: object
-                podAntiAffinityTopologyKey:
-                  type: string
-                cpu:
-                  type: string
-                  description: "DEPRECATED. Please set this value using `spec.podTemplate` instead."
-                cpuRequests:
-                  type: string
-                  description: "DEPRECATED. Please set this value using `spec.podTemplate` instead."
-                memory:
-                  type: string
-                  description: "DEPRECATED. Please set this value using `spec.podTemplate` instead."
-                memoryRequests:
-                  type: string
-                  description: "DEPRECATED. Please set this value using `spec.podTemplate` instead."
-                podAffinity:
-                  type: object
-                nodeAffinity:
-                  type: object
-                persistence:
-                  type: object
-                  properties:
-                    single:
-                      type: object
-                      properties:
-                        storage:
-                          type: string
-                        storageClass:
-                          type: string
-                        labelSelector:
-                          type: object
-                    multiple:
-                      type: object
-                      properties:
-                        data:
-                          type: object
-                          properties:
-                            storage:
-                              type: string
-                            storageClass:
-                              type: string
-                            labelSelector:
-                              type: object
-                        journal:
-                          type: object
-                          properties:
-                            storage:
-                              type: string
-                            storageClass:
-                              type: string
-                            labelSelector:
-                              type: object
-                        logs:
-                          type: object
-                          properties:
-                            storage:
-                              type: string
-                            storageClass:
-                              type: string
-                            labelSelector:
-                              type: object
-            mongosPodSpec:
-              type: object
-              properties:
-                podTemplate:
-                  type: object
-                  properties:
-                    metadata:
-                      type: object
-                    spec:
-                      type: object
-                podAntiAffinityTopologyKey:
-                  type: string
-                cpu:
-                  type: string
-                  description: "DEPRECATED. Please set this value using `spec.podTemplate` instead."
-                cpuRequests:
-                  type: string
-                  description: "DEPRECATED. Please set this value using `spec.podTemplate` instead."
-                memory:
-                  type: string
-                  description: "DEPRECATED. Please set this value using `spec.podTemplate` instead."
-                memoryRequests:
-                  type: string
-                  description: "DEPRECATED. Please set this value using `spec.podTemplate` instead."
-                podAffinity:
-                  type: object
-                nodeAffinity:
-                  type: object
-                persistence:
-                  type: object
-                  properties:
-                    single:
-                      type: object
-                      properties:
-                        storage:
-                          type: string
-                        storageClass:
-                          type: string
-                        labelSelector:
-                          type: object
-                    multiple:
-                      type: object
-                      properties:
-                        data:
-                          type: object
-                          properties:
-                            storage:
-                              type: string
-                            storageClass:
-                              type: string
-                            labelSelector:
-                              type: object
-                        journal:
-                          type: object
-                          properties:
-                            storage:
-                              type: string
-                            storageClass:
-                              type: string
-                            labelSelector:
-                              type: object
-                        logs:
-                          type: object
-                          properties:
-                            storage:
-                              type: string
-                            storageClass:
-                              type: string
-                            labelSelector:
-                              type: object
-            configSrvPodSpec:
-              type: object
-              properties:
-                podTemplate:
-                  type: object
-                  properties:
-                    metadata:
-                      type: object
-                    spec:
-                      type: object
-                podAntiAffinityTopologyKey:
-                  type: string
-                cpu:
-                  type: string
-                  description: "DEPRECATED. Please set this value using `spec.podTemplate` instead."
-                cpuRequests:
-                  type: string
-                  description: "DEPRECATED. Please set this value using `spec.podTemplate` instead."
-                memory:
-                  type: string
-                  description: "DEPRECATED. Please set this value using `spec.podTemplate` instead."
-                memoryRequests:
-                  type: string
-                  description: "DEPRECATED. Please set this value using `spec.podTemplate` instead."
-                podAffinity:
-                  type: object
-                nodeAffinity:
-                  type: object
-                persistence:
-                  type: object
-                  properties:
-                    single:
-                      type: object
-                      properties:
-                        storage:
-                          type: string
-                        storageClass:
-                          type: string
-                        labelSelector:
-                          type: object
-                    multiple:
-                      type: object
-                      properties:
-                        data:
-                          type: object
-                          properties:
-                            storage:
-                              type: string
-                            storageClass:
-                              type: string
-                            labelSelector:
-                              type: object
-                        journal:
-                          type: object
-                          properties:
-                            storage:
-                              type: string
-                            storageClass:
-                              type: string
-                            labelSelector:
-                              type: object
-                        logs:
-                          type: object
-                          properties:
-                            storage:
-                              type: string
-                            storageClass:
-                              type: string
-                            labelSelector:
-                              type: object
-            configServerCount:
-              minimum: 1
-              type: integer
-            mongodsPerShardCount:
-              minimum: 1
-              type: integer
-            mongosCount:
-              minimum: 1
-              type: integer
-            shardCount:
-              minimum: 1
-              type: integer
-            mongos:
-              type: object
-              properties:
-                additionalMongodConfig:
-                  type: object
-                agent:
-                  type: object
-                  properties:
-                    startupOptions:
-                      type: object
-            configSrv:
-              type: object
-              properties:
-                additionalMongodConfig:
-                  type: object
-                agent:
-                  type: object
-                  properties:
-                    startupOptions:
-                      type: object
-            shard:
-              type: object
-              properties:
-                additionalMongodConfig:
-                  type: object
-                agent:
-                  type: object
-                  properties:
-                    startupOptions:
-                      type: object
 ---
-apiVersion: apiextensions.k8s.io/v1beta1
+apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.4.1
+  creationTimestamp: null
   name: mongodbusers.mongodb.com
 spec:
   group: mongodb.com
-  version: v1
-  scope: Namespaced
   names:
     kind: MongoDBUser
+    listKind: MongoDBUserList
     plural: mongodbusers
-    shortNames:
-      - mdbu
     singular: mongodbuser
-  additionalPrinterColumns:
-    - name: State
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: The current state of the MongoDB User.
+      jsonPath: .status.phase
+      name: Phase
       type: string
-      description: The current state of the MongoDB User
-      JSONPath: .status.phase
-    - name: Age
+    - description: The time since the MongoDB User resource was created.
+      jsonPath: .metadata.creationTimestamp
+      name: Age
       type: date
-      description: The time since the MongoDB User resource was created
-      JSONPath: .metadata.creationTimestamp
-  subresources:
-    status: {}
-  validation:
-    openAPIV3Schema:
-      type: object
-      properties:
-        spec:
-          type: object
-          properties:
-            username:
-              type: string
-              description: "The username of the user"
-            db:
-              type: string
-              description: "The database the user is stored in"
-            project:
-              type: string
-              description: "The project the user belongs to"
-            passwordSecretKeyRef:
-              type: object
-              properties:
-                name:
-                  type: string
-                key:
-                  type: string
-              description: "DEPRECATED The project the user belongs to"
-            mongodbResourceRef:
-              type: object
-              properties:
-                name:
-                  type: string
-                  description: "The name of a MongoDB resource in the same namespace"
-            roles:
-              type: array
-              items:
-                type: object
+    name: v1
+    schema:
+      openAPIV3Schema:
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          spec:
+            properties:
+              db:
+                type: string
+              mongodbResourceRef:
                 properties:
                   name:
                     type: string
-                    description: "The name of the role"
-                  db:
+                  namespace:
                     type: string
-                    description: "The db the role can act on"
-                  passwordSecretKeyRef:
-                    type: object
-                    properties:
-                      name:
-                        type: string
-                      key:
-                        type: string
                 required:
-                  - name
+                - name
+                type: object
+              passwordSecretKeyRef:
+                properties:
+                  key:
+                    type: string
+                  name:
+                    type: string
+                required:
+                - name
+                type: object
+              project:
+                type: string
+              roles:
+                items:
+                  properties:
+                    db:
+                      type: string
+                    name:
+                      type: string
+                  required:
                   - db
-          required:
-            - username
+                  - name
+                  type: object
+                type: array
+              username:
+                type: string
+            required:
             - db
+            - username
+            type: object
+          status:
+            properties:
+              db:
+                type: string
+              lastTransition:
+                type: string
+              message:
+                type: string
+              observedGeneration:
+                format: int64
+                type: integer
+              phase:
+                type: string
+              project:
+                type: string
+              resourcesNotReady:
+                items:
+                  properties:
+                    errors:
+                      items:
+                        properties:
+                          message:
+                            type: string
+                          reason:
+                            type: string
+                        type: object
+                      type: array
+                    kind:
+                      type: string
+                    message:
+                      type: string
+                    name:
+                      type: string
+                  required:
+                  - kind
+                  - name
+                  type: object
+                type: array
+              roles:
+                items:
+                  properties:
+                    db:
+                      type: string
+                    name:
+                      type: string
+                  required:
+                  - db
+                  - name
+                  type: object
+                type: array
+              username:
+                type: string
+              warnings:
+                items:
+                  type: string
+                type: array
+            required:
+            - db
+            - phase
+            - project
+            - username
+            type: object
+        required:
+        - spec
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+
 ---
-apiVersion: apiextensions.k8s.io/v1beta1
+apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.4.1
+  creationTimestamp: null
   name: opsmanagers.mongodb.com
 spec:
   group: mongodb.com
-  version: v1
-  scope: Namespaced
   names:
     kind: MongoDBOpsManager
+    listKind: MongoDBOpsManagerList
     plural: opsmanagers
     shortNames:
-      - om
+    - om
     singular: opsmanager
-  additionalPrinterColumns:
-    - name: Replicas
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: The number of replicas of MongoDBOpsManager.
+      jsonPath: .spec.replicas
+      name: Replicas
       type: integer
-      description: The number of replicas of MongoDBOpsManager.
-      JSONPath: .spec.replicas
-    - name: Version
+    - description: The version of MongoDBOpsManager.
+      jsonPath: .spec.version
+      name: Version
       type: string
-      description: The version of MongoDBOpsManager.
-      JSONPath: .spec.version
-    - name: State (OpsManager)
+    - description: The current state of the MongoDBOpsManager.
+      jsonPath: .status.opsManager.phase
+      name: State (OpsManager)
       type: string
-      description: The current state of the MongoDBOpsManager.
-      JSONPath: .status.opsManager.phase
-    - name: State (AppDB)
+    - description: The current state of the MongoDBOpsManager Application Database.
+      jsonPath: .status.applicationDatabase.phase
+      name: State (AppDB)
       type: string
-      description: The current state of the MongoDBOpsManager Application Database.
-      JSONPath: .status.applicationDatabase.phase
-    - name: State (Backup)
+    - description: The current state of the MongoDBOpsManager Backup Daemon.
+      jsonPath: .status.backup.phase
+      name: State (Backup)
       type: string
-      description: The current state of the MongoDBOpsManager Backup Daemon.
-      JSONPath: .status.backup.phase
-    - name: Age
+    - description: The time since the MongoDBOpsManager resource was created.
+      jsonPath: .metadata.creationTimestamp
+      name: Age
       type: date
-      description: The time since the MongoDBOpsManager resource was created.
-      JSONPath: .metadata.creationTimestamp
-    - name: Warnings
+    - description: Warnings.
+      jsonPath: .status.warnings
+      name: Warnings
       type: string
-      description: Warnings
-      JSONPath: .status.warnings
-  subresources:
-    status: {}
-  validation:
-    openAPIV3Schema:
-      type: object
-      properties:
-        spec:
-          type: object
-          properties:
-            version:
-              type: string
-            replicas:
-              minimum: 1
-              type: integer
-            clusterName:
-              type: string
-              format: hostname
-              description: "DEPRECATED Use clusterDomain instead"
-            clusterDomain:
-              type: string
-              format: hostname
-
-            security:
-              type: object
-              properties:
-                tls:
-                  type: object
-                  properties:
-                    ca:
-                      type: string
-                    secretRef:
-                      type: object
+    name: v1
+    schema:
+      openAPIV3Schema:
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          spec:
+            properties:
+              adminCredentials:
+                type: string
+              applicationDatabase:
+                properties:
+                  additionalMongodConfig:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                  agent:
+                    properties:
+                      startupOptions:
+                        additionalProperties:
+                          type: string
+                        type: object
+                    type: object
+                  cloudManager:
+                    properties:
+                      configMapRef:
+                        properties:
+                          name:
+                            type: string
+                        type: object
+                    type: object
+                  clusterDomain:
+                    type: string
+                  clusterName:
+                    type: string
+                  connectivity:
+                    properties:
+                      replicaSetHorizons:
+                        items:
+                          additionalProperties:
+                            type: string
+                          type: object
+                        type: array
+                    type: object
+                  credentials:
+                    type: string
+                  featureCompatibilityVersion:
+                    type: string
+                  logLevel:
+                    enum:
+                    - DEBUG
+                    - INFO
+                    - WARN
+                    - ERROR
+                    - FATAL
+                    type: string
+                  members:
+                    maximum: 50
+                    minimum: 3
+                    type: integer
+                  opsManager:
+                    properties:
+                      configMapRef:
+                        properties:
+                          name:
+                            type: string
+                        type: object
+                    type: object
+                  passwordSecretKeyRef:
+                    properties:
+                      key:
+                        type: string
+                      name:
+                        type: string
+                    required:
+                    - name
+                    type: object
+                  persistent:
+                    type: boolean
+                  podSpec:
+                    properties:
+                      cpu:
+                        type: string
+                      cpuRequests:
+                        type: string
+                      memory:
+                        type: string
+                      memoryRequests:
+                        type: string
+                      nodeAffinity:
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+                      persistence:
+                        properties:
+                          multiple:
+                            properties:
+                              data:
+                                properties:
+                                  labelSelector:
+                                    properties:
+                                      matchExpressions:
+                                        items:
+                                          properties:
+                                            key:
+                                              type: string
+                                            operator:
+                                              type: string
+                                            values:
+                                              items:
+                                                type: string
+                                              type: array
+                                          required:
+                                          - key
+                                          - operator
+                                          type: object
+                                        type: array
+                                      matchLabels:
+                                        additionalProperties:
+                                          type: string
+                                        type: object
+                                    type: object
+                                  storage:
+                                    type: string
+                                  storageClass:
+                                    type: string
+                                type: object
+                              journal:
+                                properties:
+                                  labelSelector:
+                                    properties:
+                                      matchExpressions:
+                                        items:
+                                          properties:
+                                            key:
+                                              type: string
+                                            operator:
+                                              type: string
+                                            values:
+                                              items:
+                                                type: string
+                                              type: array
+                                          required:
+                                          - key
+                                          - operator
+                                          type: object
+                                        type: array
+                                      matchLabels:
+                                        additionalProperties:
+                                          type: string
+                                        type: object
+                                    type: object
+                                  storage:
+                                    type: string
+                                  storageClass:
+                                    type: string
+                                type: object
+                              logs:
+                                properties:
+                                  labelSelector:
+                                    properties:
+                                      matchExpressions:
+                                        items:
+                                          properties:
+                                            key:
+                                              type: string
+                                            operator:
+                                              type: string
+                                            values:
+                                              items:
+                                                type: string
+                                              type: array
+                                          required:
+                                          - key
+                                          - operator
+                                          type: object
+                                        type: array
+                                      matchLabels:
+                                        additionalProperties:
+                                          type: string
+                                        type: object
+                                    type: object
+                                  storage:
+                                    type: string
+                                  storageClass:
+                                    type: string
+                                type: object
+                            type: object
+                          single:
+                            properties:
+                              labelSelector:
+                                properties:
+                                  matchExpressions:
+                                    items:
+                                      properties:
+                                        key:
+                                          type: string
+                                        operator:
+                                          type: string
+                                        values:
+                                          items:
+                                            type: string
+                                          type: array
+                                      required:
+                                      - key
+                                      - operator
+                                      type: object
+                                    type: array
+                                  matchLabels:
+                                    additionalProperties:
+                                      type: string
+                                    type: object
+                                type: object
+                              storage:
+                                type: string
+                              storageClass:
+                                type: string
+                            type: object
+                        type: object
+                      podAffinity:
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+                      podAntiAffinityTopologyKey:
+                        type: string
+                      podTemplate:
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+                    type: object
+                  project:
+                    type: string
+                  security:
+                    properties:
+                      authentication:
+                        properties:
+                          agents:
+                            properties:
+                              automationLdapGroupDN:
+                                type: string
+                              automationPasswordSecretRef:
+                                properties:
+                                  key:
+                                    type: string
+                                  name:
+                                    type: string
+                                  optional:
+                                    type: boolean
+                                required:
+                                - key
+                                type: object
+                              automationUserName:
+                                type: string
+                              clientCertificateSecretRef:
+                                type: object
+                                x-kubernetes-preserve-unknown-fields: true
+                              mode:
+                                type: string
+                            required:
+                            - mode
+                            type: object
+                          enabled:
+                            type: boolean
+                          ignoreUnknownUsers:
+                            type: boolean
+                          internalCluster:
+                            type: string
+                          ldap:
+                            properties:
+                              authzQueryTemplate:
+                                type: string
+                              bindQueryPasswordSecretRef:
+                                properties:
+                                  name:
+                                    type: string
+                                required:
+                                - name
+                                type: object
+                              bindQueryUser:
+                                type: string
+                              caConfigMapRef:
+                                properties:
+                                  key:
+                                    type: string
+                                  name:
+                                    type: string
+                                  optional:
+                                    type: boolean
+                                required:
+                                - key
+                                type: object
+                              servers:
+                                items:
+                                  type: string
+                                type: array
+                              transportSecurity:
+                                enum:
+                                - tls
+                                - none
+                                type: string
+                              userToDNMapping:
+                                type: string
+                              validateLDAPServerConfig:
+                                type: boolean
+                            type: object
+                          modes:
+                            items:
+                              type: string
+                            type: array
+                          requireClientTLSAuthentication:
+                            type: boolean
+                        required:
+                        - enabled
+                        type: object
+                      clusterAuthenticationMode:
+                        type: string
+                      roles:
+                        items:
+                          properties:
+                            authenticationRestrictions:
+                              items:
+                                properties:
+                                  clientSource:
+                                    items:
+                                      type: string
+                                    type: array
+                                  serverAddress:
+                                    items:
+                                      type: string
+                                    type: array
+                                type: object
+                              type: array
+                            db:
+                              type: string
+                            privileges:
+                              items:
+                                properties:
+                                  actions:
+                                    items:
+                                      type: string
+                                    type: array
+                                  resource:
+                                    properties:
+                                      cluster:
+                                        type: boolean
+                                      collection:
+                                        type: string
+                                      db:
+                                        type: string
+                                    type: object
+                                required:
+                                - actions
+                                - resource
+                                type: object
+                              type: array
+                            role:
+                              type: string
+                            roles:
+                              items:
+                                properties:
+                                  db:
+                                    type: string
+                                  role:
+                                    type: string
+                                required:
+                                - db
+                                - role
+                                type: object
+                              type: array
+                          required:
+                          - db
+                          - role
+                          type: object
+                        type: array
+                      tls:
+                        properties:
+                          additionalCertificateDomains:
+                            items:
+                              type: string
+                            type: array
+                          ca:
+                            type: string
+                          enabled:
+                            type: boolean
+                          secretRef:
+                            properties:
+                              name:
+                                type: string
+                            required:
+                            - name
+                            type: object
+                        type: object
+                    type: object
+                  service:
+                    type: string
+                  type:
+                    enum:
+                    - Standalone
+                    - ReplicaSet
+                    - ShardedCluster
+                    type: string
+                  version:
+                    pattern: ^[0-9]+.[0-9]+.[0-9]+(-.+)?$|^$
+                    type: string
+                type: object
+              backup:
+                properties:
+                  blockStores:
+                    items:
                       properties:
+                        mongodbResourceRef:
+                          properties:
+                            name:
+                              type: string
+                            namespace:
+                              type: string
+                          required:
+                          - name
+                          type: object
+                        mongodbUserRef:
+                          properties:
+                            name:
+                              type: string
+                          required:
+                          - name
+                          type: object
                         name:
                           type: string
                       required:
-                        - name
-
-            adminCredentials:
-              type: string
-            externalConnectivity:
-              type: object
-              properties:
-                type:
-                  type: string
-                  enum: ["LoadBalancer", "NodePort"]
-                port:
-                  type: integer
-                loadBalancerIP:
-                  type: string
-                externalTrafficPolicy:
-                  type: string
-                  enum: ["Cluster", "Local"]
-                annotations:
-                  type: object
-              required:
-                - type
-            configuration:
-              type: object
-            jvmParameters:
-              type: array
-              items:
-                type: string
-            statefulSet:
-              type: object
-              properties:
-                spec:
-                  type: object
-            backup:
-              type: object
-              properties:
-                enabled:
-                  type: boolean
-                jvmParameters:
-                  type: array
-                  items:
-                    type: string
-                headDB:
-                  type: object
-                  properties:
-                    storage:
-                      type: string
-                    storageClass:
-                      type: string
-                opLogStores:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      name:
-                        type: string
-                      mongodbResourceRef:
-                        type: object
-                        properties:
-                          name:
-                            type: string
-                        required:
-                          - name
-                      mongodbUserRef:
-                        type: object
-                        properties:
-                          name:
-                            type: string
-                        required:
-                          - name
-                    required:
-                      - name
                       - mongodbResourceRef
-                blockStores:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      name:
-                        type: string
-                      mongodbResourceRef:
-                        type: object
-                        properties:
-                          name:
-                            type: string
-                        required:
-                          - name
-                      mongodbUserRef:
-                        type: object
-                        properties:
-                          name:
-                            type: string
-                        required:
-                          - name
-                    required:
                       - name
-                      - mongodbResourceRef
-                s3Stores:
-                  type: array
-                  items:
-                    type: object
+                      type: object
+                    type: array
+                  enabled:
+                    type: boolean
+                  headDB:
                     properties:
-                      name:
-                        type: string
-                      mongodbResourceRef:
-                        type: object
+                      labelSelector:
                         properties:
-                          name:
-                            type: string
-                        required:
+                          matchExpressions:
+                            items:
+                              properties:
+                                key:
+                                  type: string
+                                operator:
+                                  type: string
+                                values:
+                                  items:
+                                    type: string
+                                  type: array
+                              required:
+                              - key
+                              - operator
+                              type: object
+                            type: array
+                          matchLabels:
+                            additionalProperties:
+                              type: string
+                            type: object
+                        type: object
+                      storage:
+                        type: string
+                      storageClass:
+                        type: string
+                    type: object
+                  jvmParameters:
+                    items:
+                      type: string
+                    type: array
+                  opLogStores:
+                    items:
+                      properties:
+                        mongodbResourceRef:
+                          properties:
+                            name:
+                              type: string
+                            namespace:
+                              type: string
+                          required:
                           - name
-                      mongodbUserRef:
-                        type: object
-                        properties:
-                          name:
-                            type: string
-                        required:
+                          type: object
+                        mongodbUserRef:
+                          properties:
+                            name:
+                              type: string
+                          required:
                           - name
-                      pathStyleAccessEnabled:
-                        type: boolean
-                      s3BucketEndpoint:
-                        type: string
-                      s3BucketName:
-                        type: string
-                      s3SecretRef:
-                        type: object
-                        properties:
-                          name:
-                            type: string
-                    required:
+                          type: object
+                        name:
+                          type: string
+                      required:
+                      - mongodbResourceRef
+                      - name
+                      type: object
+                    type: array
+                  s3Stores:
+                    items:
+                      properties:
+                        mongodbResourceRef:
+                          properties:
+                            name:
+                              type: string
+                            namespace:
+                              type: string
+                          required:
+                          - name
+                          type: object
+                        mongodbUserRef:
+                          properties:
+                            name:
+                              type: string
+                          required:
+                          - name
+                          type: object
+                        name:
+                          type: string
+                        pathStyleAccessEnabled:
+                          type: boolean
+                        s3BucketEndpoint:
+                          type: string
+                        s3BucketName:
+                          type: string
+                        s3SecretRef:
+                          properties:
+                            name:
+                              type: string
+                          required:
+                          - name
+                          type: object
+                      required:
                       - name
                       - pathStyleAccessEnabled
                       - s3BucketEndpoint
                       - s3BucketName
                       - s3SecretRef
-                statefulSet:
-                  type: object
-                  properties:
-                    spec:
                       type: object
-              required:
+                    type: array
+                  statefulSet:
+                    properties:
+                      spec:
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+                    type: object
+                required:
                 - enabled
-            applicationDatabase:
-              type: object
-              properties:
-                passwordSecretKeyRef:
-                  type: object
-                  properties:
-                    name:
-                      type: string
-                    key:
-                      type: string
-                  required:
-                    - name
-                security:
-                  type: object
-                  properties:
-                    tls:
-                      type: object
-                      properties:
-                        ca:
-                          type: string
-                        secretRef:
-                          type: object
-                          properties:
-                            name:
-                              type: string
-                          required:
-                            - name
-                      required:
-                        - secretRef
-                members:
-                  maximum: 50
-                  minimum: 3
-                  type: integer
-                version:
+                type: object
+              clusterDomain:
+                format: hostname
+                type: string
+              clusterName:
+                format: hostname
+                type: string
+              configuration:
+                additionalProperties:
                   type: string
-                  pattern: "^[0-9]+.[0-9]+.[0-9]+(-.+)?$|^$"
-                logLevel:
+                type: object
+              externalConnectivity:
+                properties:
+                  annotations:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  externalTrafficPolicy:
+                    enum:
+                    - Cluster
+                    - Local
+                    type: string
+                  loadBalancerIP:
+                    type: string
+                  port:
+                    format: int32
+                    type: integer
+                  type:
+                    enum:
+                    - LoadBalancer
+                    - NodePort
+                    type: string
+                required:
+                - type
+                type: object
+              jvmParameters:
+                items:
                   type: string
-                  enum: ["DEBUG", "INFO", "WARN", "ERROR", "FATAL"]
-                persistent:
-                  type: boolean
-                statefulSet:
-                  type: object
-                  properties:
-                    spec:
-                      type: object
-
-                agent:
-                  type: object
-                  properties:
-                    startupOptions:
-                      type: object
-
-                podSpec:
-                  type: object
-                  properties:
-                    podTemplate:
-                      type: object
-                      properties:
-                        metadata:
-                          type: object
-                        spec:
-                          type: object
-                    podAntiAffinityTopologyKey:
-                      type: string
-                    cpu:
-                      type: string
-                    cpuRequests:
-                      type: string
-                    memory:
-                      type: string
-                    memoryRequests:
-                      type: string
-                    podAffinity:
-                      type: object
-                    nodeAffinity:
-                      type: object
-                    persistence:
-                      type: object
-                      properties:
-                        single:
-                          type: object
-                          properties:
-                            storage:
-                              type: string
-                            storageClass:
-                              type: string
-                            labelSelector:
-                              type: object
-                        multiple:
-                          type: object
-                          properties:
-                            data:
-                              type: object
-                              properties:
-                                storage:
-                                  type: string
-                                storageClass:
-                                  type: string
-                                labelSelector:
-                                  type: object
-                            journal:
-                              type: object
-                              properties:
-                                storage:
-                                  type: string
-                                storageClass:
-                                  type: string
-                                labelSelector:
-                                  type: object
-                            logs:
-                              type: object
-                              properties:
-                                storage:
-                                  type: string
-                                storageClass:
-                                  type: string
-                                labelSelector:
-                                  type: object
-              required:
-                - members
-          required:
-            - version
+                type: array
+              replicas:
+                minimum: 1
+                type: integer
+              security:
+                properties:
+                  tls:
+                    properties:
+                      ca:
+                        type: string
+                      secretRef:
+                        properties:
+                          name:
+                            type: string
+                        required:
+                        - name
+                        type: object
+                    type: object
+                type: object
+              statefulSet:
+                properties:
+                  spec:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                type: object
+              version:
+                type: string
+            required:
             - applicationDatabase
+            - version
+            type: object
+          status:
+            properties:
+              applicationDatabase:
+                properties:
+                  backup:
+                    properties:
+                      statusName:
+                        type: string
+                    required:
+                    - statusName
+                    type: object
+                  configServerCount:
+                    type: integer
+                  lastTransition:
+                    type: string
+                  link:
+                    type: string
+                  members:
+                    type: integer
+                  message:
+                    type: string
+                  mongodsPerShardCount:
+                    type: integer
+                  mongosCount:
+                    type: integer
+                  observedGeneration:
+                    format: int64
+                    type: integer
+                  phase:
+                    type: string
+                  resourcesNotReady:
+                    items:
+                      properties:
+                        errors:
+                          items:
+                            properties:
+                              message:
+                                type: string
+                              reason:
+                                type: string
+                            type: object
+                          type: array
+                        kind:
+                          type: string
+                        message:
+                          type: string
+                        name:
+                          type: string
+                      required:
+                      - kind
+                      - name
+                      type: object
+                    type: array
+                  shardCount:
+                    type: integer
+                  version:
+                    type: string
+                  warnings:
+                    items:
+                      type: string
+                    type: array
+                required:
+                - phase
+                - version
+                type: object
+              backup:
+                properties:
+                  lastTransition:
+                    type: string
+                  message:
+                    type: string
+                  observedGeneration:
+                    format: int64
+                    type: integer
+                  phase:
+                    type: string
+                  resourcesNotReady:
+                    items:
+                      properties:
+                        errors:
+                          items:
+                            properties:
+                              message:
+                                type: string
+                              reason:
+                                type: string
+                            type: object
+                          type: array
+                        kind:
+                          type: string
+                        message:
+                          type: string
+                        name:
+                          type: string
+                      required:
+                      - kind
+                      - name
+                      type: object
+                    type: array
+                  version:
+                    type: string
+                  warnings:
+                    items:
+                      type: string
+                    type: array
+                required:
+                - phase
+                type: object
+              opsManager:
+                properties:
+                  lastTransition:
+                    type: string
+                  message:
+                    type: string
+                  observedGeneration:
+                    format: int64
+                    type: integer
+                  phase:
+                    type: string
+                  replicas:
+                    type: integer
+                  resourcesNotReady:
+                    items:
+                      properties:
+                        errors:
+                          items:
+                            properties:
+                              message:
+                                type: string
+                              reason:
+                                type: string
+                            type: object
+                          type: array
+                        kind:
+                          type: string
+                        message:
+                          type: string
+                        name:
+                          type: string
+                      required:
+                      - kind
+                      - name
+                      type: object
+                    type: array
+                  url:
+                    type: string
+                  version:
+                    type: string
+                  warnings:
+                    items:
+                      type: string
+                    type: array
+                required:
+                - phase
+                type: object
+            type: object
+        required:
+        - spec
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1

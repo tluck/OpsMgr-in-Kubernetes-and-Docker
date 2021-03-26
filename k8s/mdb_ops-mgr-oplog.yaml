@@ -11,7 +11,7 @@ spec:
   opsManager:
     configMapRef:
       name: ops-mgr-oplog # Must match metadata.name in ConfigMap file
-  credentials: opsmanager-admin-key
+  credentials: mongodb-opsmanager-admin-key
   persistent: true
   podSpec:
     cpu: "0.33"

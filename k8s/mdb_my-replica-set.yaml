@@ -18,7 +18,9 @@ spec:
     # note: it's important to always specify memory otherwise wired tiger cache will be calculated incorrectly and
     # monitoring tools will report the size of Kubernetes node instead of the real size of the container
     memory: 500 Mi  # 2Gi
-    storage: 1Gi    # 2Gi
+    persistence:
+      single:
+        storage: 1Gi # 2Gi
   security:
     tls:
       enabled: true # false

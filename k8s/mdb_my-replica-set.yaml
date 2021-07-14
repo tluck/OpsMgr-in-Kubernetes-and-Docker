@@ -5,7 +5,7 @@ metadata:
   name: my-replica-set
   namespace: mongodb
 spec:
-  version: 4.2.8-ent # 3.6.20-ent
+  version: 4.2.12-ent # 3.6.20-ent
   type: ReplicaSet
   members: 3 
   opsManager:

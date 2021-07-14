@@ -6,7 +6,7 @@ metadata:
   namespace: mongodb
 spec:
   members: 3
-  version: 4.2.8-ent # 3.6.19 # 4.2.8 # (works with OM 4.4.1)
+  version: 4.2.12-ent # 3.6.19 # 4.2.8 # (works with OM 4.4.1)
   type: ReplicaSet
   opsManager:
     configMapRef:

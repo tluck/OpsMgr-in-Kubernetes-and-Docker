@@ -6,7 +6,7 @@ metadata:
 
 spec:
   replicas: 1
-  version: 5.0.0 # 4.4.15 # 4.2.25
+  version: 5.0.3 # 4.4.15 4.2.25
   jvmParameters: ["-Xms2560m", "-Xmx2560m"] # 2.5M is a good size for docker-desktop -- comment out for larger clusters in production
   adminCredentials: admin-user-credentials # Should match metadata.name in the Kubernetes secret for the admin user
   statefulSet:
@@ -91,11 +91,11 @@ spec:
     mms.user.bypassInviteForExistingUsers: "true"
     mms.publicApi.whitelistEnabled: "false"
     automation.versions.source: mongodb # hybrid
-    brs.queryable.pem: /opt/mongodb/mms/secrets/queryable-backup.pem # stored in a secret
-    brs.queryable.expiration: "3600000"
     mongodb.release.autoDownload: "false" # stop downloads of binaries
     mongodb.release.autoDownload.enterprise: "true"
     mongodb.release.modulePreference: enterpriseRequired
+    brs.queryable.pem: /opt/mongodb/mms/secrets/queryable-backup.pem # stored in a secret
+    brs.queryable.expiration: "3600000"
 
   backup:
     enabled: true

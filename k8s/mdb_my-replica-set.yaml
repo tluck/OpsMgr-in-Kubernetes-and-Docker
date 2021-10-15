@@ -24,7 +24,10 @@ spec:
   security:
     tls:
       enabled: true # false
-      # ca: ca-pem
+      # ca: ca-pem # provide a custom certificate authority (cert in a pem file)
+      # secretRef: # provide custom x509 certificates (key and cert in a pem file)
+      #   name: "my-replica-set-cert"
+
     authentication:
       enabled : true # false
       modes: ["SCRAM"]

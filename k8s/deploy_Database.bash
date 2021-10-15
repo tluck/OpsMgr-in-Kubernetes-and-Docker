@@ -20,7 +20,7 @@ then
 fi
 
 # create new certs if the service does not exist
-
+# check to see if the svc needs to be created
 for n in ${exposed_dbs[@]}
 do
   if [[ "$n" == "${name}" ]] 
@@ -54,19 +54,20 @@ kubectl create configmap ${name} \
   --from-literal="projectName=${name}"
 fi
 
-# kubernetes is managing TLS
-
+# kubernetes is managing TLS - use below to provide custom certificates
+# rm certs/${name}*
+# certs/make_db_certs.bash ${name}
 # Create a secret for the member certs for TLS
 # kubectl delete secret ${name}-cert
-# sleep 10
+# sleep 3
 # kubectl get secrets
 # kubectl create secret generic ${name}-cert \
-#   --from-file=${name}-0-pem \
-#   --from-file=${name}-1-pem \
-#   --from-file=${name}-2-pem
+#   --from-file=certs/${name}-0-pem \
+#   --from-file=certs/${name}-1-pem \
+#   --from-file=certs/${name}-2-pem
 # Create a map for the cert
 # kubectl delete configmap ca-pem
-# kubectl create configmap ca-pem --from-file=ca-pem
+# kubectl create configmap ca-pem --from-file=certs/ca-pem
 
 # Create a a secret for db user credentials
 kubectl delete secret         dbadmin-${name} > /dev/null 2>&1

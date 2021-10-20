@@ -12,7 +12,7 @@ then
     kubectl cp kube-system/etcd-docker-desktop:run/config/pki/etcd/ca.crt ca.crt
     kubectl cp kube-system/etcd-docker-desktop:run/config/pki/etcd/ca.key ca.key
 else
-# need the ca.key
+# need a key and the cert for queriable backup -  ca.key and ca.crt
     kubectl get secret -n default -o jsonpath="{.items[?(@.type==\"kubernetes.io/service-account-token\")].data['ca\.crt']}" | base64 --decode > ca.crt
 fi
 

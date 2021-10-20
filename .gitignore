@@ -17,3 +17,4 @@ k8s/certs/opsmanager-db-2.pem
 k8s/certs/opsmanager-svc.pem
 k8s/certs/server.pem
 k8s/server.pem
+*.orig

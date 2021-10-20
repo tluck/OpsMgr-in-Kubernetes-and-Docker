@@ -31,3 +31,8 @@ spec:
     authentication:
       enabled : true # false
       modes: ["SCRAM"]
+
+  additionalMongodConfig: # use for 4.2+
+    net:
+      ssl:
+        mode: "requireSSL" # "preferSSL" "allowSSL"

@@ -9,23 +9,22 @@ then
     printf "%s\n" "Exit - need resource name"
     exit 1
 fi
-cname="$2"
-
-# generate $name.pem
+shift
+cname="$1"
+shift
+dnsHorizon=("$@")
 
 if [[ ! -e ${name}.pem ]]
 then
-printf "%s\n" "Making ${name}.pem ..."
-
-kubectl delete csr ${name}.mongodb > /dev/null 2>&1
+printf "%s\n" "Making ${name}.pem for ${cname} and ${dnsHorizon[@]} ..."
 
 # generate request
-
-cat <<EOF | cfssl genkey - | cfssljson -bare server
+if [[ "${dnsHorizon[0]}" != "" ]]
+then
+cat <<EOF | cfssl gencert -config ca-config.json -ca ca.crt -ca-key ca.key -profile kubernetes - | cfssljson -bare node
 {
   "hosts": [
-    "${cname}",
-    "${name}"
+    "${cname}", "${dnsHorizon[0]}", "${dnsHorizon[1]}", "${dnsHorizon[2]}"
   ],
   "CN": "${cname}",
   "key": {
@@ -39,38 +38,38 @@ cat <<EOF | cfssl genkey - | cfssljson -bare server
   ]
 }
 EOF
-mv server-key.pem ${name}.key
-mv server.csr ${name}.csr
 
-# submit cert request (csr)
-cat <<EOF | kubectl apply -f -
-apiVersion: certificates.k8s.io/v1beta1
-kind: CertificateSigningRequest
-metadata:
-  name: ${name}.mongodb
-spec:
-  request: $(cat ${name}.csr | base64 | tr -d '\n')
-  # signerName: kubernetes.io/kube-apiserver-client
-  usages:
-  - digital signature
-  - key encipherment
-  - server auth
-  - client auth
+else
+
+cat <<EOF | cfssl gencert -config ca-config.json -ca ca.crt -ca-key ca.key -profile kubernetes - | cfssljson -bare node
+{
+  "hosts": [
+    "${cname}"
+  ],
+  "CN": "${cname}",
+  "key": {
+    "algo": "rsa",
+    "size": 4096
+  },
+  "names": [
+    {
+      "O": "system:nodes"
+    }
+  ]
+}
 EOF
 
-# approve csr 
-kubectl certificate approve ${name}.mongodb
-kubectl get csr ${name}.mongodb
+fi
 
-# get certs and build pem
-eval c=$( kubectl get csr ${name}.mongodb -o json|jq .status.certificate)
-echo $c |base64 -D> ${name}.crt
+mv node-key.pem ${name}.key
+mv node.pem ${name}.crt
+mv node.csr ${name}.csr
 cat ${name}.key ${name}.crt > ${name}.pem
 
 # clean up
-rm ${name}.key
-rm ${name}.crt
-rm ${name}.csr
+#rm ${name}.key
+#rm ${name}.crt
+#rm ${name}.csr
 
 printf "%s\n\n" "Made ${name}.pem"
 fi

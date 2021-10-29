@@ -2,15 +2,15 @@
 apiVersion: mongodb.com/v1
 kind: MongoDBUser
 metadata:
-  name: dbadmin-ops-mgr-blockstore
+  name: dbadmin-opsmanager-blockstore
 spec:
   passwordSecretKeyRef:
-    name: dbadmin-ops-mgr-blockstore # Match to metadata.name of the User Secret
+    name: dbadmin-opsmanager-blockstore # Match to metadata.name of the User Secret
     key: password
   username: "dbAdmin"
   db: "admin" #
   mongodbResourceRef:
-    name: "ops-mgr-blockstore" # Match to MongoDB resource using authenticaiton
+    name: "opsmanager-blockstore" # Match to MongoDB resource using authenticaiton
   roles:
     - db: "admin"
       name: "clusterAdmin"

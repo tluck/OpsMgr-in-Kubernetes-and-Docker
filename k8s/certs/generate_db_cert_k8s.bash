@@ -9,25 +9,24 @@ then
     printf "%s\n" "Exit - need resource name"
     exit 1
 fi
-cname="$2"
-horizon="$3"
-
-# generate $name.pem
+shift
+cname="$1"
+shift
+dnsHorizon=("$@")
 
 if [[ ! -e ${name}.pem ]]
 then
-printf "%s\n" "Making ${name}.pem ..."
+printf "%s\n" "Making ${name}.pem for ${cname} and ${dnsHorizon[@]} ..."
 
 kubectl delete csr ${name}.mongodb > /dev/null 2>&1
 
 # generate request
-
+if [[ "${dnsHorizon[0]}" != "" ]]
+then
 cat <<EOF | cfssl genkey - | cfssljson -bare server
 {
   "hosts": [
-    "${cname}",
-    "${name}",
-    "${horizon}"
+    "${cname}", "${dnsHorizon[0]}", "${dnsHorizon[1]}", "${dnsHorizon[2]}"
   ],
   "CN": "${cname}",
   "key": {
@@ -41,6 +40,29 @@ cat <<EOF | cfssl genkey - | cfssljson -bare server
   ]
 }
 EOF
+
+else
+
+cat <<EOF | cfssl genkey - | cfssljson -bare server
+{
+  "hosts": [
+    "${cname}"
+  ],
+  "CN": "${cname}",
+  "key": {
+    "algo": "rsa",
+    "size": 4096
+  },
+  "names": [
+    {
+      "O": "system:nodes"
+    }
+  ]
+}
+EOF
+
+fi
+
 mv server-key.pem ${name}.key
 mv server.csr ${name}.csr
 
@@ -70,8 +92,8 @@ echo $c |base64 -D> ${name}.crt
 cat ${name}.key ${name}.crt > ${name}.pem
 
 # clean up
-rm ${name}.key
-rm ${name}.crt
+#rm ${name}.key
+#rm ${name}.crt
 rm ${name}.csr
 
 printf "%s\n\n" "Made ${name}.pem"

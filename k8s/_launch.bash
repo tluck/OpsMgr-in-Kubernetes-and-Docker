@@ -53,11 +53,11 @@ deploy_OM.bash opsmanager ${skipcerts}
 
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Create the Backup Oplog1 DB for OM ..."
-deploy_Database.bash ops-mgr-oplog
+deploy_Database.bash opsmanager-oplog
 
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Create the Backup BlockStore1 DB for OM ..."
-deploy_Database.bash ops-mgr-blockstore
+deploy_Database.bash opsmanager-blockstore
 
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Generate splitHorizon configuration for External access to a Production DB ..."

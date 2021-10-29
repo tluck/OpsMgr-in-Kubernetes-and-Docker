@@ -14,7 +14,7 @@ then
     printf "\n%s\n" "__________________________________________________________________________________________"
     printf "%s\n" "Getting Certs status..."
     # Get ca.crt and create certs for OM and App-db
-    rm certs/${name}*pem > /dev/null 2>&1
+    rm certs/${name}*pem server.pem > /dev/null 2>&1
     if [[ ! -e certs/queryable-backup.pem ]]
     then
         certs/make_query_certs.bash
@@ -41,11 +41,21 @@ then
     kubectl create configmap ${name}-ca --from-file="certs/ca-pem" --from-file="certs/mms-ca.crt" # need specific keynames ca-pem and mms-ca.crt
 
 # For enablement of TLS on the appdb - custom certs
-    kubectl delete secret         appdb-certs > /dev/null 2>&1
-    kubectl create secret generic appdb-certs \
-            --from-file="certs/${name}-db-0-pem" \
-            --from-file="certs/${name}-db-1-pem" \
-            --from-file="certs/${name}-db-2-pem"
+#    kubectl delete secret         appdb-certs > /dev/null 2>&1
+#    kubectl create secret generic appdb-certs \
+#            --from-file="certs/${name}-db-0-pem" \
+#            --from-file="certs/${name}-db-1-pem" \
+#            --from-file="certs/${name}-db-2-pem"
+appdb=${name}-db
+certs/make_db_certs.bash ${appdb} 
+# Create a secret for the member certs for TLS
+kubectl delete secret ${appdb}-cert > /dev/null 2>&1
+# sleep 3
+# kubectl get secrets
+kubectl create secret tls ${appdb}-cert \
+  --cert=certs/${appdb}.crt \
+  --key=certs/${appdb}.key
+
 
 #  Deploy OpsManager resources
     kubectl apply -f ${mdbom_tls}

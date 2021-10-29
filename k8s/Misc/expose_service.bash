@@ -112,3 +112,4 @@ echo "Adding the connection string variable to init.conf:"
 echo "${name//-/}_URI=\"mongodb://${dbadmin}:${dbpassword}@${hn0}:${np0},${hn1}:${np1},${hn2}:${np2}/?replicaSet=${name}&authSource=admin\"" | tee -a new
 echo
 mv new init.conf
+printf "%s %s %s" "$hn0" "$hn1" "$hn2" > dnsHorizon

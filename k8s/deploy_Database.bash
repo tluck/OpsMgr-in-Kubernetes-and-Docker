@@ -13,7 +13,7 @@ cleanup=${1:-0}
 # clean up any previous certs and services
 if [[ ${cleanup} = 1 ]]
 then
-  kubectl delete secret ${name}-cert > /dev/null 2>&1
+  #kubectl delete secret ${name}-cert > /dev/null 2>&1
   #kubectl delete csr $( kubectl get csr | grep "${name}" | awk '{print $1}' )
   kubectl delete svc $( kubectl get svc | grep "${name}" | awk '{print $1}' )
   kubectl delete mdb ${name}
@@ -47,27 +47,32 @@ kubectl create configmap ${name} \
   --from-literal="sslMMSCAConfigMap=opsmanager-ca" \
   --from-literal="sslRequireValidMMSServerCertificates='true'"
 
+rm certs/${name}*
+if [[ -e dnsHorizon ]] 
+then
+  dnsHorizon=( $(cat dnsHorizon) )
+  rm dnsHorizon
+  certs/make_db_certs.bash ${name} ${dnsHorizon[@]}
+else
+  certs/make_db_certs.bash ${name}
+fi
+# Create a secret for the member certs for TLS
+kubectl delete secret mdb-${name}-cert > /dev/null 2>&1
+# sleep 3
+# kubectl get secrets
+kubectl create secret tls mdb-${name}-cert \
+  --cert=certs/${name}.crt \
+  --key=certs/${name}.key
+
+# Create a map for the cert
+kubectl delete configmap ca-pem
+kubectl create configmap ca-pem --from-file=certs/ca-pem
 else
 kubectl delete configmap ${name} > /dev/null 2>&1
 kubectl create configmap ${name} \
   --from-literal="baseUrl=${opsMgrUrl}" \
   --from-literal="projectName=${name}"
 fi
-
-# kubernetes is managing TLS - use below to provide custom certificates
-# rm certs/${name}*
-# certs/make_db_certs.bash ${name}
-# Create a secret for the member certs for TLS
-# kubectl delete secret ${name}-cert
-# sleep 3
-# kubectl get secrets
-# kubectl create secret generic ${name}-cert \
-#   --from-file=certs/${name}-0-pem \
-#   --from-file=certs/${name}-1-pem \
-#   --from-file=certs/${name}-2-pem
-# Create a map for the cert
-# kubectl delete configmap ca-pem
-# kubectl create configmap ca-pem --from-file=certs/ca-pem
 
 # Create a a secret for db user credentials
 kubectl delete secret         dbadmin-${name} > /dev/null 2>&1
@@ -113,7 +118,7 @@ done
 
 # get keys for TLS
 tls=$( kubectl get mdb/${name} -o jsonpath='{.spec.security.tls}' )
-if [[ "${tls}" == "map[enabled:true]" || "${tls}" == "{\"enabled\":true}" ]]
+if [[ "${tls}" == "map[enabled:true]" || "${tls}" == *"\"enabled\":true"* ]]
 then
     eval version=$( kubectl get mdb ${name} -o jsonpath={.spec.version} )
     if [[ ${version%%.*} = 3 ]]

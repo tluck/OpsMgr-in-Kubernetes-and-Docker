@@ -2,7 +2,7 @@
 apiVersion: mongodb.com/v1
 kind: MongoDB
 metadata:
-  name: ops-mgr-blockstore
+  name: opsmanager-blockstore
   namespace: mongodb
 spec:
   members: 3
@@ -10,7 +10,7 @@ spec:
   type: ReplicaSet
   opsManager:
     configMapRef:
-      name: ops-mgr-blockstore # Must match metadata.name in ConfigMap file
+      name: opsmanager-blockstore # Must match metadata.name in ConfigMap file
   credentials: mongodb-opsmanager-admin-key
   persistent: true
   podSpec:
@@ -22,15 +22,17 @@ spec:
       single:
         storage: 1Gi # 2Gi
   security:
+    certsSecretPrefix: mdb # provide custom x509 certificates (keys and certs)
     tls:
-      enabled: true # false - with 4.2 opsmgr this does not work - set true with OM 4.4.x
-      # ca: ca-pem
+      enabled: true # false
+      ca: ca-pem # provide a custom certificate authority (cert in a pem file)
+      secretRef:
+        prefix: mdb
+        # name: mdb-opsmanager-blockstore-cert
     authentication:
       enabled : true
       modes: ["SCRAM"]
-  additionalMongodConfig: # use for 4.4 OM
-    net:
-      ssl:
-        mode: "allowSSL" # "preferTLS"
-
-      
+  # additionalMongodConfig: # use for 4.4 OM
+  #   net:
+  #     ssl:
+  #       mode: "allowSSL" # "preferTLS"

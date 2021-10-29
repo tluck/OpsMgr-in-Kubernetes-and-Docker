@@ -22,17 +22,20 @@ spec:
       single:
         storage: 1Gi # 2Gi
   security:
+    certsSecretPrefix: mdb # provide custom x509 certificates (keys and certs)
     tls:
       enabled: true # false
-      # ca: ca-pem # provide a custom certificate authority (cert in a pem file)
-      # secretRef: # provide custom x509 certificates (key and cert in a pem file)
-      #   name: "my-replica-set-cert"
-
+      ca: ca-pem # provide a custom certificate authority (cert in a pem file)
+      secretRef:
+        prefix: mdb
+        # name: mdb-my-replica-set-cert
     authentication:
       enabled : true # false
       modes: ["SCRAM"]
-
-  additionalMongodConfig: # use for 4.2+
-    net:
-      ssl:
-        mode: "requireSSL" # "preferSSL" "allowSSL"
+  # The default TLS mode is 'requireTLS' but it can be customized using the
+  # the `additionalMongodConfig` structure. Please find more information here:
+  # https://docs.mongodb.com/manual/reference/configuration-options/#net.ssl.mode
+  # additionalMongodConfig:
+  #   net:
+  #     ssl:
+  #       mode: "preferSSL" # "requireSSL" "preferSSL" "allowSSL"

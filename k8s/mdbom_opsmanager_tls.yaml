@@ -25,7 +25,7 @@ spec:
 
   security: # enables TLS for Ops Manager allowing it to serve traffic over HTTPS
     tls:
-      # enabled: true
+      # enabled: true (on by default here)
       ca: "opsmanager-ca" 
       secretRef: # secret containing the TLS certificate signed by known or custom CA. The secret must have a key "server.pem"
         name: "opsmanager-cert"
@@ -40,11 +40,12 @@ spec:
     version: 4.4.4-ent # 4.2.12-ent
     # persistent: true
     security:
+      # certsSecretPrefix: <prefix>
       tls:
         enabled: true
         ca: "opsmanager-ca" # needs to be mms-ca.crt
-        secretRef:
-          name: "appdb-certs"
+        # secretRef:
+        #  name: "opsmanager-appdb-cert"
     podSpec:
       # cpu: "0.25"
       # memory: 500Mi # 1Gi
@@ -103,15 +104,15 @@ spec:
     opLogStores:
       - name: oplog
         mongodbResourceRef:
-          name: ops-mgr-oplog
+          name: opsmanager-oplog
         mongodbUserRef:
-          name: dbadmin-ops-mgr-oplog
+          name: dbadmin-opsmanager-oplog
     blockStores:
       - name: blockstore
         mongodbResourceRef:
-          name: ops-mgr-blockstore
+          name: opsmanager-blockstore
         mongodbUserRef:
-          name: dbadmin-ops-mgr-blockstore
+          name: dbadmin-opsmanager-blockstore
     statefulSet:
       spec:
         template:

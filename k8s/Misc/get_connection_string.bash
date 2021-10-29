@@ -54,10 +54,13 @@ fi
 cs="mongodb://${dbadmin}:${dbpassword}@${hn0}:${np0},${hn1}:${np1},${hn2}:${np2}/?replicaSet=${name}&authSource=admin"
 
 tls=$( kubectl get mdb/${name} -o jsonpath='{.spec.security.tls}' )
-if [[ "${tls}" == "map[enabled:true]" || "${tls}" == "{\"enabled\":true}" ]]
+if [[ "${tls}" == "map[enabled:true]" || "${tls}" == *"\"enabled\":true"* ]]
 then
-    kubectl exec ${name}-0 -i -t -- cat /mongodb-automation/ca.pem > ca.pem
-    kubectl exec ${name}-0 -i -t -- cat /mongodb-automation/server.pem > server.pem
+    #kubectl exec ${name}-0 -i -t -- cat /mongodb-automation/ca.pem > ca.pem
+    kubectl get configmap ca-pem -o jsonpath="{.data['ca-pem']}" > ca.pem
+    kubectl get secret mdb-${name}-cert -o jsonpath="{.data['tls\.crt']}" | base64 --decode > server.pem
+    kubectl get secret mdb-${name}-cert -o jsonpath="{.data['tls\.key']}" | base64 --decode >> server.pem
+    #kubectl exec ${name}-0 -i -t -- cat /mongodb-automation/server.pem > server.pem
     eval version=$( kubectl get mdb ${name} -o jsonpath={.spec.version} )
     if [[ ${version%%.*} = 3 ]]
     then

@@ -25,15 +25,15 @@ for n in ${exposed_dbs[@]}
 do
   if [[ "$n" == "${name}" ]] 
   then
-#    kubectl get svc ${name}-0 > /dev/null 2>&1
-#    if [[ $? != 0 ]]
-#    then
-      # expose ports - creates loadlancer or nodeport service for each pod of member set
-      # add the nodeport map for splitHorizon into the yaml file
-      printf "%s\n" "Generating NodePort/Loadbalancer Service ports..."
-      Misc/expose_service.bash ${mdb} ${cleanup}
-      source init.conf
-#    fi
+  # kubectl get svc ${name}-0 > /dev/null 2>&1
+  # if [[ $? != 0 ]]
+  # then
+    # expose ports - creates loadlancer or nodeport service for each pod of member set
+    # add the nodeport map for splitHorizon into the yaml file
+    printf "%s\n" "Generating NodePort/Loadbalancer Service ports..."
+    Misc/expose_service.bash ${mdb} ${cleanup}
+    source init.conf
+  # fi
   fi
 done
 
@@ -42,10 +42,10 @@ if [[ ${tls} == 1 ]]
 then
 kubectl delete configmap ${name} > /dev/null 2>&1
 kubectl create configmap ${name} \
-  --from-literal="baseUrl=${opsMgrUrl}" \
-  --from-literal="projectName=${name}" \
-  --from-literal="sslMMSCAConfigMap=opsmanager-ca" \
-  --from-literal="sslRequireValidMMSServerCertificates='true'"
+    --from-literal="baseUrl=${opsMgrUrl}" \
+    --from-literal="projectName=${name}" \
+    --from-literal="sslMMSCAConfigMap=opsmanager-ca" \
+    --from-literal="sslRequireValidMMSServerCertificates='true'"
 
 rm certs/${name}*
 if [[ -e dnsHorizon ]] 
@@ -61,8 +61,8 @@ kubectl delete secret mdb-${name}-cert > /dev/null 2>&1
 # sleep 3
 # kubectl get secrets
 kubectl create secret tls mdb-${name}-cert \
-  --cert=certs/${name}.crt \
-  --key=certs/${name}.key
+    --cert=certs/${name}.crt \
+    --key=certs/${name}.key
 
 # Create a map for the cert
 kubectl delete configmap ca-pem > /dev/null 2>&1

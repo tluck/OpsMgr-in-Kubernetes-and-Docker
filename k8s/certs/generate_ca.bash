@@ -19,4 +19,3 @@ EOF
 
 mv ca-key.pem ca.key
 mv ca.pem ca.crt
-

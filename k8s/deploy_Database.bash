@@ -65,20 +65,21 @@ kubectl create secret tls mdb-${name}-cert \
   --key=certs/${name}.key
 
 # Create a map for the cert
-kubectl delete configmap ca-pem
-kubectl create configmap ca-pem --from-file=certs/ca-pem
+kubectl delete configmap ca-pem > /dev/null 2>&1
+kubectl create configmap ca-pem \
+    --from-file="ca-pem=certs/ca.pem"
 else
 kubectl delete configmap ${name} > /dev/null 2>&1
 kubectl create configmap ${name} \
-  --from-literal="baseUrl=${opsMgrUrl}" \
-  --from-literal="projectName=${name}"
+    --from-literal="baseUrl=${opsMgrUrl}" \
+    --from-literal="projectName=${name}"
 fi
 
 # Create a a secret for db user credentials
 kubectl delete secret         dbadmin-${name} > /dev/null 2>&1
 kubectl create secret generic dbadmin-${name} \
-  --from-literal=name="${dbadmin}" \
-  --from-literal=password="${dbpassword}"
+    --from-literal=name="${dbadmin}" \
+    --from-literal=password="${dbpassword}"
 
 # Create the User Resource
 kubectl apply -f "${mdbuser}"

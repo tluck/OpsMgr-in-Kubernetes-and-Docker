@@ -21,7 +21,7 @@ fi
 # certs for the proxy server for queryable backup
 if [[ ! -e queryable-backup.pem ]]
 then
-    generate_cert.bash ${name}-svc ${name}-svc.mongodb.svc.cluster.local
+    generate_cert.bash ${name}-svc ${name}-svc.mongodb.svc.cluster.local ${name}-svc ${name}-backup-daemon-0.${name}-backup-daemon-svc.mongodb.svc.cluster.local ${name}-backup-daemon-0
     cat ${name}-svc.pem ca.key ca.crt > queryable-backup.pem
     rm ${name}-svc.pem
 fi

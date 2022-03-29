@@ -5,7 +5,7 @@ metadata:
   name: my-sharded
   namespace: mongodb
 spec:
-  version: 4.2.8-ent
+  version: 4.2.12-ent
   type: ShardedCluster
   shardCount: 2
   mongodsPerShardCount: 3
@@ -16,19 +16,99 @@ spec:
       name: my-sharded # Must match metadata.name in ConfigMap file
   credentials: mongodb-opsmanager-admin-key
   persistent: true
-  podSpec:
-    cpu: "0.5"
-    # note: it's important to always specify memory otherwise wired tiger cache will be calculated incorrectly and
-    # monitoring tools will report the size of Kubernetes node instead of the real size of the container
-    memory: 500 Mi  # 2Gi
+  # podSpec:
+  #   cpu: "0.5"
+  #   # note: it's important to always specify memory otherwise wired tiger cache will be calculated incorrectly and
+  #   # monitoring tools will report the size of Kubernetes node instead of the real size of the container
+  #   memory: 500 Mi  # 2Gi
+  #   persistence:
+  #     single:
+  #       storage: 1Gi # 2Gi
+  mongosPodSpec:
+    podTemplate:
+      spec:
+        containers:
+          - name: mongodb-enterprise-database
+            resources:
+              limits:
+                cpu: "0.5"
+                memory: 500Mi
+    # podAntiAffinityTopologyKey: rackId
+    # nodeAffinity:
+    #   preferredDuringSchedulingIgnoredDuringExecution:
+    #   - weight: 1
+    #     preference:
+    #       matchExpressions:
+    #       - key: another-node-label-key
+    #         operator: In
+    #         values:
+    #         - another-node-label-value
+  configSrvPodSpec:
+    # `podTemplate.spec.containers[].resources` should be specified otherwise, WiredTiger
+    # cache won't be calculated properly by MongoDB daemon.
+    podTemplate:
+      spec:
+        containers:
+          - name: mongodb-enterprise-database
+            # For more information about Pod and container resource management, see:
+            # https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+            resources:
+              limits:
+                cpu: "0.33"
+                memory: 500Mi
+    # For podAffinity and nodeAffinity see Kubernetes Docs
+    # https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+    # podAntiAffinityTopologyKey: kubernetes.io/hostname
+    # podAffinity:
+    #   requiredDuringSchedulingIgnoredDuringExecution:
+    #   - labelSelector:
+    #       matchExpressions:
+    #       - key: security
+    #         operator: In
+    #         values:
+    #         - S1
+    #     topologyKey: failure-domain.beta.kubernetes.io/zone
+    #
+    # If "persistence" element is omitted then Operator uses the default size
+    # (5G) for mounting single Persistent Volume for config server.
+    #
     persistence:
       single:
-        storage: 1Gi # 2Gi
+        storage: 1Gi
+  shardPodSpec:
+    podTemplate:
+      spec:
+        containers:
+          - name: mongodb-enterprise-database
+            resources:
+              limits:
+                cpu: "0.6"
+                memory: 1Gi
+    persistence:
+      single:
+        storage: 1Gi
+      # multiple:
+      #   # if the child of "multiple" is omitted then the default size will be used.
+      #   # 16G for "data", 1G for "journal", 3Gb for "logs"
+      #   data:
+      #     storage: 5Gi
+      #   logs:
+      #     storage: 1Gi
+      #     #storageClass: standard
   exposedExternally: true # create NodePorts
   security:
+    certsSecretPrefix: mdb # provide custom x509 certificates (keys and certs)
     tls:
       enabled: true # false
-      # ca: ca-pem
+      ca: ca-pem # provide a custom certificate authority (cert in a pem file)
+      secretRef:
+        prefix: mdb
+        # name: mdb-my-sharded-cert
+        # The operator will look for secrets with the following names:
+        # mdb-${metadata.name}-mongos-cert
+        # mdb-${metadata.name}-config-cert
+        # mdb-${metadata.name}-<x>-cert
+        # Where x is all numbers between 0 and the number of shards (excluded)
     authentication:
       enabled : true # false
       modes: ["SCRAM"]

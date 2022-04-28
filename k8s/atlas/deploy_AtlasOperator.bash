@@ -45,4 +45,11 @@ spec:
       comment: "IP address for home"
 EOF
 
-kubectl get atlasproject ${project} -o=jsonpath='{.status.conditions[?(@.type=="Ready")].status}'
+stat=$( kubectl get atlasproject ${project} -o=jsonpath='{.status.conditions[?(@.type=="Ready")].status}' )
+if [[ "$stat" == "False" ]]
+then
+    kubectl describe atlasproject ${project}
+else
+    printf "%s\n" "Project ${project} is Ready"
+    printf "\n%s\n" "__________________________________________________________________________________________"
+fi

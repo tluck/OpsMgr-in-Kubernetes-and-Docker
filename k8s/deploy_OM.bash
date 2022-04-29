@@ -14,7 +14,7 @@ then
     printf "\n%s\n" "__________________________________________________________________________________________"
     printf "%s\n" "Getting Certs status..."
     # Generate CA and create certs for OM and App-db
-    rm certs/${name}*.pem certs/ca.pem certs/queryable-backup.pem > /dev/null 2>&1
+    rm certs/${name}*.pem certs/queryable-backup.pem > /dev/null 2>&1
     certs/make_OM_certs.bash ${name}
     ls -1 certs/*pem certs/*crt 
 fi

@@ -24,10 +24,10 @@ spec:
   security:
     certsSecretPrefix: mdb # provide custom x509 certificates (keys and certs)
     tls:
-      enabled: true # false
+      # enabled: true # false # deprecated in 1.16
       ca: ca-pem # provide a custom certificate authority (cert in a pem file)
       secretRef:
-        prefix: mdb
+        prefix: mdb # same as certsSecretPrefix (not needed)
         # name: mdb-opsmanager-blockstore-cert
     authentication:
       enabled : true

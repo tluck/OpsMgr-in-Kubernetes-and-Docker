@@ -2,25 +2,25 @@
 apiVersion: mongodb.com/v1
 kind: MongoDB
 metadata:
-  name: opsmanager-blockstore
+  name: NAME
   namespace: mongodb
 spec:
   members: 3
-  version: 4.4.4-ent # 4.2.12-ent
+  version: VERSION
   type: ReplicaSet
   opsManager:
     configMapRef:
-      name: opsmanager-blockstore # Must match metadata.name in ConfigMap file
+      name: NAME # Must match metadata.name in ConfigMap file
   credentials: mongodb-opsmanager-admin-key
   persistent: true
   podSpec:
-    cpu: "0.33"
+    cpu: "CPU"
     # note: it's important to always specify memory otherwise wired tiger cache will be calculated incorrectly and
     # monitoring tools will report the size of Kubernetes node instead of the real size of the container
-    memory: 300Mi # 1Gi
+    memory: MEM # 2Gi
     persistence:
       single:
-        storage: 1Gi # 2Gi
+        storage: DISK # 2Gi
   security:
     certsSecretPrefix: mdb # provide custom x509 certificates (keys and certs)
     tls:
@@ -28,11 +28,14 @@ spec:
       ca: ca-pem # provide a custom certificate authority (cert in a pem file)
       secretRef:
         prefix: mdb # same as certsSecretPrefix (not needed)
-        # name: mdb-opsmanager-blockstore-cert
+        # name: mdb-my-replica-set-cert
     authentication:
-      enabled : true
+      enabled : true # false
       modes: ["SCRAM"]
-  # additionalMongodConfig: # use for 4.4 OM
+  # The default TLS mode is 'requireTLS' but it can be customized using the
+  # the `additionalMongodConfig` structure. Please find more information here:
+  # https://docs.mongodb.com/manual/reference/configuration-options/#net.ssl.mode
+  # additionalMongodConfig:
   #   net:
   #     ssl:
-  #       mode: "allowSSL" # "preferTLS"
+  #       mode: "preferSSL" # "requireSSL" "preferSSL" "allowSSL"

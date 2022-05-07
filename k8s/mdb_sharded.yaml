@@ -2,10 +2,10 @@
 apiVersion: mongodb.com/v1
 kind: MongoDB
 metadata:
-  name: my-sharded
+  name: NAME 
   namespace: mongodb
 spec:
-  version: 4.2.12-ent
+  version: VERSION
   type: ShardedCluster
   shardCount: 2
   mongodsPerShardCount: 3
@@ -13,7 +13,7 @@ spec:
   configServerCount: 3
   opsManager:
     configMapRef:
-      name: my-sharded # Must match metadata.name in ConfigMap file
+      name: NAME # Must match metadata.name in ConfigMap file
   credentials: mongodb-opsmanager-admin-key
   persistent: true
   # podSpec:
@@ -82,11 +82,11 @@ spec:
           - name: mongodb-enterprise-database
             resources:
               limits:
-                cpu: "0.6"
-                memory: 1Gi
+                cpu: "CPU"
+                memory: MEM
     persistence:
       single:
-        storage: 1Gi
+        storage: DISK
       # multiple:
       #   # if the child of "multiple" is omitted then the default size will be used.
       #   # 16G for "data", 1G for "journal", 3Gb for "logs"

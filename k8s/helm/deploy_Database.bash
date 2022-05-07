@@ -2,45 +2,13 @@
 
 d=$( dirname "$0" )
 cd "${d}"
-source init.conf
+source ../init.conf
 
-while getopts 'n:c:m:d:v:xh' opt
-do
-  case "$opt" in
-    n) name="$OPTARG" ;;
-    c) cpu="$OPTARG" ;;
-    m) mem="$OPTARG" ;;
-    d) dsk="$OPTARG" ;;
-    v) ver="$OPTARG" ;;
-    x) x="1" ;; # cleanup
-    ?|h)
-      echo "Usage: $(basename $0) [-n name] [-c cpu] [-m memory] [-d disk] [-c arg] [-v version] [-x]"
-      exit 1
-      ;;
-  esac
-done
-shift "$(($OPTIND -1))"
-
-name="${name:-my-replica-set}"
-cpu="${cpu:-0.5}"
-mem="${mem:-500Mi}"
-dsk="${dsk:-1Gi}"
-ver="${ver:-4.4.4-ent}"
-cleanup=${x:-0}
-
-# make manifest from template
+name="${1:-mydb}"
 mdb="mdb_${name}.yaml"
 mdbuser="mdbuser_${name}.yaml"
-
-cat mdb_replicaset.yaml | sed \
-    -e "s/MEM/$mem/" \
-    -e "s/CPU/$cpu/" \
-    -e "s/DISK/$dsk/" \
-    -e "s/VERSION/$ver/" \
-    -e "s/NAME/$name/" > $mdb
-
-cat mdbuser_template.yaml | sed \
-    -e "s/NAME/$name/" > $mdbuser
+shift
+cleanup=${1:-0}
 
 # clean up any previous certs and services
 if [[ ${cleanup} = 1 ]]
@@ -79,27 +47,27 @@ kubectl create configmap ${name} \
     --from-literal="sslMMSCAConfigMap=opsmanager-ca" \
     --from-literal="sslRequireValidMMSServerCertificates='true'"
 
-rm certs/${name}*
-if [[ -e dnsHorizon ]] 
-then
-  dnsHorizon=( $(cat dnsHorizon) )
-  rm dnsHorizon
-  certs/make_db_certs.bash ${name} ${dnsHorizon[@]}
-else
-  certs/make_db_certs.bash ${name}
-fi
-# Create a secret for the member certs for TLS
-kubectl delete secret mdb-${name}-cert > /dev/null 2>&1
-# sleep 3
-# kubectl get secrets
-kubectl create secret tls mdb-${name}-cert \
-    --cert=certs/${name}.crt \
-    --key=certs/${name}.key
+# rm certs/${name}*
+# if [[ -e dnsHorizon ]] 
+# then
+#   dnsHorizon=( $(cat dnsHorizon) )
+#   rm dnsHorizon
+#   certs/make_db_certs.bash ${name} ${dnsHorizon[@]}
+# else
+#   certs/make_db_certs.bash ${name}
+# fi
+# # Create a secret for the member certs for TLS
+# kubectl delete secret mdb-${name}-cert > /dev/null 2>&1
+# # sleep 3
+# # kubectl get secrets
+# kubectl create secret tls mdb-${name}-cert \
+#     --cert=certs/${name}.crt \
+#     --key=certs/${name}.key
 
-# Create a map for the cert
-kubectl delete configmap ca-pem > /dev/null 2>&1
-kubectl create configmap ca-pem \
-    --from-file="ca-pem=certs/ca.pem"
+# # Create a map for the cert
+# kubectl delete configmap ca-pem > /dev/null 2>&1
+# kubectl create configmap ca-pem \
+#     --from-file="ca-pem=certs/ca.pem"
 else
 kubectl delete configmap ${name} > /dev/null 2>&1
 kubectl create configmap ${name} \
@@ -122,7 +90,9 @@ if [[ ${#list[@]} > 0 ]]
 then
 kubectl delete csr ${list[@]}
 fi
-kubectl apply -f "${mdb}"
+
+helm install mydb enterprise-database
+#kubectl apply -f "${mdb}"
 
 # Monitor the progress
 notapproved="Not all certificates have been approved"

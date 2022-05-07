@@ -4,11 +4,45 @@ d=$( dirname "$0" )
 cd "${d}"
 source init.conf
 
-name="${1:-my-sharded}"
+while getopts 'n:c:m:d:v:s:xh' opt
+do
+  case "$opt" in
+    n) name="$OPTARG" ;;
+    c) cpu="$OPTARG" ;;
+    m) mem="$OPTARG" ;;
+    d) dsk="$OPTARG" ;;
+    v) ver="$OPTARG" ;;
+    s) shards="$OPTARG" ;;
+    x) x="1" ;;
+    ?|h)
+      echo "Usage: $(basename $0) [-n name] [-c cpu] [-m memory] [-d disk] [-c arg] [-s shards] [-v version] [-x]"
+      exit 1
+      ;;
+  esac
+done
+shift "$(($OPTIND -1))"
+
+name="${name:-my-replica-set}"
+cpu="${cpu:-0.5}"
+mem="${mem:-500Mi}"
+dsk="${dsk:-1Gi}"
+ver="${ver:-4.4.4-ent}"
+shards="${shards:-2}"
+cleanup=${x:-0}
+
+# make manifest from template
 mdb="mdb_${name}.yaml"
 mdbuser="mdbuser_${name}.yaml"
-shift
-cleanup=${1:-0}
+
+cat mdb_sharded.yaml | sed \
+    -e "s/MEM/$mem/" \
+    -e "s/CPU/$cpu/" \
+    -e "s/DISK/$dsk/" \
+    -e "s/VERSION/$ver/" \
+    -e "s/NAME/$name/" > $mdb
+
+cat mdbuser_template.yaml | sed \
+    -e "s/NAME/$name/" > $mdbuser
 
 # clean up any previous certs and services
 if [[ ${cleanup} = 1 ]]

@@ -23,8 +23,10 @@ fi
 #create nodeport service
 if [[ "${horizon}" == "LoadBalancer" ]]
 then
+    cat svc_expose_template.yaml| sed -e "s/NAME/$name/" -e "s/PORTTYPE/LoadBalancer/g" > svc_lb_${name}.yaml
     kubectl apply -f svc_lb_${name}.yaml
 else
+    cat svc_expose_template.yaml| sed -e "s/NAME/$name/" -e "s/PORTTYPE/NodePort/g" > svc_np_${name}.yaml
     kubectl apply -f svc_np_${name}.yaml
 fi
 

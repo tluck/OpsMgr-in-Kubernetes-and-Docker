@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: my-replica-set-0
+  name: NAME-0
 spec:
   ports:
   - nodePort:
@@ -10,13 +10,13 @@ spec:
     protocol: TCP
     targetPort: 27017
   selector:
-    statefulset.kubernetes.io/pod-name: my-replica-set-0
-  type: NodePort
+    statefulset.kubernetes.io/pod-name: NAME-0
+  type: PORTTYPE
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: my-replica-set-1
+  name: NAME-1
 spec:
   ports:
   - nodePort:
@@ -24,19 +24,19 @@ spec:
     protocol: TCP
     targetPort: 27017
   selector:
-    statefulset.kubernetes.io/pod-name: my-replica-set-1
-  type: NodePort
+    statefulset.kubernetes.io/pod-name: NAME-1
+  type: PORTTYPE
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: my-replica-set-2
+  name: NAME-2
 spec:
   ports:
-  - nodePort: 
+  - nodePort:
     port: 27017
     protocol: TCP
     targetPort: 27017
   selector:
-    statefulset.kubernetes.io/pod-name: my-replica-set-2
-  type: NodePort
+    statefulset.kubernetes.io/pod-name: NAME-2
+  type: PORTTYPE

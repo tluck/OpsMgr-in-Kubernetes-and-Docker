@@ -29,7 +29,11 @@ else
     else
         slist=( $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="ExternalDNS")].address}' ) )
         # get node external IPs
-       if [[ ${#slist[@]} == 0 ]] 
+    if [[ ${#slist[@]} == 0 ]] 
+        then
+            slist=( $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="InternalDNS")].address}' ) )
+        fi
+    if [[ ${#slist[@]} == 0 ]] 
         then
             slist=( $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="ExternalIP")].address}' ) )
         fi
@@ -54,7 +58,7 @@ fi
 cs="mongodb://${dbadmin}:${dbpassword}@${hn0}:${np0},${hn1}:${np1},${hn2}:${np2}/?replicaSet=${name}&authSource=admin"
 
 tls=$( kubectl get mdb/${name} -o jsonpath='{.spec.security.tls}' )
-if [[ "${tls}" == "map[enabled:true]" || "${tls}" == *"\"enabled\":true"* ]]
+if [[ "${tls}" == "map[enabled:true]" || "${tls}" == *"\"enabled\":true"* || "${tls}" == *"prefix"* ]]
 then
     #kubectl exec ${name}-0 -i -t -- cat /mongodb-automation/ca.pem > ca.pem
     kubectl get configmap ca-pem -o jsonpath="{.data['ca-pem']}" > ca.pem

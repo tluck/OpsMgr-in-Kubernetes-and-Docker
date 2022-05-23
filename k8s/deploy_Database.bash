@@ -150,7 +150,7 @@ done
 
 # get keys for TLS
 tls=$( kubectl get mdb/${name} -o jsonpath='{.spec.security.tls}' )
-if [[ "${tls}" == "map[enabled:true]" || "${tls}" == *"\"enabled\":true"* ]]
+if [[ "${tls}" == "map[enabled:true]" || "${tls}" == *"\"enabled\":true"* || "${tls}" == *"prefix"* ]]
 then
     eval version=$( kubectl get mdb ${name} -o jsonpath={.spec.version} )
     if [[ ${version%%.*} = 3 ]]

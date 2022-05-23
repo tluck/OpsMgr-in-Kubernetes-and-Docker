@@ -14,10 +14,20 @@ spec:
   credentials: mongodb-opsmanager-admin-key
   persistent: true
   podSpec:
-    cpu: "CPU"
-    # note: it's important to always specify memory otherwise wired tiger cache will be calculated incorrectly and
-    # monitoring tools will report the size of Kubernetes node instead of the real size of the container
-    memory: MEM # 2Gi
+    # `podTemplate` allows to set custom fields in PodTemplateSpec for the
+    # Database Pods.
+    # For more information see:
+    # https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.17/#podtemplatespec-v1-core
+    podTemplate:
+      spec:
+        containers:
+        - name: mongodb-enterprise-database
+          # For more information about Pod and container resource management, see:
+          # https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+          resources:
+            limits:
+              cpu: "CPU"
+              memory: MEM 
     persistence:
       single:
         storage: DISK # 2Gi

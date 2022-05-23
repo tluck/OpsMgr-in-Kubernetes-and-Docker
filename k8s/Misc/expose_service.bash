@@ -70,7 +70,11 @@ else
     else
         slist=( $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="ExternalDNS")].address}' ) )
         # get node external IPs
-       if [[ ${#slist[@]} == 0 ]] 
+        if [[ ${#slist[@]} == 0 ]] 
+        then
+            slist=( $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="InternalDNS")].address}' ) )
+        fi
+        if [[ ${#slist[@]} == 0 ]] 
         then
             slist=( $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="ExternalIP")].address}' ) )
         fi

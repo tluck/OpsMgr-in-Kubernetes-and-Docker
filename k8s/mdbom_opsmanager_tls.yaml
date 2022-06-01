@@ -100,6 +100,9 @@ spec:
 
   backup:
     enabled: true
+    headDB:
+      storage: "4Gi" # optional. Default storage is 30G
+    members: 1 # Configures the number of backup daemons to create (default 1)
     jvmParameters: ["-Xms1024m", "-Xmx1536m"] # 1M is a good size for docker-desktop -- comment out for larger clusters in production
     # queryableBackupSecretRef:
     #   name: "opsmanager-cert"

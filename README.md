@@ -78,4 +78,4 @@ the **_launch.bash** script has several script for each of these steps:
 	```127.0.0.1       opsmanager-svc.mongodb.svc.cluster.local # opsmgr```
 	into
 	```/etc/hosts```
-- and add the certifice for K8s (certs/ca.crt) to your keystore to allow secure https without challenge
+- and add the custom TLS certificate authority (certs/ca.crt) to your keystore to allow secure https without challenge

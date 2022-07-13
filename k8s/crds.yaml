@@ -112,9 +112,6 @@ spec:
                 x-kubernetes-preserve-unknown-fields: true
               configSrvPodSpec:
                 properties:
-                  nodeAffinity:
-                    type: object
-                    x-kubernetes-preserve-unknown-fields: true
                   persistence:
                     properties:
                       multiple:
@@ -161,11 +158,6 @@ spec:
                             type: string
                         type: object
                     type: object
-                  podAffinity:
-                    type: object
-                    x-kubernetes-preserve-unknown-fields: true
-                  podAntiAffinityTopologyKey:
-                    type: string
                   podTemplate:
                     type: object
                     x-kubernetes-preserve-unknown-fields: true
@@ -226,9 +218,6 @@ spec:
                 type: integer
               mongosPodSpec:
                 properties:
-                  nodeAffinity:
-                    type: object
-                    x-kubernetes-preserve-unknown-fields: true
                   persistence:
                     properties:
                       multiple:
@@ -275,11 +264,6 @@ spec:
                             type: string
                         type: object
                     type: object
-                  podAffinity:
-                    type: object
-                    x-kubernetes-preserve-unknown-fields: true
-                  podAntiAffinityTopologyKey:
-                    type: string
                   podTemplate:
                     type: object
                     x-kubernetes-preserve-unknown-fields: true
@@ -296,9 +280,6 @@ spec:
                 type: boolean
               podSpec:
                 properties:
-                  nodeAffinity:
-                    type: object
-                    x-kubernetes-preserve-unknown-fields: true
                   persistence:
                     properties:
                       multiple:
@@ -345,11 +326,6 @@ spec:
                             type: string
                         type: object
                     type: object
-                  podAffinity:
-                    type: object
-                    x-kubernetes-preserve-unknown-fields: true
-                  podAntiAffinityTopologyKey:
-                    type: string
                   podTemplate:
                     type: object
                     x-kubernetes-preserve-unknown-fields: true
@@ -602,8 +578,9 @@ spec:
                     type: object
                 type: object
               service:
-                description: this is an optional service, it will get the name "<rsName>-service"
-                  in case not provided
+                description: DEPRECATED please use `spec.statefulSet.spec.serviceName`
+                  to provide a custom service name. this is an optional service, it
+                  will get the name "<rsName>-service" in case not provided
                 type: string
               shard:
                 properties:
@@ -623,9 +600,6 @@ spec:
                 type: integer
               shardPodSpec:
                 properties:
-                  nodeAffinity:
-                    type: object
-                    x-kubernetes-preserve-unknown-fields: true
                   persistence:
                     properties:
                       multiple:
@@ -672,14 +646,19 @@ spec:
                             type: string
                         type: object
                     type: object
-                  podAffinity:
-                    type: object
-                    x-kubernetes-preserve-unknown-fields: true
-                  podAntiAffinityTopologyKey:
-                    type: string
                   podTemplate:
                     type: object
                     x-kubernetes-preserve-unknown-fields: true
+                type: object
+              statefulSet:
+                description: StatefulSetConfiguration holds the optional custom StatefulSet
+                  that should be merged into the operator created one.
+                properties:
+                  spec:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                required:
+                - spec
                 type: object
               type:
                 enum:
@@ -1654,9 +1633,6 @@ spec:
                     type: object
                   podSpec:
                     properties:
-                      nodeAffinity:
-                        type: object
-                        x-kubernetes-preserve-unknown-fields: true
                       persistence:
                         properties:
                           multiple:
@@ -1703,11 +1679,6 @@ spec:
                                 type: string
                             type: object
                         type: object
-                      podAffinity:
-                        type: object
-                        x-kubernetes-preserve-unknown-fields: true
-                      podAntiAffinityTopologyKey:
-                        type: string
                       podTemplate:
                         type: object
                         x-kubernetes-preserve-unknown-fields: true

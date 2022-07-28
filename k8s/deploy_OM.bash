@@ -61,6 +61,7 @@ else
 fi
 
 # Monitor the progress until the OpsMgr app is ready
+sleep 10
 while true
 do
     kubectl get om 

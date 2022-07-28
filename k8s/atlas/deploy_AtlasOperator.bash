@@ -39,10 +39,8 @@ metadata:
 spec:
   name: "${project}"
   projectIpAccessList:
-    - ipAddress: "63.81.44.34"
-      comment: "IP address for weWork"
-    - ipAddress: "67.188.49.195"
-      comment: "IP address for home"
+    - ipAddress: "${ipAddress1}"
+    - ipAddress: "${ipAddress2}"
 EOF
 
 stat=$( kubectl get atlasproject ${project} -o=jsonpath='{.status.conditions[?(@.type=="Ready")].status}' )

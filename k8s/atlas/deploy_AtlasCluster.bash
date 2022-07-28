@@ -7,13 +7,13 @@ printf "\n%s\n" "_______________________________________________________________
 printf "%s\n" "Create the Cluster ..."
 cat <<EOF | kubectl apply -f -
 apiVersion: atlas.mongodb.com/v1
-kind: AtlasCluster
+kind: AtlasDeployment
 metadata:
   name: "${cluster}"
 spec:
   projectRef:
     name: "${project}" 
-  clusterSpec:
+  deploymentSpec:
     name: "${cluster}"
     providerSettings:
       instanceSizeName: M10
@@ -61,9 +61,9 @@ while true
 do
     sleep 15
     # kubectl get atlascluster ${cluster}
-    status=$( kubectl get atlascluster ${cluster} -o=jsonpath='{.status.conditions[?(@.type=="Ready")].status}' )
+    status=$( kubectl get atlasdeployment ${cluster} -o=jsonpath='{.status.conditions[?(@.type=="Ready")].status}' )
     printf "%s\n" "Status Messages:"
-    kubectl get atlascluster ${cluster} -o json | jq '.status.conditions[2]' 
+    kubectl get atlasdeployment ${cluster} -o json | jq '.status.conditions[2]' 
     # if [[ "$status" == "Pending" || "$status" == "Running" ]];
     if [[ "$status" == "True" ]]
     then

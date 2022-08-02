@@ -59,7 +59,7 @@ spec:
               resources:
                 limits:
                   cpu: "0.25"
-                  memory: 500Mi
+                  memory: 400Mi
                 requests:
                   cpu: "0.25"
                   memory: 400Mi
@@ -130,4 +130,4 @@ spec:
                     memory: 1.5Gi # 2Gi is good size for docker-desktop -- use 5Gi for larger clusters in production
                   limits:
                     cpu: "1.0"
-                    memory: 2.0Gi # 2Gi is good size for docker-desktop -- use 5Gi for larger clusters in production
+                    memory: 1.5Gi # 2Gi is good size for docker-desktop -- use 5Gi for larger clusters in production

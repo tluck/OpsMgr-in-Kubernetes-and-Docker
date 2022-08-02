@@ -57,18 +57,18 @@ printf "\n%s\n" "_______________________________________________________________
 printf "%s\n" "Create the Backup Oplog1 DB for OM ..."
 if [[ "${context}" == "docker-desktop" ]]
 then
-    deploy_Database.bash -n "opsmanager-oplog"      -c "0.33" -m "300Mi"        -v "5.0.7-ent" 
+    deploy_Database.bash -n "opsmanager-oplog"      -c "0.33" -m "300Mi"        -v "5.0.9-ent" 
 else
-    deploy_Database.bash -n "opsmanager-oplog"      -c "0.50" -m "2Gi"          -v "5.0.7-ent"
+    deploy_Database.bash -n "opsmanager-oplog"      -c "0.50" -m "2Gi"          -v "5.0.9-ent"
 fi
 
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Create the Backup BlockStore1 DB for OM ..."
 if [[ "${context}" == "docker-desktop" ]]
 then
-    deploy_Database.bash -n "opsmanager-blockstore" -c "0.33" -m "300Mi"        -v "5.0.7-ent"
+    deploy_Database.bash -n "opsmanager-blockstore" -c "0.33" -m "300Mi"        -v "5.0.9-ent"
 else
-    deploy_Database.bash -n "opsmanager-blockstore" -c "0.50" -m "2Gi"          -v "5.0.7-ent"
+    deploy_Database.bash -n "opsmanager-blockstore" -c "0.50" -m "2Gi"          -v "5.0.9-ent"
 fi
 
 
@@ -76,9 +76,9 @@ printf "\n%s\n" "_______________________________________________________________
 printf "%s\n" "Generate splitHorizon configuration for External access to a Production DB ..."
 if [[ "${context}" == "docker-desktop" ]]
 then
-    deploy_Database.bash -n "my-replica-set"        -c "0.50" -m "400Mi"        -v "4.4.4-ent"
+    deploy_Database.bash -n "my-replica-set"        -c "0.50" -m "400Mi"        -v "5.0.7-ent"
 else
-    deploy_Database.bash -n "my-replica-set"        -c "1.00" -m "4Gi" -d "4Gi" -v "4.4.4-ent"
+    deploy_Database.bash -n "my-replica-set"        -c "1.00" -m "4Gi" -d "4Gi" -v "5.0.7-ent"
 fi
 
 printf "\n%s\n" "__________________________________________________________________________________________"
@@ -87,7 +87,7 @@ if [[ "${context}" == "docker-desktop" ]]
 then
     printf "\n%s\n" " **** skipping sharded deployment - not enough resources ***"
 else
-    deploy_DatabaseSharded.bash  -n "my-sharded"    -c "0.50" -m "2Gi" -s "2" -v "4.4.4-ent"
+    deploy_DatabaseSharded.bash  -n "my-sharded"    -c "0.50" -m "2Gi" -s "2" -v "5.0.9-ent"
 fi
 
 printf "\n%s\n" "__________________________________________________________________________________________"

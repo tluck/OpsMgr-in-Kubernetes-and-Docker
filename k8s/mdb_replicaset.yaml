@@ -49,3 +49,7 @@ spec:
   #   net:
   #     ssl:
   #       mode: "preferSSL" # "requireSSL" "preferSSL" "allowSSL"
+  additionalMongodConfig:
+    operationProfiling:
+      mode: "off" # "slowOp"
+      slowOpThresholdMs: 100

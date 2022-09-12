@@ -6,6 +6,7 @@ skipcerts=${1:-0}
 d=$( dirname "$0" )
 cd "${d}"
 source init.conf
+export PATH=".:$PATH"
 
 which jq > /dev/null
 if [[ $? != 0 ]]

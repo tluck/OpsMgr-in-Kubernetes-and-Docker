@@ -3,7 +3,7 @@
 d=$( dirname "$0" )
 cd "${d}"
 
-name=${1:-my-shard}
+name=${1:-mysharded}
 shift
 ctype=${1}
 comp=${ctype}

@@ -119,7 +119,7 @@ do
 done
 
 # get keys for TLS
-tls=$( kubectl get mdb/${name} -o jsonpath='{.spec.security.tls}' )
+tls=$( kubectl get mdb/${name} -o jsonpath='{.spec.security.authentication}' )
 if [[ "${tls}" == "map[enabled:true]" || "${tls}" == *"\"enabled\":true"* ]]
 then
     eval version=$( kubectl get mdb ${name} -o jsonpath={.spec.version} )

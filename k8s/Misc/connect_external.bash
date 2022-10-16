@@ -2,7 +2,7 @@
 
 source ./init.conf
 
-name=${1:-my-replica-set}
+name=${1:-myreplicaset}
 export PATH=.:Misc:$PATH
 
 fcs=$( get_connection_string.bash "${name}" )

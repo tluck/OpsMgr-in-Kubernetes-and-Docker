@@ -38,7 +38,7 @@ spec:
       ca: ca-pem # provide a custom certificate authority (cert in a pem file)
       secretRef:
         prefix: mdb # same as certsSecretPrefix (not needed)
-        # name: mdb-my-replica-set-cert
+        # name: mdb-myreplicaset-cert
     authentication:
       enabled : true # false
       modes: ["SCRAM"]

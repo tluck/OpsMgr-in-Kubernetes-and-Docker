@@ -103,7 +103,7 @@ spec:
       ca: ca-pem # provide a custom certificate authority (cert in a pem file)
       secretRef:
         prefix: mdb # same as certsSecretPrefix (not needed)
-        # name: mdb-my-sharded-cert
+        # name: mdb-mysharded-cert
         # The operator will look for secrets with the following names:
         # mdb-${metadata.name}-mongos-cert
         # mdb-${metadata.name}-config-cert

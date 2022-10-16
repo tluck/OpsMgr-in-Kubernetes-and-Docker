@@ -77,9 +77,9 @@ printf "\n%s\n" "_______________________________________________________________
 printf "%s\n" "Generate splitHorizon configuration for External access to a Production DB ..."
 if [[ "${context}" == "docker-desktop" ]]
 then
-    deploy_Database.bash -n "my-replica-set"        -c "0.50" -m "400Mi"        -v "5.0.7-ent"
+    deploy_Database.bash -n "myreplicaset"        -c "0.50" -m "400Mi"        -v "5.0.7-ent"
 else
-    deploy_Database.bash -n "my-replica-set"        -c "1.00" -m "4Gi" -d "4Gi" -v "5.0.7-ent"
+    deploy_Database.bash -n "myreplicaset"        -c "1.00" -m "4Gi" -d "4Gi" -v "5.0.7-ent"
 fi
 
 printf "\n%s\n" "__________________________________________________________________________________________"
@@ -88,7 +88,7 @@ if [[ "${context}" == "docker-desktop" ]]
 then
     printf "\n%s\n" " **** skipping sharded deployment - not enough resources ***"
 else
-    deploy_DatabaseSharded.bash  -n "my-sharded"    -c "0.50" -m "2Gi" -s "2" -v "5.0.9-ent"
+    deploy_DatabaseSharded.bash  -n "mysharded"    -c "0.50" -m "2Gi" -s "2" -v "5.0.9-ent"
 fi
 
 printf "\n%s\n" "__________________________________________________________________________________________"

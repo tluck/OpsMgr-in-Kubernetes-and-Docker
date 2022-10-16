@@ -21,11 +21,11 @@ do
 done
 shift "$(($OPTIND -1))"
 
-name="${name:-my-replica-set}"
+name="${name:-myreplicaset}"
 cpu="${cpu:-0.5}"
 mem="${mem:-500Mi}"
 dsk="${dsk:-1Gi}"
-ver="${ver:-4.4.4-ent}"
+ver="${ver:-5.0.9-ent}"
 cleanup=${x:-0}
 
 # make manifest from template
@@ -149,16 +149,16 @@ do
 done
 
 # get keys for TLS
-tls=$( kubectl get mdb/${name} -o jsonpath='{.spec.security.tls}' )
+tls=$( kubectl get mdb/${name} -o jsonpath='{.spec.security.authentication}' )
 if [[ "${tls}" == "map[enabled:true]" || "${tls}" == *"\"enabled\":true"* || "${tls}" == *"prefix"* ]]
 then
     eval version=$( kubectl get mdb ${name} -o jsonpath={.spec.version} )
     if [[ ${version%%.*} = 3 ]]
     then
-        ssltls_options=" --ssl --sslCAFile ca.pem --sslPEMKeyFile server.pem "
+        ssltls_options=" --ssl --sslCAFile certs/ca.pem --sslPEMKeyFile certs/${name}.pem "
         ssltls_enabled="&ssl=true"
     else
-        ssltls_options=" --tls --tlsCAFile ca.pem --tlsCertificateKeyFile server.pem "
+        ssltls_options=" --tls --tlsCAFile certs/ca.pem --tlsCertificateKeyFile certs/${name}.pem "
         ssltls_enabled="&tls=true"
     fi
 fi

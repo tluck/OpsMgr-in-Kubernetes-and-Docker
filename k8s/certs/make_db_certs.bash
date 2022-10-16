@@ -3,7 +3,7 @@
 d=$( dirname "$0" )
 cd "${d}"
 
-name=${1:-my-replica-set}
+name=${1:-myreplicaset}
 shift
 dnsHorizon=( $@ )
 

@@ -13,4 +13,9 @@ kubectl config set-context $(kubectl config current-context) --namespace=mongodb
 
 # Deploy the MongoDB Enterprise Operator
 kubectl apply -f crds.yaml
+if [[ "${clusterType}" == "openshift" ]]
+then
+kubectl apply -f mongodb-enterprise-openshift.yaml
+else
 kubectl apply -f mongodb-enterprise.yaml
+fi

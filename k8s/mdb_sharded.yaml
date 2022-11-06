@@ -7,9 +7,9 @@ metadata:
 spec:
   version: VERSION
   type: ShardedCluster
-  shardCount: 2
+  shardCount: SHARDS
   mongodsPerShardCount: 3
-  mongosCount: 2
+  mongosCount: MONGOS
   configServerCount: 3
   opsManager:
     configMapRef:
@@ -31,8 +31,8 @@ spec:
           - name: mongodb-enterprise-database
             resources:
               limits:
-                cpu: "0.5"
-                memory: 500Mi
+                cpu: "MSCPU"
+                memory: "MSMEM"
     # podAntiAffinityTopologyKey: rackId
     # nodeAffinity:
     #   preferredDuringSchedulingIgnoredDuringExecution:
@@ -54,8 +54,8 @@ spec:
             # https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
             resources:
               limits:
-                cpu: "0.33"
-                memory: 500Mi
+                cpu: "CSCPU"
+                memory: "CSMEM"
     # For podAffinity and nodeAffinity see Kubernetes Docs
     # https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
     # podAntiAffinityTopologyKey: kubernetes.io/hostname
@@ -82,8 +82,8 @@ spec:
           - name: mongodb-enterprise-database
             resources:
               limits:
-                cpu: "CPU"
-                memory: MEM
+                cpu: "DBCPU"
+                memory: "DBMEM"
     persistence:
       single:
         storage: DISK

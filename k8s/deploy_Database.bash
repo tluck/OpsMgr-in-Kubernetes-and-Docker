@@ -47,8 +47,9 @@ if [[ ${cleanup} = 1 ]]
 then
   #kubectl delete secret ${name}-cert > /dev/null 2>&1
   #kubectl delete csr $( kubectl get csr | grep "${name}" | awk '{print $1}' )
-  kubectl delete svc $( kubectl get svc | grep "${name}" | awk '{print $1}' )
   kubectl delete mdb ${name}
+  kubectl delete pvc $( kubectl get svc | grep "${name}" | awk '{print $1}' )
+  kubectl delete svc $( kubectl get svc | grep "${name}" | awk '{print $1}' )
 fi
 
 # create new certs if the service does not exist

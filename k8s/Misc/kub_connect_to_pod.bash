@@ -23,4 +23,6 @@ fi
 ics=$( kubectl get secret ${name}-dbadmin-${name}-admin -o jsonpath="{.data['connectionString\.standard']}" | base64 --decode ) 
 fcs=\'${ics}${ssltls_enabled}\'
 printf "\n%s %s\n\n" "Connect String: ${fcs} ${ssltls_options}"
-eval "kubectl exec ${name}${mongos}-0 -i -t -- /var/lib/mongodb-mms-automation/bin/mongo ${fcs} ${ssltls_options}"
+path="$( kubectl exec ${name}${mongos}-0  -- find /var/lib/ -name mongo )"
+mongosh=$( printf "%s" $path)
+eval "kubectl exec ${name}${mongos}-0 -i -t -- ${mongosh} ${fcs} ${ssltls_options}"

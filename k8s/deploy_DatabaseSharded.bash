@@ -13,9 +13,10 @@ do
     d) dsk="$OPTARG" ;;
     v) ver="$OPTARG" ;;
     s) shards="$OPTARG" ;;
+    r) mongos="$OPTARG" ;;
     x) x="1" ;;
     ?|h)
-      echo "Usage: $(basename $0) [-n name] [-c cpu] [-m memory] [-d disk] [-c arg] [-s shards] [-v version] [-x]"
+      echo "Usage: $(basename $0) [-n name] [-c cpu] [-m memory] [-d disk] [-c arg] [-s shards] [-r mongos] [-v version] [-x]"
       exit 1
       ;;
   esac
@@ -23,22 +24,45 @@ done
 shift "$(($OPTIND -1))"
 
 name="${name:-mysharded}"
-cpu="${cpu:-0.5}"
-mem="${mem:-500Mi}"
-dsk="${dsk:-1Gi}"
 ver="${ver:-5.0.9-ent}"
+mem="${mem:-2Gi}"
+cpu="${cpu:-1.0}"
+dsk="${dsk:-1Gi}"
 shards="${shards:-2}"
+mongos="${mongos:-1}"
 cleanup=${x:-0}
+
+# mongos and configServer resources
+msmem="3Gi"
+mscpu="1.0"
+csmem="4Gi"
+cscpu="1.0"
+
+context=$( kubectl config current-context )
+if [[ "${context}" == "docker-desktop" ]]
+then
+    msmem="400Mi"
+    mscpu="0.33"
+    csmem="400Mi"
+    cscpu="0.33"
+fi
+
 
 # make manifest from template
 mdb="mdb_${name}.yaml"
 mdbuser="mdbuser_${name}.yaml"
 
 cat mdb_sharded.yaml | sed \
-    -e "s/MEM/$mem/" \
-    -e "s/CPU/$cpu/" \
-    -e "s/DISK/$dsk/" \
     -e "s/VERSION/$ver/" \
+    -e "s/DBMEM/$mem/" \
+    -e "s/DBCPU/$cpu/" \
+    -e "s/DISK/$dsk/" \
+    -e "s/SHARDS/$shards/" \
+    -e "s/MONGOS/$mongos/" \
+    -e "s/CSCPU/$cscpu/" \
+    -e "s/CSMEM/$csmem/" \
+    -e "s/MSCPU/$mscpu/" \
+    -e "s/MSMEM/$msmem/" \
     -e "s/NAME/$name/" > $mdb
 
 cat mdbuser_template.yaml | sed \
@@ -49,8 +73,9 @@ if [[ ${cleanup} = 1 ]]
 then
   #kubectl delete secret ${name}-cert > /dev/null 2>&1
   #kubectl delete csr $( kubectl get csr | grep "${name}" | awk '{print $1}' )
-  kubectl delete svc $( kubectl get svc | grep "${name}" | awk '{print $1}' )
   kubectl delete mdb ${name}
+  kubectl delete pvc $( kubectl get pvc | grep "${name}" | awk '{print $1}' )
+  kubectl delete svc $( kubectl get svc | grep "${name}" | awk '{print $1}' )
 fi
 
 # Create map for OM Org/Project

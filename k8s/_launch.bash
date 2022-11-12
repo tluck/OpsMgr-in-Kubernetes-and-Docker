@@ -77,9 +77,9 @@ printf "\n%s\n" "_______________________________________________________________
 printf "%s\n" "Generate splitHorizon configuration for External access to a Production DB ..."
 if [[ "${context}" == "docker-desktop" ]]
 then
-    deploy_Database.bash -n "myreplicaset"        -c "0.50" -m "400Mi"        -v "5.0.9-ent"
+    deploy_Database.bash -n "myreplicaset"          -c "0.50" -m "400Mi"        -v "6.0.1-ent"
 else
-    deploy_Database.bash -n "myreplicaset"        -c "1.00" -m "4Gi" -d "4Gi" -v "5.0.9-ent"
+    deploy_Database.bash -n "myreplicaset"          -c "1.00" -m "4Gi" -d "4Gi" -v "6.0.1-ent"
 fi
 
 printf "\n%s\n" "__________________________________________________________________________________________"
@@ -87,9 +87,9 @@ printf "%s\n" "Generate configuration for External access to a Sharded Productio
 if [[ "${context}" == "docker-desktop" ]]
 then
     printf "\n%s\n" " **** skipping sharded deployment - not enough resources ***"
-    # deploy_DatabaseSharded.bash  -n "mysharded"    -c "0.33" -m "400Mi"        -s "1"        -v "6.0.2-ent"
+    # deploy_DatabaseSharded.bash -n "mysharded"    -c "0.33" -m "400Mi"        -s "1"        -v "6.0.2-ent"
 else
-    deploy_DatabaseSharded.bash  -n "mysharded"    -c "1.00" -m "2Gi" -d "4Gi" -s "2" -r "2" -v "6.0.2-ent"
+    deploy_DatabaseSharded.bash -n "mysharded"      -c "1.00" -m "2Gi" -d "4Gi" -s "2" -r "2" -v "6.0.2-ent"
 fi
 
 printf "\n%s\n" "__________________________________________________________________________________________"

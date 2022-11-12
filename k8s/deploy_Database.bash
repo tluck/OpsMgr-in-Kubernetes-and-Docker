@@ -25,7 +25,7 @@ name="${name:-myreplicaset}"
 cpu="${cpu:-0.5}"
 mem="${mem:-500Mi}"
 dsk="${dsk:-1Gi}"
-ver="${ver:-5.0.9-ent}"
+ver="${ver:-$mdbVersion}"
 cleanup=${x:-0}
 
 # make manifest from template
@@ -126,9 +126,10 @@ fi
 kubectl apply -f "${mdb}"
 
 # Monitor the progress
+pod=mongodb/${name}
+printf "\n%s\n" "Monitoring the progress of pod ${pod}..."
 notapproved="Not all certificates have been approved"
 certificate="Certificate"
-pod=mongodb/${name}
 while true
 do
     kubectl get ${pod}

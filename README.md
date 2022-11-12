@@ -1,9 +1,9 @@
 # OpsMgr K8s Demo
 
-## For Kubernetes Summary:
+## In Kubernetes Summary:
 
 - This demo will install into a Kubernetes cluster:
-  * Ops Manager v5 
+  * Ops Manager v6 
   * its app DB
   * a blockstore DB for backups
   * an oplog DB for continous backups
@@ -26,7 +26,7 @@
 - Restart to enable new settings
 
 ### Step 2. Launch the Services
-the **_launch.bash** script has several script for each of these steps:
+the **_launch.bash** script runs several "deploy" scripts for each of the following steps:
 
 - Script 1: **deploy_Operator.bash**
 	- Setup the OM enviroment
@@ -43,7 +43,7 @@ the **_launch.bash** script has several script for each of these steps:
 - Script 3: **deploy_Database.bash**
 	- Deploy a DB - three more are created
 	- Oplog1 and Blockstore1 dbs complete the Backup setup for OM
-	- My-replica-set is a "Production" DB and has a splitHorizon configuration for external cluster access
+	- myreplicaset is a "Production" DB and has a splitHorizon configuration for external cluster access
 		- connect via ```Misc/connect_external.bash``` script
 	- Monitors the progress until the pods are ready
 
@@ -51,19 +51,20 @@ the **_launch.bash** script has several script for each of these steps:
 	- starts a mail relay to send alerts and user invitations
 	
 ### Step 3. Login to OM
-- login to OM at https://localhost:8443 with the admin credentials set in ```init.conf```
-- or put:
+- login to OM at https://opsmanager-svc.mongodb.svc.cluster.local:8443 
+- Note: the admin credentials are set in ```init.conf```
+	- the scripts also put:
 	```127.0.0.1       opsmanager-svc.mongodb.svc.cluster.local # opsmgr```
-	into
-	```/etc/hosts```
-- and add the custom TLS certificate authority (certs/ca.crt) to your keystore to allow secure https without challenge
+	into the ```/etc/hosts``` file
 
-Ops Manager Demo Environment (in Docker)
+	- Also add the custom TLS certificate authority (certs/ca.crt) to your keystore to allow secure https without challenge
+
+# Ops Manager Demo Environment (in Docker)
 
 GitHub Repo:             https://github.com/tluck/OpsMgrDocker
 Docker Image Repo:     https://hub.docker.com/repository/docker/tjluckenbach/mongodb
 
-## For Docker Summary:
+## In Docker Summary:
 Runs OpsManager 4.3 with severval agent-ready "empty nodes" to demo Automation and Backup
 
 ### Step 1. StartUp OpsMgr
@@ -89,5 +90,5 @@ Runs OpsManager 4.3 with severval agent-ready "empty nodes" to demo Automation a
     - run these commands: run 1; run 2; run 3
 
 ### Step 5.
-- Login in to http://opsmgr:8080 (localhost)
+- Login in to http://localhost:8080 (localhost)
 - Provision a cluster on the 3 nodes

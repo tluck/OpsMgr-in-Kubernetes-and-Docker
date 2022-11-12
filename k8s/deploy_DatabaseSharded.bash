@@ -4,7 +4,7 @@ d=$( dirname "$0" )
 cd "${d}"
 source init.conf
 
-while getopts 'n:c:m:d:v:s:xh' opt
+while getopts 'n:c:m:d:v:s:r:xh' opt
 do
   case "$opt" in
     n) name="$OPTARG" ;;
@@ -24,7 +24,7 @@ done
 shift "$(($OPTIND -1))"
 
 name="${name:-mysharded}"
-ver="${ver:-5.0.9-ent}"
+ver="${ver:-$mdbVersion}"
 mem="${mem:-2Gi}"
 cpu="${cpu:-1.0}"
 dsk="${dsk:-1Gi}"
@@ -132,9 +132,10 @@ fi
 kubectl apply -f "${mdb}"
 
 # Monitor the progress
+pod=mongodb/${name}
+printf "\n%s\n" "Monitoring the progress of pod ${pod}..."
 notapproved="Not all certificates have been approved"
 certificate="Certificate"
-pod=mongodb/${name}
 while true
 do
     kubectl get ${pod}

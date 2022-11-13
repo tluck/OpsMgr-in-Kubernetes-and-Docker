@@ -2,24 +2,29 @@
 
 source ./init.conf
 
-orgname=$1
+orgname="${1:-DemoOrg}"
 
-echo '{ "name" : "NAME" }' | sed -e"s/ORGID/${orgId}/" -e"s/NAME/${orgname}/" > data.json
+ifile=data.json
 
-rm org.json > /dev/null 2>&1
-curl --user "${publicKey}:${privateKey}" --digest \
+echo '{ "name" : "NAME" }' | sed -e"s/ORGID/${orgId}/" -e"s/NAME/${orgname}/" > ${ifile}
+
+#rm ${ofile} > /dev/null 2>&1
+oid=$( curl --silent --user "${publicKey}:${privateKey}" --digest \
  --header 'Accept: application/json' \
  --header 'Content-Type: application/json' \
  --request POST "${opsMgrUrl}/api/public/v1.0/orgs?pretty=true" \
- --data @data.json \
- -o org.json > /dev/null 2>&1
+ --data @data.json ) 
+#\ # -o ${ofile} > /dev/null 2>&1
+errorCode=$( printf "%s" "$oid" | jq .errorCode )
+rm ${ifile}
+orgId=$( eval printf $oid)
 
-if [[ -e "org.json" ]]
+if [[ "${errorCode}" == "null" ]]
 then
-    cat init.conf |sed -e '/orgId/d' > new
-    echo  orgId="$( cat org.json | jq .id )"
-    echo  orgId="$( cat org.json | jq .id )" >> new
-    mv new init.conf
+    initconf=$( sed -e '/orgId=/d' init.conf )
+    printf "%s\n" "${initconf}" > init.conf
+    printf "\n%s\n" "Successfully created Organization: $orgName"
+    echo  orgId="$( printf "%s" "$oid" | jq .id )" | tee -a init.conf
 else
     printf "%s\n" "Error did not create org"
     exit 1

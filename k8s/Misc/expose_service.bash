@@ -110,12 +110,12 @@ echo "      -" \"horizon-1\": \"${hn1}:$np1\" | tee -a new
 echo "      -" \"horizon-1\": \"${hn2}:$np2\" | tee -a new
 mv new "$fn"
 
-cat init.conf | sed -e "/${name//-/}_URI/d" > new
+initconf=$( sed -e "/${name//-/}_URI/d" init.conf )
+printf "%s\n" "${initconf}" > init.conf
 echo 
 echo "Adding the connection string variable to init.conf:"
-#echo "${name//-/}_URI=\"mongodb://${hn0}:${np0},${hn1}:${np1},${hn2}:${np2}/?replicaSet=${name} -u \$dbadmin -p \$dbpassword --authenticationDatabase admin \" " | tee -a new
-#echo "${name//-/}_URI=\"mongodb://${dbadmin}:${dbpassword}@${hn0}:${np0},${hn1}:${np1},${hn2}:${np2}/?replicaSet=${name}&authMechanism=SCRAM-SHA-256&authSource=admin\"" | tee -a new
-echo "${name//-/}_URI=\"mongodb://${dbadmin}:${dbpassword}@${hn0}:${np0},${hn1}:${np1},${hn2}:${np2}/?replicaSet=${name}&authSource=admin\"" | tee -a new
+#echo "${name//-/}_URI=\"mongodb://${hn0}:${np0},${hn1}:${np1},${hn2}:${np2}/?replicaSet=${name} -u \$dbadmin -p \$dbpassword --authenticationDatabase admin \" " | tee -a init.conf
+#echo "${name//-/}_URI=\"mongodb://${dbadmin}:${dbpassword}@${hn0}:${np0},${hn1}:${np1},${hn2}:${np2}/?replicaSet=${name}&authMechanism=SCRAM-SHA-256&authSource=admin\"" | tee -a init.conf
+echo "${name//-/}_URI=\"mongodb://${dbadmin}:${dbpassword}@${hn0}:${np0},${hn1}:${np1},${hn2}:${np2}/?replicaSet=${name}&authSource=admin\"" | tee -a init.conf
 echo
-mv new init.conf
 printf "%s %s %s" "$hn0" "$hn1" "$hn2" > dnsHorizon

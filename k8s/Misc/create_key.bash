@@ -1,18 +1,20 @@
 #!/bin/bash
 
-cat init.conf |sed -e '/publicApiKey/d' -e '/keyUser/d' > new
-keyUser="$(         kubectl get secret opsmanager-admin-key -o json | jq .data.user |         sed -e's/"//g'| base64 --decode )"
-publicApiKey="$( kubectl get secret opsmanager-admin-key -o json | jq .data.publicApiKey | sed -e's/"//g'| base64 --decode )"
-echo keyUser="\"${keyrUser}\"" 
-echo publicApiKey="\"${publicApiKey}\""
-echo keyUser="\"${keyUser}\""  >> new
-echo publicApiKey="\"${publicApiKey}\"" >> new
-mv new init.conf
+adminUser="$(     kubectl get secret admin-user-credentials -o json | jq .data.Username |         sed -e's/"//g'| base64 --decode )"
+publicApiKey="$(  kubectl get secret mongodb-opsmanager-admin-key -o json | jq .data.publicKey  | sed -e's/"//g'| base64 --decode )"
+privateApiKey="$( kubectl get secret mongodb-opsmanager-admin-key -o json | jq .data.privateKey | sed -e's/"//g'| base64 --decode )"
 
-source ./init.conf
+initconf=$( sed -e '/adminUser/d' -e '/private.*Key/d' -e '/public.*Key/d'  init.conf )
+printf "%s\n" "$initconf" > init.conf
 
-rm key.json > /dev/null 2>&1
-curl --insecure --user "${keyUser}:${publicApiKey}" --digest \
+#echo  adminUser="${adminUser}" | tee -a init.conf
+echo  publicApiKey="${publicApiKey}"   | tee -a init.conf
+echo  privateApiKey="${privateApiKey}" | tee -a init.conf
+
+source init.conf
+file=/tmp/key.json
+rm "${file}" > /dev/null 2>&1
+curl --insecure --user "${publicApiKey}:${privateApiKey}" --digest \
   --header "Accept: application/json" \
   --header "Content-Type: application/json" \
   --request POST "${opsMgrUrl}/api/public/v1.0/admin/apiKeys?pretty=true" \
@@ -20,16 +22,12 @@ curl --insecure --user "${keyUser}:${publicApiKey}" --digest \
     "desc" : "New API key for Global Testing",
     "roles" : [ "GLOBAL_OWNER" ]
   }' \
-  -o key.json > /dev/null 2>&1
+  -o "${file}" > /dev/null 2>&1
 
-if [[ -e "key.json" ]]
+if [[ -e "${file}" ]]
 then
-    cat init.conf |sed -e '/privateKey/d' -e '/publicKey/d' > new
-    echo  publicKey="$( cat key.json |jq .publicKey )"
-    echo  privateKey="$( cat key.json |jq .privateKey )"
-    echo  publicKey="$( cat key.json |jq .publicKey )" >> new
-    echo  privateKey="$( cat key.json |jq .privateKey )" >> new
-    mv new init.conf
+    echo  publicKey="$(  cat ${file} |jq .publicKey  )" | tee -a init.conf
+    echo  privateKey="$( cat ${file} |jq .privateKey )" | tee -a init.conf
 else
     printf "%s\n" "Error did not create key"
     exit 1

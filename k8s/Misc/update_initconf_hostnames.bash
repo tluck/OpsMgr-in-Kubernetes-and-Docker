@@ -45,13 +45,13 @@ else
 fi
 
 # Update init.conf with OpsMgr info
-cat init.conf | sed -e '/opsMgrUrl/d' -e '/opsMgrExt/d' -e '/queryableBackupIp/d'  > new
+initconf=$( sed -e '/opsMgrUrl/d' -e '/opsMgrExt/d' -e '/queryableBackupIp/d' init.conf )
+printf "%s\n" "$initconf" > init.conf
 echo ""
-echo  opsMgrUrl="$opsMgrUrl"                        | tee -a new
-echo  opsMgrExtUrl=\""$opsMgrExtUrl"\"              | tee -a new
-echo  opsMgrExtIp=\""$opsMgrExtIp"\"                | tee -a new
-# echo  queryableBackupIp=\""$queryableBackupIp"\"    | tee -a new
-mv new init.conf
+echo  opsMgrUrl="$opsMgrUrl"                        | tee -a init.conf
+echo  opsMgrExtUrl=\""$opsMgrExtUrl"\"              | tee -a init.conf
+echo  opsMgrExtIp=\""$opsMgrExtIp"\"                | tee -a init.conf
+# echo  queryableBackupIp=\""$queryableBackupIp"\"    | tee -a init.conf
 
 if [[ ${opsMgrExtIp} != "" ]]
 then

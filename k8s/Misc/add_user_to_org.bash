@@ -2,7 +2,7 @@
 
 source ./init.conf
 
-orgname=$1
+orgname=${1:-DemoOrg}
 
 echo '{
         "roles": [
@@ -18,5 +18,13 @@ curl --user "${publicKey}:${privateKey}" --digest \
      --request PATCH "${opsMgrUrl}/api/public/v1.0/users/${userId}" \
      --data @data.json > /dev/null 2>&1
 
-exit
+errorCode=$?
+
+if [[ "$errorCode" == "0" ]]
+then
+    printf "\n%s\n" "Successfully added userId $userId to $orgname"
+fi
+
+rm data.json
+exit $errorCode
 

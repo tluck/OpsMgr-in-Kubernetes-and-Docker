@@ -61,10 +61,11 @@ else
 fi
 
 # Monitor the progress until the OpsMgr app is ready
+printf "\n%s\n" "Monitoring the progress of resource om/${name} ..."
 sleep 10
 while true
 do
-    kubectl get om 
+    kubectl get om/${name}
     eval status=$(  kubectl get om -o json | jq .items[0].status.opsManager.phase )
     eval message=$( kubectl get om -o json | jq .items[0].status.opsManager.message )
     printf "%s\n" "status.opsManager.message: $message"
@@ -82,6 +83,7 @@ done
 # list services for OM and QB
 
 # update init.conf and put internal hostnames in /etc/hosts
+printf "\n%s\n" "Monitoring the progress of svc ${name} ..."
 while true
 do
     kubectl get svc | grep ${name} | grep pending

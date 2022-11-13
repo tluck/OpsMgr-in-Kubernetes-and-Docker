@@ -126,15 +126,15 @@ fi
 kubectl apply -f "${mdb}"
 
 # Monitor the progress
-pod=mongodb/${name}
-printf "\n%s\n" "Monitoring the progress of pod ${pod}..."
+resource=mongodb/${name}
+printf "\n%s\n" "Monitoring the progress of resource ${resource} ..."
 notapproved="Not all certificates have been approved"
 certificate="Certificate"
 while true
 do
-    kubectl get ${pod}
-    eval status=$(  kubectl get ${pod} -o json| jq '.status.phase' )
-    eval message=$( kubectl get ${pod} -o json| jq '.status.message' )
+    kubectl get ${resource}
+    eval status=$(  kubectl get ${resource} -o json| jq '.status.phase' )
+    eval message=$( kubectl get ${resource} -o json| jq '.status.message' )
     printf "%s\n" "status.message: $message"
     if [[ "${message:0:39}" == "${notapproved}" ||  "${message:0:11}" == "${certificate}" ]]
     then

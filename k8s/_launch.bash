@@ -22,6 +22,13 @@ then
     exit 1
 fi
 
+which kubectl > /dev/null
+if [[ $? != 0 ]]
+then
+    printf "%s\n" "Exiting - Missing kubectl tool - run: brew install kubernetes-cli"
+    exit 1
+fi
+
 kubectl api-resources > /dev/null 2>&1
 if [[ $? != 0 ]]
 then

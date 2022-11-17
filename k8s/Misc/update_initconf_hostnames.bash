@@ -116,7 +116,7 @@ then
 fi
 
 # add 3 nodes to the /etc/hosts
-names=( mongodb1 mongodb2 mongodb3 )
+names=( mongodb1 mongodb2 mongodb3 mongos-0 )  
 num=${#iplist[@]}
 if [[ ${num} > 0 ]]
 then
@@ -141,5 +141,21 @@ do
     printf "%s" "Adding /etc/hosts entry: "
     printf "%s\n"                                   "${iplist[$m]}${TAB}${names[$n]} ${dnslist[$m]} ${hostname[$m]}" | sudo tee -a /etc/hosts
   fi
-
 done
+n=3
+name=( $( kubectl get svc|grep svc-external ) )
+name=${name[0]%%-*}
+name1=${name}-mongos-0.mysharded-svc.mongodb.svc.cluster.local
+name2=${name}-svc.mongodb.svc.cluster.local
+  grep "^[0-9].*${names[$n]}" /etc/hosts > /dev/null 2>&1
+  if [[ $? == 0 ]]
+  then
+    # replace host entry
+    printf "%s" "Replacing /etc/hosts entry: "
+    printf "%s\n"                                   "${iplist[$m]}${TAB}${names[$n]} ${name1} ${name2}" 
+    sudo sed -E -i .bak -e "s|^[0-9].*${names[$n]}.*|${iplist[$m]}${TAB}${names[$n]} ${name1} ${name2}|" /etc/hosts
+  else
+    # add host entry
+    printf "%s" "Adding /etc/hosts entry: "
+    printf "%s\n"                                   "${iplist[$m]}${TAB}${names[$n]} ${name1} ${name2}" | sudo tee -a /etc/hosts
+  fi

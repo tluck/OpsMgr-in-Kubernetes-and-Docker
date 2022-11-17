@@ -95,14 +95,15 @@ helm install mydb enterprise-database
 #kubectl apply -f "${mdb}"
 
 # Monitor the progress
+resource=mongodb/${name}
+printf "\n%s\n" "Monitoring the progress of resource ${resource} ..."
 notapproved="Not all certificates have been approved"
 certificate="Certificate"
-pod=mongodb/${name}
 while true
 do
-    kubectl get ${pod}
-    eval status=$(  kubectl get ${pod} -o json| jq '.status.phase' )
-    eval message=$( kubectl get ${pod} -o json| jq '.status.message' )
+    kubectl get ${resource}
+    eval status=$(  kubectl get ${resource} -o json| jq '.status.phase' )
+    eval message=$( kubectl get ${resource} -o json| jq '.status.message' )
     printf "%s\n" "status.message: $message"
     if [[ "${message:0:39}" == "${notapproved}" ||  "${message:0:11}" == "${certificate}" ]]
     then
@@ -125,24 +126,18 @@ then
     eval version=$( kubectl get mdb ${name} -o jsonpath={.spec.version} )
     if [[ ${version%%.*} = 3 ]]
     then
-        ssltls_options=" --ssl --sslCAFile ca.pem --sslPEMKeyFile server.pem "
+        ssltls_options=" --ssl --sslCAFile certs/ca.pem --sslPEMKeyFile certs/${name}.pem "
         ssltls_enabled="&ssl=true"
     else
-        ssltls_options=" --tls --tlsCAFile ca.pem --tlsCertificateKeyFile server.pem "
+        ssltls_options=" --tls --tlsCAFile certs/ca.pem --tlsCertificateKeyFile certs/${name}.pem "
         ssltls_enabled="&tls=true"
     fi
 fi
 
-eval cs=\$${name//-/}_URI
-if [[ "$cs" != "" ]]
-then
-  printf "\n"
-  printf "%s\n" "Wait a minute for the reconfiguration and then connect by running: Misc/connect_external.bash ${name}"
-  fcs=\'${cs}${ssltls_enabled}\'
-  printf "\n%s\n\n" "Connect String: ${fcs} ${ssltls_options}"
-else
-  printf "\n"
-  printf "%s\n" "Wait a minute for the reconfiguration and then connect by running: Misc/kub_connect_to_pod.bash ${name}"
-fi
+sleep 10
+printf "\n"
+printf "%s\n" "Wait a minute for the reconfiguration and then connect directly by running: Misc/connect_external.bash   -n \"${name}\""
+printf "%s\n" "                                        or connect from the pod by running: Misc/kub_connect_to_pod.bash -n \"${name}\""
+Misc/get_connection_string.bash -n "${name}"
 
 exit 0

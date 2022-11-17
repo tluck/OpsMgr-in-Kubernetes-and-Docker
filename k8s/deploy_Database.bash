@@ -3,6 +3,7 @@
 d=$( dirname "$0" )
 cd "${d}"
 source init.conf
+PATH=Misc:$PATH
 
 while getopts 'n:c:m:d:v:xh' opt
 do
@@ -48,7 +49,7 @@ then
   #kubectl delete secret ${name}-cert > /dev/null 2>&1
   #kubectl delete csr $( kubectl get csr | grep "${name}" | awk '{print $1}' )
   kubectl delete mdb ${name}
-  kubectl delete pvc $( kubectl get svc | grep "${name}" | awk '{print $1}' )
+  kubectl delete pvc $( kubectl get pvc | grep "${name}" | awk '{print $1}' )
   kubectl delete svc $( kubectl get svc | grep "${name}" | awk '{print $1}' )
 fi
 
@@ -64,7 +65,7 @@ do
     # expose ports - creates loadlancer or nodeport service for each pod of member set
     # add the nodeport map for splitHorizon into the yaml file
     printf "%s\n" "Generating NodePort/Loadbalancer Service ports..."
-    Misc/expose_service.bash ${mdb} ${cleanup}
+    expose_service.bash ${mdb} ${cleanup}
     source init.conf
   # fi
   fi
@@ -165,16 +166,10 @@ then
     fi
 fi
 
-eval cs=\$${name//-/}_URI
-if [[ "$cs" != "" ]]
-then
-  printf "\n"
-  printf "%s\n" "Wait a minute for the reconfiguration and then connect by running: Misc/connect_external.bash ${name}"
-  fcs=\'${cs}${ssltls_enabled}\'
-  printf "\n%s\n\n" "Connect String: ${fcs} ${ssltls_options}"
-else
-  printf "\n"
-  printf "%s\n" "Wait a minute for the reconfiguration and then connect by running: Misc/kub_connect_to_pod.bash ${name}"
-fi
+sleep 10
+printf "\n"
+printf "%s\n" "Wait a minute for the reconfiguration and then connect directly by running: Misc/connect_external.bash   -n \"${name}\""
+printf "%s\n" "                                        or connect from the pod by running: Misc/kub_connect_to_pod.bash -n \"${name}\""
+Misc/get_connection_string.bash -n "${name}"
 
 exit 0

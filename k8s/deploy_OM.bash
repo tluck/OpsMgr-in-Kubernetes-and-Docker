@@ -3,6 +3,7 @@
 d=$( dirname "$0" )
 cd "${d}"
 source init.conf
+PATH=Misc:$PATH
 
 name=${1:-opsmanager}
 skipcerts=${2:-0}
@@ -95,6 +96,6 @@ do
     printf "%s\n" "Sleeping 15 seconds to allow IP/Hostnames to be created"
     sleep 15
 done
-Misc/update_initconf_hostnames.bash
+update_initconf_hostnames.bash
 
 exit 0

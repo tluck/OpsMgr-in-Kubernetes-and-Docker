@@ -171,16 +171,10 @@ then
     fi
 fi
 
-eval cs=\$${name//-/}_URI
-if [[ "$cs" != "" ]]
-then
-  printf "\n"
-  printf "%s\n" "Wait a minute for the reconfiguration and then connect by running: Misc/connect_external.bash ${name} -mongos"
-  fcs=\'${cs}${ssltls_enabled}\'
-  printf "\n%s\n\n" "Connect String: ${fcs} ${ssltls_options}"
-else
-  printf "\n"
-  printf "%s\n" "Wait a minute for the reconfiguration and then connect by running: Misc/kub_connect_to_pod.bash ${name} -mongos"
-fi
+sleep 10
+printf "\n"
+printf "%s\n" "Wait a minute for the reconfiguration and then connect directly by running: Misc/connect_external.bash   -s -n \"${name}\""
+printf "%s\n" "                                        or connect from the pod by running: Misc/kub_connect_to_pod.bash -s -n \"${name}\""
+Misc/get_connection_string.bash -s -n "${name}"
 
 exit 0

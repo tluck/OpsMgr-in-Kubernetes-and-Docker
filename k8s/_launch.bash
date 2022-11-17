@@ -6,7 +6,7 @@ skipcerts=${1:-0}
 d=$( dirname "$0" )
 cd "${d}"
 source init.conf
-export PATH=".:$PATH"
+export PATH=".:Misc:certs:$PATH"
 
 which jq > /dev/null
 if [[ $? != 0 ]]
@@ -101,6 +101,6 @@ fi
 
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Update init.conf with IPs and put k8s internal hostnames in /etc/hosts ..."
-Misc/update_initconf_hostnames.bash
+update_initconf_hostnames.bash
 
 date

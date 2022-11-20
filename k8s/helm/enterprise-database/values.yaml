@@ -2,7 +2,7 @@
 mongodb:
   type: ReplicaSet
   members: 3
-  version: 5.0.4
+  version: 6.0.2
 
   authentication:
     - SCRAM
@@ -21,7 +21,7 @@ mongodb:
 manager:
   # Corresponds to `spec.opsManager.configMapRef.name`
   # More info: https://docs.mongodb.com/kubernetes-operator/stable/reference/k8s-operator-specification/#spec.opsManager.configMapRef.name
-  configMapRef: mydb
+  configMapRef: areplicaset
 
   # Corresponds to `spec.credentials`
   # More info: https://docs.mongodb.com/kubernetes-operator/stable/reference/k8s-operator-specification/#spec.credentials
@@ -43,16 +43,16 @@ podSpec:
           resources:
             limits:
               cpu: "0.25"
-              memory: 512M
+              memory: 500Mi
 
   persistence:
     multiple:
       data:
-        storage: 10Gi
+        storage: 4Gi
       journal:
         storage: 1Gi
       logs:
-        storage: 500M
+        storage: 500Mi
 
 # The following attributes allow you to change the configuration of a
 # MongoDB Sharded Cluster.

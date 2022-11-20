@@ -1,13 +1,12 @@
 #!/bin/bash
 
-while getopts 'n:t:srh' opts
+while getopts 'n:t:h' opts
 do
   case "$opts" in
     n) name="$OPTARG" ;;
-    s|r) sharded="1" ;;
     t) serviceType="$OPTARG" ;;
     ?|h)
-      echo "Usage: $(basename $0) [-n clusterName] [-s] [-t NodePort|LoadBalancer ] -- Note: use -s or -r for a sharded cluster"
+      echo "Usage: $(basename $0) [-n clusterName] [-t NodePort|LoadBalancer ] "
       exit 1
       ;;
   esac
@@ -16,6 +15,13 @@ shift "$(($OPTIND -1))"
 
 name=${name:-myreplicaset}
 serviceType=${serviceType:-NodePort}
+
+type=$( kubectl get mdb/${name} -o jsonpath='{.spec.type}' 2>/dev/null )
+#if [[ "${sharded}" == "1" ]]
+if [[ "${type}" == "ShardedCluster" ]]
+then
+    sharded=1
+fi
 
 if [[ "$serviceType" == "LoadBalancer" ]]
 then

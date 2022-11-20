@@ -13,7 +13,7 @@ s=( $( grep " name" "${fn}") )
 name="${s[1]}"
 
 source init.conf
-PATH=.:Misc:$PATH
+PATH=.:bin:$PATH
 
 # remove any old services
 if [[ $clean = 1 ]]

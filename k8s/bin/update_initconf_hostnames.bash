@@ -12,12 +12,12 @@ name="${1:-opsmanager}"
 #fi
 
 # get the OpsMgr URL and internal IP
-opsMgrUrl=$(        kubectl get om                  -o json | jq .items[0].status.opsManager.url )
-eval hostname=$(    kubectl get svc/${name}-svc-ext -o json | jq .status.loadBalancer.ingress[0].hostname ) 
-eval opsMgrExtIp=$( kubectl get svc/${name}-svc-ext -o json | jq .status.loadBalancer.ingress[0].ip ) 
-eval port=$(        kubectl get svc/${name}-svc-ext -o json | jq .spec.ports[0].port )
-eval nodePort=$(    kubectl get svc/${name}-svc-ext -o json | jq .spec.ports[0].nodePort )
-eval portType=$(    kubectl get svc/${name}-svc-ext -o json | jq .spec.type )
+opsMgrUrl=$(        kubectl get om/${name}          -o jsonpath={.status.opsManager.url} )
+eval hostname=$(    kubectl get svc/${name}-svc-ext -o jsonpath={.status.loadBalancer.ingress[0].hostname} ) 
+eval opsMgrExtIp=$( kubectl get svc/${name}-svc-ext -o jsonpath={.status.loadBalancer.ingress[0].ip} ) 
+eval port=$(        kubectl get svc/${name}-svc-ext -o jsonpath={.spec.ports[0].port} )
+eval nodePort=$(    kubectl get svc/${name}-svc-ext -o jsonpath={.spec.ports[0].nodePort} )
+eval portType=$(    kubectl get svc/${name}-svc-ext -o jsonpath={.spec.type} )
 
 
 http="http"
@@ -115,8 +115,18 @@ then
     iplist=(127.0.0.1)
 fi
 
-# add 3 nodes to the /etc/hosts
-names=( mongodb1 mongodb2 mongodb3 mongos-0 )  
+# add 3 nodes to the /etc/hosts file
+names=( mongodb1 mongodb2 mongodb3 )  
+
+name=( $( kubectl get svc|grep svc-external ) )
+if [[ $? == 0 ]]
+then
+    name=${name[0]%%-svc*}
+    snames[0]="${name}-mongos-0.${name}-svc.mongodb.svc.cluster.local"
+    snames[1]="${name}-mongos-1.${name}-svc.mongodb.svc.cluster.local"
+    snames[2]="${name}-mongos-2.${name}-svc.mongodb.svc.cluster.local"
+fi
+
 num=${#iplist[@]}
 if [[ ${num} > 0 ]]
 then
@@ -141,21 +151,20 @@ do
     printf "%s" "Adding /etc/hosts entry: "
     printf "%s\n"                                   "${iplist[$m]}${TAB}${names[$n]} ${dnslist[$m]} ${hostname[$m]}" | sudo tee -a /etc/hosts
   fi
-done
-n=3
-name=( $( kubectl get svc|grep svc-external ) )
-name=${name[0]%%-*}
-name1=${name}-mongos-0.mysharded-svc.mongodb.svc.cluster.local
-name2=${name}-svc.mongodb.svc.cluster.local
-  grep "^[0-9].*${names[$n]}" /etc/hosts > /dev/null 2>&1
+
+  if [[ "${snames[$n]}" != "" ]] 
+    then
+  grep "^[0-9].*${snames[$n]%%.*}" /etc/hosts > /dev/null 2>&1
   if [[ $? == 0 ]]
   then
-    # replace host entry
     printf "%s" "Replacing /etc/hosts entry: "
-    printf "%s\n"                                   "${iplist[$m]}${TAB}${names[$n]} ${name1} ${name2}" 
-    sudo sed -E -i .bak -e "s|^[0-9].*${names[$n]}.*|${iplist[$m]}${TAB}${names[$n]} ${name1} ${name2}|" /etc/hosts
+    printf "%s\n"                                        "${iplist[$m]}${TAB}${snames[$n]%%.*} ${snames[$n]}"
+    sudo sed -E -i .bak -e "s|^[0-9].*${snames[$n]%%.*}.*|${iplist[$m]}${TAB}${snames[$n]%%.*} ${snames[$n]}|" /etc/hosts
   else
     # add host entry
     printf "%s" "Adding /etc/hosts entry: "
-    printf "%s\n"                                   "${iplist[$m]}${TAB}${names[$n]} ${name1} ${name2}" | sudo tee -a /etc/hosts
+    printf "%s\n"                                      "${iplist[$m]}${TAB}${snames[$n]%%.*} ${snames[$n]}" | sudo tee -a /etc/hosts
   fi
+    fi
+done
+printf "\n" 

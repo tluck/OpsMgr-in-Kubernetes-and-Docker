@@ -6,7 +6,6 @@ skipcerts=${1:-0}
 d=$( dirname "$0" )
 cd "${d}"
 source init.conf
-export PATH=".:Misc:certs:$PATH"
 
 which jq > /dev/null
 if [[ $? != 0 ]]
@@ -96,7 +95,7 @@ then
     printf "\n%s\n" " **** skipping sharded deployment - not enough resources ***"
     # deploy_DatabaseSharded.bash -n "mysharded"    -c "0.33" -m "400Mi"        -s "1"        -v "6.0.2-ent"
 else
-    deploy_DatabaseSharded.bash -n "mysharded"      -c "1.00" -m "2Gi" -d "4Gi" -s "2" -r "2" -v "6.0.2-ent"
+    deploy_DatabaseSharded.bash -n "mysharded"      -c "1.00" -m "2Gi" -d "4Gi" -s "3" -r "2" -v "6.0.2-ent"
 fi
 
 printf "\n%s\n" "__________________________________________________________________________________________"

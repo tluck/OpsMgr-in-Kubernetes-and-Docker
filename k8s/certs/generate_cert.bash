@@ -14,7 +14,7 @@ cname="$1"
 shift
 dnsHorizon=("$@")
 
-if [[ ! -e ${name}.pem ]]
+if [[ ! -e "${name}.pem" ]]
 then
 printf "%s\n" "Making ${name}.pem for ${cname} and ${dnsHorizon[@]} ..."
 
@@ -61,10 +61,10 @@ EOF
 
 fi
 
-mv node-key.pem ${name}.key
-mv node.pem ${name}.crt
-mv node.csr ${name}.csr
-cat ${name}.key ${name}.crt > ${name}.pem
+mv node-key.pem "${name}.key"
+mv node.pem "${name}.crt"
+mv node.csr "${name}.csr"
+cat "${name}.key" "${name}.crt" > "${name}.pem"
 
 # clean up
 #rm ${name}.key

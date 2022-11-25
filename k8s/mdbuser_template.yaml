@@ -2,15 +2,15 @@
 apiVersion: mongodb.com/v1
 kind: MongoDBUser
 metadata:
-  name: dbadmin-NAME
+  name: NAME-USER
 spec:
   passwordSecretKeyRef:
-    name: dbadmin-NAME # Match to metadata.name of the User Secret
+    name: NAME-USER # Match to metadata.name of the User Secret
     key: password
-  username: "dbAdmin"
+  username: "USER"
   db: "admin" #
   mongodbResourceRef:
-    name: "NAME" # Match to MongoDB resource using authenticaiton
+    name: "NAME" # Match to MongoDB resource using authentication
   roles:
     - db: "admin"
       name: "clusterAdmin"

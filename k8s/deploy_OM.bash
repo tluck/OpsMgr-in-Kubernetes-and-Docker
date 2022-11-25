@@ -4,20 +4,32 @@ d=$( dirname "$0" )
 cd "${d}"
 source init.conf
 
-name=${1:-opsmanager}
-skipcerts=${2:-0}
-mdbom="mdbom_${name}.yaml"
-mdbom_tls="mdbom_${name}_tls.yaml"
+while getopts 'n:v:a:c:m:d:psh' opt
+do
+  case "$opt" in
+    n) name="$OPTARG" ;;
+    v) omVer="$OPTARG" ;;
+    a) appdbVer="$OPTARG" ;;
+    c) cpu="$OPTARG" ;;
+    m) mem="$OPTARG" ;;
+    d) dsk="$OPTARG" ;;
+    p) prod="#DEMO " ;;
+    s) skipMakeCerts=1 ;; 
+    ?|h)
+      echo "Usage: $(basename $0) [-n name] [-v omVersion][-a appdbVersion] [-c cpu] [-m memory] [-d disk] [-p] [-s]"
+      exit 1
+      ;;
+  esac
+done
+shift "$(($OPTIND -1))"
 
-if [[ ${tls} == 1 && ${skipcerts} == 0 ]]
-then
-    printf "\n%s\n" "__________________________________________________________________________________________"
-    printf "%s\n" "Getting Certs status..."
-    # Generate CA and create certs for OM and App-db
-    rm "${PWD}/certs/${name}*.pem" "${PWD}/certs/queryable-backup.pem" > /dev/null 2>&1
-    "${PWD}/certs/make_OM_certs.bash" ${name}
-    ls -1 "${PWD}/certs/"*pem "${PWD}/certs/"*crt 
-fi
+name=${name:-opsmanager}
+cpu="${cpu:-0.25}"
+mem="${mem:-400Mi}"
+dsk="${dsk:-2Gi}"
+omVer="${omVer:-$omVersion}"
+appdbVer="${appdbVer:-$appdbVersion}"
+skipMakeCerts=${skipMakeCerts:-0}
 
 # Create the credentials for main admin user
 kubectl delete secret         admin-user-credentials > /dev/null 2>&1
@@ -27,13 +39,24 @@ kubectl create secret generic admin-user-credentials \
     --from-literal=FirstName="${firstName}" \
     --from-literal=LastName="${lastName}"
   
+if [[ ${tls} == 1 && ${skipMakeCerts} == 0 ]]
+then
+    printf "\n%s\n" "__________________________________________________________________________________________"
+    printf "%s\n" "Getting Certs status..."
+    # Generate CA and create certs for OM and App-db
+    rm "${PWD}/certs/${name}*.pem" "${PWD}/certs/queryable-backup.pem" > /dev/null 2>&1
+    "${PWD}/certs/make_OM_certs.bash" ${name}
+    ls -1 "${PWD}/certs/"*pem "${PWD}/certs/"*crt 
+fi
+
+tlsc="#TLS "
 if [[ ${tls} == 1 ]]
 then
 # For enablement of TLS (https) - provide certs and certificate authority
     kubectl delete secret         ${name}-cert > /dev/null 2>&1
     kubectl create secret generic ${name}-cert \
         --from-file="server.pem=${PWD}/certs/${name}-svc.pem" \
-        --from-file="certs/queryable-backup.pem" # need specific keyname server.pem
+        --from-file="${PWD}/certs/queryable-backup.pem" # need specific keyname server.pem
     # CA used to define the projects configmap and agent ca for OM dbs
     kubectl delete configmap ${name}-ca > /dev/null 2>&1
     kubectl create configmap ${name}-ca \
@@ -51,14 +74,30 @@ kubectl create secret tls ${appdb}-cert \
     --cert="${PWD}/certs/${appdb}.crt" \
     --key="${PWD}/certs/${appdb}.key"
 
-#  Deploy OpsManager resources
-    kubectl apply -f ${mdbom_tls}
+tlsr=""
 else
+tlsr="$tlsc"
     kubectl delete secret         ${name}-cert > /dev/null 2>&1
-    kubectl create secret generic ${name}-cert --from-file="${PWD}/certs/queryable-backup.pem"
-
-    kubectl apply -f ${mdbom}
+    kubectl create secret generic ${name}-cert \
+        --from-file="${PWD}/certs/queryable-backup.pem"
 fi
+
+mdbom="mdbom_${name}.yaml"
+dbuserlc=$( printf "$dbuser" | tr '[:upper:]' '[:lower:]' )
+# make manifest from template
+cat mdbom_template.yaml | sed \
+    -e "s/#DEMO /$prod/" \
+    -e "s/$tlsc/$tlsr/" \
+    -e "s/VERSION/$omVer/" \
+    -e "s/APPDBVER/$appdbVer/" \
+    -e "s/MEM/$mem/" \
+    -e "s/CPU/$cpu/" \
+    -e "s/DISK/$dsk/" \
+    -e "s/USER/$dbuserlc/" \
+    -e "s/NAME/$name/" > "${mdbom}"
+
+#  Deploy OpsManager resources
+kubectl apply -f "${mdbom}"
 
 # Monitor the progress until the OpsMgr app is ready
 printf "\n%s\n" "Monitoring the progress of resource om/${name} ..."

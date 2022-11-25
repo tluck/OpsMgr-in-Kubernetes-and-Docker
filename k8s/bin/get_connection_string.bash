@@ -16,6 +16,7 @@ done
 shift "$(($OPTIND -1))"
 
 name=${name:-myreplicaset}
+dbuserlc=$( printf "$dbuser" | tr '[:upper:]' '[:lower:]' )
 type=$( kubectl get mdb/${name} -o jsonpath='{.spec.type}' )
 #if [[ "${sharded}" == "1" ]]
 if [[ "${type}" == "ShardedCluster" ]]
@@ -27,8 +28,8 @@ else
     serviceType=$( kubectl get svc/${name}-0 -o jsonpath='{.spec.type}' 2>/dev/null )
 fi
 
-#cs="mongodb://${dbadmin}:${dbpassword}@${hn0}:${np0},${hn1}:${np1},${hn2}:${np2}/?replicaSet=${name}&authSource=admin"
-ics=$( kubectl get secret ${name}-dbadmin-${name}-admin -o jsonpath="{.data['connectionString\.standard']}" | base64 --decode ) 
+#cs="mongodb://${dbuser}:${dbpassword}@${hn0}:${np0},${hn1}:${np1},${hn2}:${np2}/?replicaSet=${name}&authSource=admin"
+ics=$( kubectl get secret ${name}-${name}-${dbuserlc}-admin -o jsonpath="{.data['connectionString\.standard']}" | base64 --decode ) 
 ecs="${ics}"
 if [[ ${serviceType} != "" ]]
 then
@@ -42,10 +43,10 @@ else
 fi
 fi
 
-tls=$( kubectl get mdb/${name} -o jsonpath='{.spec.security.authentication}' )
+tls=$( kubectl get mdb/${name} -o jsonpath='{.spec.security.tls}' )
 if [[ ${serviceType} != "" ]]
 then
-if [[ "${tls}" == "map[enabled:true]" || "${tls}" == *"\"enabled\":true"* || "${tls}" == *"prefix"* ]]
+if [[ "${tls}" == "map[enabled:true]" || "${tls}" == *"refix"* || "${tls}" == *"ecret"* ]]
 then
     test -e "${PWD}/certs/ca.pem"               || kubectl get configmap ca-pem -o jsonpath="{.data['ca-pem']}" > "${PWD}/certs/ca.pem"
     test -e "${PWD}/certs/${name}${mongos}.pem" || kubectl get secret mdb-${name}${mongos}-cert-pem -o jsonpath="{.data.*}" | base64 --decode > "${PWD}/certs/${name}${mongos}.pem"
@@ -63,7 +64,7 @@ fi
     printf "%s\n" "The connection string (external): ${fcs} ${ssltls_options}"
 
 else # internal
-if [[ "${tls}" == "map[enabled:true]" || "${tls}" == *"\"enabled\":true"* || "${tls}" == *"prefix"* ]]
+if [[ "${tls}" == "map[enabled:true]" || "${tls}" == *"refix"* || "${tls}" == *"ecret"* ]]
 then
     eval serverpem=$( kubectl get secret mdb-${name}${mongos}-cert-pem -o json |jq ".data"| jq "keys[]" )
     if [[ ${version%%.*} = 3 ]]

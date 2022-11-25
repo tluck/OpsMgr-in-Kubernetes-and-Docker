@@ -2,12 +2,12 @@
 apiVersion: mongodb.com/v1
 kind: MongoDBOpsManager
 metadata:
-  name: opsmanager
+  name: NAME
 
 spec:
   replicas: 1
-  version: 6.0.6 # 5.0.14 # 4.4.15
-  jvmParameters: ["-Xms2560m", "-Xmx2560m"] # 2.5M is a good size for docker-desktop -- comment out for larger clusters in production
+  version: VERSION # 6.0.6 # 5.0.14 # 4.4.15
+  #DEMO jvmParameters: ["-Xms2560m", "-Xmx2560m"] # 2.5M is a good size for docker-desktop -- comment out for larger clusters in production
   adminCredentials: admin-user-credentials # Should match metadata.name in the Kubernetes secret for the admin user
   statefulSet:
     spec:
@@ -22,13 +22,16 @@ spec:
                 limits:
                   cpu: "0.75"  # "2.0"
                   memory: 3Gi  # 3Gi a good size for docker-desktop - use 5Gi or more for larger clusters in production
+                requests:
+                  cpu: "0.75"  # "2.0"
+                  memory: 3Gi  # 3Gi a good size for docker-desktop - use 5Gi or more for larger clusters in production
 
-  security: # enables TLS for Ops Manager allowing it to serve traffic over HTTPS
-    tls:
-      # enabled: true (on by default here)
-      ca: "opsmanager-ca" 
-      secretRef: # secret containing the TLS certificate signed by known or custom CA. The secret must have a key "server.pem"
-        name: "opsmanager-cert"
+  #TLS security: # enables TLS for Ops Manager allowing it to serve traffic over HTTPS
+  #TLS   tls:
+  #TLS     # enabled: true (on by default here)
+  #TLS     ca: "NAME-ca" 
+  #TLS     secretRef: # secret containing the TLS certificate signed by known or custom CA. The secret must have a key "server.pem"
+  #TLS       name: "NAME-cert"
 
   externalConnectivity:
     type: LoadBalancer
@@ -37,32 +40,32 @@ spec:
 
   applicationDatabase:
     members: 3
-    version: 5.0.9-ent # 4.4.4-ent
+    version: APPDBVER # 5.0.9-ent # 4.4.4-ent
     # persistent: true
-    security:
-      # certsSecretPrefix: <prefix>
-      tls:
-        enabled: true
-        ca: "opsmanager-ca" # needs to be mms-ca.crt
-        # secretRef:
-        #  name: "opsmanager-appdb-cert"
+    #TLS security:
+    #TLS # certsSecretPrefix: <prefix>
+    #TLS   tls:
+    #TLS     enabled: true
+    #TLS     ca: "NAME-ca" # needs to be mms-ca.crt
+    #TLS     # secretRef:
+    #TLS     # name: "NAME-appdb-certs"
     podSpec:
       # cpu: "0.25"
       # memory: 500Mi # 4Gi
       persistence:
         single:
-          storage: 2Gi # 5Gi
+          storage: DISK # 5Gi
       podTemplate:
         spec:
           containers:
             - name: mongod
               resources:
                 limits:
-                  cpu: "0.25"
-                  memory: 400Mi
+                  cpu: "CPU"
+                  memory: MEM
                 requests:
-                  cpu: "0.25"
-                  memory: 400Mi
+                  cpu: "CPU"
+                  memory: MEM
             - name: mongodb-agent
               resources:
                 limits:
@@ -95,7 +98,7 @@ spec:
     mongodb.release.autoDownload: "false" # stop downloads of binaries (unless you need to demo recovery)
     mongodb.release.autoDownload.enterprise: "true"
     mongodb.release.modulePreference: enterpriseRequired
-    brs.queryable.pem: /opt/mongodb/mms/secrets/queryable-backup.pem # stored in a secret
+    #TLS brs.queryable.pem: /opt/mongodb/mms/secrets/queryable-backup.pem # stored in a secret
     brs.queryable.expiration: "3600000"
 
   backup:
@@ -103,21 +106,19 @@ spec:
     headDB:
       storage: "4Gi" # optional. Default storage is 30G
     members: 1 # Configures the number of backup daemons to create (default 1)
-    jvmParameters: ["-Xms1024m", "-Xmx1536m"] # 1M is a good size for docker-desktop -- comment out for larger clusters in production
-    # queryableBackupSecretRef:
-    #   name: "opsmanager-cert"
+    #DEMO jvmParameters: ["-Xms1024m", "-Xmx1536m"] # 1M is a good size for docker-desktop -- comment out for larger clusters in production
     opLogStores:
       - name: oplog
         mongodbResourceRef:
-          name: opsmanager-oplog
+          name: NAME-oplog
         mongodbUserRef:
-          name: dbadmin-opsmanager-oplog
+          name: NAME-oplog-USER
     blockStores:
       - name: blockstore
         mongodbResourceRef:
-          name: opsmanager-blockstore
+          name: NAME-blockstore
         mongodbUserRef:
-          name: dbadmin-opsmanager-blockstore
+          name: NAME-blockstore-USER
     statefulSet:
       spec:
         template:
@@ -125,9 +126,9 @@ spec:
             containers:
               - name: mongodb-backup-daemon
                 resources:
-                  requests:
-                    cpu: "0.5"
-                    memory: 1.5Gi # 2Gi is good size for docker-desktop -- use 5Gi for larger clusters in production
                   limits:
                     cpu: "1.0"
+                    memory: 1.5Gi # 2Gi is good size for docker-desktop -- use 5Gi for larger clusters in production
+                  requests:
+                    cpu: "0.5"
                     memory: 1.5Gi # 2Gi is good size for docker-desktop -- use 5Gi for larger clusters in production

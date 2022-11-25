@@ -29,18 +29,27 @@ ver="${ver:-$mdbVersion}"
 cleanup=${x:-0}
 
 # make manifest from template
-mdb="mdb_${name}.yaml"
 mdbuser="mdbuser_${name}.yaml"
-
+mdb="mdb_${name}.yaml"
+tlsc="#TLS "
+tlsr=$tlsc
+if [[ ${tls} == 1 ]]
+then
+tlsr=""
+fi
 cat mdb_replicaset.yaml | sed \
+    -e "s/$tlsc/$tlsr/" \
     -e "s/MEM/$mem/" \
     -e "s/CPU/$cpu/" \
     -e "s/DISK/$dsk/" \
     -e "s/VERSION/$ver/" \
     -e "s/NAME/$name/" > "$mdb"
 
+#dbuserlc=${dbuser,,}
+dbuserlc=$( printf "$dbuser" | tr '[:upper:]' '[:lower:]' )
 cat mdbuser_template.yaml | sed \
-    -e "s/NAME/$name/" > "$mdbuser"
+    -e "s/NAME/${name}/" \
+    -e "s/USER/${dbuserlc}/" > "$mdbuser"
 
 # clean up any previous certs and services
 if [[ ${cleanup} = 1 ]]
@@ -80,7 +89,7 @@ kubectl create configmap "${name}" \
     --from-literal="sslMMSCAConfigMap=opsmanager-ca" \
     --from-literal="sslRequireValidMMSServerCertificates='true'"
 
-rm "${PWD}/certs/${name}"*
+rm "${PWD}/certs/${name}"* > /dev/null 2>&1
 if [[ -e dnsHorizon ]] 
 then
   dnsHorizon=( $(cat dnsHorizon) )
@@ -109,9 +118,9 @@ kubectl create configmap "${name}" \
 fi # tls
 
 # Create a a secret for db user credentials
-kubectl delete secret         dbadmin-${name} > /dev/null 2>&1
-kubectl create secret generic dbadmin-${name} \
-    --from-literal=name="${dbadmin}" \
+kubectl delete secret         ${name}-${dbuserlc} > /dev/null 2>&1
+kubectl create secret generic ${name}-${dbuserlc} \
+    --from-literal=name="${dbuser}" \
     --from-literal=password="${dbpassword}"
 
 # Create the User Resource

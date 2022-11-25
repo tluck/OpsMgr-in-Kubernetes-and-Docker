@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # argument if set to 1 will skip creating new certs for OM and the App DB
-skipcerts=${1:-0} 
+skipMakeCerts=${1:-0} 
 
 d=$( dirname "$0" )
 cd "${d}"
@@ -54,7 +54,17 @@ fi
 
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Deploy OM and wait until Running status..."
-deploy_OM.bash opsmanager ${skipcerts}
+if [[ $skipMakeCerts == 1 ]]
+then
+    skip="-s"
+fi
+if [[ "${context}" == "docker-desktop" ]]
+then
+docker pull "quay.io/mongodb/mongodb-enterprise-ops-manager:$omVersion" # issue with docker not (re)pulling the image
+deploy_OM.bash -n opsmanager $skip  # [-n name] [-c cpu] [-m memory] [-d disk] [-v version] [-p] [-s]
+else
+deploy_OM.bash -n opsmanager $skip -p -n opsmanager -c 0.5 -m 1Gi -d 4Gi -v "$omVersion"
+fi
 
 #printf "\n%s\n" "__________________________________________________________________________________________"
 #printf "%s\n" "Create the first Org in OM ..."
@@ -64,18 +74,18 @@ printf "\n%s\n" "_______________________________________________________________
 printf "%s\n" "Create the Backup Oplog1 DB for OM ..."
 if [[ "${context}" == "docker-desktop" ]]
 then
-    deploy_Database.bash -n "opsmanager-oplog"      -c "0.33" -m "300Mi"        -v "5.0.9-ent" 
+    deploy_Database.bash -n "opsmanager-oplog"      -c "0.33" -m "300Mi"        -v "$appdbVersion"
 else
-    deploy_Database.bash -n "opsmanager-oplog"      -c "0.50" -m "2Gi"          -v "5.0.9-ent"
+    deploy_Database.bash -n "opsmanager-oplog"      -c "0.50" -m "2Gi"          -v "$appdbVersion"
 fi
 
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Create the Backup BlockStore1 DB for OM ..."
 if [[ "${context}" == "docker-desktop" ]]
 then
-    deploy_Database.bash -n "opsmanager-blockstore" -c "0.33" -m "300Mi"        -v "5.0.9-ent"
+    deploy_Database.bash -n "opsmanager-blockstore" -c "0.33" -m "300Mi"        -v "$appdbVersion"
 else
-    deploy_Database.bash -n "opsmanager-blockstore" -c "0.50" -m "2Gi"          -v "5.0.9-ent"
+    deploy_Database.bash -n "opsmanager-blockstore" -c "0.50" -m "2Gi"          -v "$appdbVersion"
 fi
 
 
@@ -93,9 +103,9 @@ printf "%s\n" "Generate configuration for External access to a Sharded Productio
 if [[ "${context}" == "docker-desktop" ]]
 then
     printf "\n%s\n" " **** skipping sharded deployment - not enough resources ***"
-    # deploy_DatabaseSharded.bash -n "mysharded"    -c "0.33" -m "400Mi"        -s "1"        -v "6.0.2-ent"
+    # deploy_DatabaseSharded.bash -n "mysharded"    -c "0.33" -m "400Mi"        -s "1"        -v "$mdbVersion"
 else
-    deploy_DatabaseSharded.bash -n "mysharded"      -c "1.00" -m "2Gi" -d "4Gi" -s "3" -r "2" -v "6.0.2-ent"
+    deploy_DatabaseSharded.bash -n "mysharded"      -c "1.00" -m "2Gi" -d "4Gi" -s "3" -r "2" -v "$mdbVersion"
 fi
 
 printf "\n%s\n" "__________________________________________________________________________________________"

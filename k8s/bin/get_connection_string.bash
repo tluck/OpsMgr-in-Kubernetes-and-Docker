@@ -3,10 +3,11 @@
 source init.conf
 PATH=.:bin:$PATH
 
-while getopts 'n:h' opt
+while getopts 'n:ih' opt
 do
   case "$opt" in
     n) name="$OPTARG" ;;
+    i) internal=1     ;;
     ?|h)
       echo "Usage: $(basename $0) [-n clusterName] "
       exit 1
@@ -16,6 +17,8 @@ done
 shift "$(($OPTIND -1))"
 
 name=${name:-myreplicaset}
+internal=${internal-0}
+
 dbuserlc=$( printf "$dbuser" | tr '[:upper:]' '[:lower:]' )
 type=$( kubectl get mdb/${name} -o jsonpath='{.spec.type}' )
 #if [[ "${sharded}" == "1" ]]
@@ -44,7 +47,7 @@ fi
 fi
 
 tls=$( kubectl get mdb/${name} -o jsonpath='{.spec.security.tls}' )
-if [[ ${serviceType} != "" ]]
+if [[ ${serviceType} != "" && ${internal} = 0 ]]
 then
 if [[ "${tls}" == "map[enabled:true]" || "${tls}" == *"refix"* || "${tls}" == *"ecret"* ]]
 then
@@ -66,7 +69,9 @@ fi
 else # internal
 if [[ "${tls}" == "map[enabled:true]" || "${tls}" == *"refix"* || "${tls}" == *"ecret"* ]]
 then
-    eval serverpem=$( kubectl get secret mdb-${name}${mongos}-cert-pem -o json |jq ".data"| jq "keys[]" )
+    #eval serverpem=$( kubectl get secret mdb-${name}${mongos}-cert-pem -o json |jq ".data"| jq "keys[]" )
+    kv=$( kubectl get secret mdb-${name}${mongos}-cert-pem -o jsonpath="{.data}" | grep -o '".*":*' )
+    serverpem=$( eval printf ${kv%:*} )
     if [[ ${version%%.*} = 3 ]]
     then
         ssltls_options=" --ssl --sslCAFile /mongodb-automation/tls/ca/ca-pem --sslPEMKeyFile /mongodb-automation/tls/${serverpem}"

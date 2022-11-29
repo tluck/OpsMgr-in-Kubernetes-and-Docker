@@ -7,12 +7,12 @@ d=$( dirname "$0" )
 cd "${d}"
 source init.conf
 
-which jq > /dev/null
-if [[ $? != 0 ]]
-then
-    printf "%s\n" "Exiting - Missing jq tool - run: brew install jq"
-    exit 1
-fi
+#which jq > /dev/null
+#if [[ $? != 0 ]]
+#then
+#    printf "%s\n" "Exiting - Missing jq tool - run: brew install jq"
+#    exit 1
+#fi
 
 which cfssl > /dev/null
 if [[ $? != 0 ]]
@@ -35,9 +35,10 @@ then
     exit 1
 fi
 
-context=$( kubectl config current-context )
-
 date
+printf "\n%s\n" "__________________________________________________________________________________________"
+context=$( kubectl config current-context )
+printf "\n%s\n" "Using context: ${context}"
 
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Deploy the Operator ..."
@@ -54,7 +55,7 @@ fi
 
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Deploy OM and wait until Running status..."
-if [[ $skipMakeCerts == 1 ]]
+if [[ ${skipMakeCerts} = 1 || ${skipMakeCerts} == "-s" ]]
 then
     skip="-s"
 fi

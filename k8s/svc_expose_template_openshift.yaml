@@ -1,0 +1,42 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: NAME-0
+spec:
+  ports:
+  - name: mongodb
+    port: 443
+    protocol: TCP
+    targetPort: 27017
+  selector:
+    statefulset.kubernetes.io/pod-name: NAME-0
+  #type: PORTTYPE
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: NAME-1
+spec:
+  ports:
+  - name: mongodb
+    port: 443
+    protocol: TCP
+    targetPort: 27017
+  selector:
+    statefulset.kubernetes.io/pod-name: NAME-1
+  #type: PORTTYPE
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: NAME-2
+spec:
+  ports:
+  - name: mongodb
+    port: 443
+    protocol: TCP
+    targetPort: 27017
+  selector:
+    statefulset.kubernetes.io/pod-name: NAME-2
+  #type: PORTTYPE

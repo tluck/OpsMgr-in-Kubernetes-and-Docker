@@ -22,13 +22,21 @@ then
     kubectl delete svc ${name}-0 ${name}-1 ${name}-2 > /dev/null 2>&1
 fi
 #create nodeport service
-if [[ "${serviceType}" == "LoadBalancer" ]]
+if [[ "${clusterType}" == "kubernetes" ]]
 then
-    cat svc_expose_template.yaml| sed -e "s/NAME/$name/" -e "s/PORTTYPE/LoadBalancer/g" > svc_lb_${name}.yaml
+    expose="svc_expose_template.yaml"
+    if [[ "${serviceType}" == "LoadBalancer" ]]
+    then
+    cat ${expose} | sed -e "s/NAME/$name/" -e "s/PORTTYPE/LoadBalancer/g" > svc_lb_${name}.yaml
     kubectl apply -f svc_lb_${name}.yaml
-else
-    cat svc_expose_template.yaml| sed -e "s/NAME/$name/" -e "s/PORTTYPE/NodePort/g" > svc_np_${name}.yaml
+    else
+    cat ${expose} | sed -e "s/NAME/$name/" -e "s/PORTTYPE/NodePort/g" > svc_np_${name}.yaml
     kubectl apply -f svc_np_${name}.yaml
+    fi
+else
+    expose="svc_expose_template_openshift.yaml"
+    cat ${expose} | sed -e "s/NAME/$name/"  > svc_cip_${name}.yaml
+    kubectl apply -f svc_cip_${name}.yaml
 fi
 
 while true

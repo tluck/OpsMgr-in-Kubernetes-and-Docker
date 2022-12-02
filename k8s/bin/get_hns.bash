@@ -23,7 +23,13 @@ then
     sharded=1
 fi
 
-if [[ "$serviceType" == "LoadBalancer" ]]
+if [[ "${sharded}" == 1 ]]
+then
+    serviceType=$( kubectl get svc/${name}-svc-external -o jsonpath='{.spec.type}' )
+else
+    serviceType=$( kubectl get svc/${name}-0 -o jsonpath='{.spec.type}' )
+fi
+if [[ "$serviceType" != "NodePort" ]]
 then
     np0=$( kubectl get svc/${name}-0 -o jsonpath='{.spec.ports[0].port}' )
     np1=$( kubectl get svc/${name}-1 -o jsonpath='{.spec.ports[0].port}' )
@@ -46,6 +52,7 @@ else
     np2=$( kubectl get svc/${name}-2 -o jsonpath='{.spec.ports[0].nodePort}' )
     fi # not sharded
 
+fi
 # get IP/DNS names
     hostname=( $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="Hostname")].address}') )
     if [[ ${hostname[0]} == "docker-desktop" ]]
@@ -64,7 +71,6 @@ else
         fi
     fi
 
-fi
 
 num=${#slist[@]}
 

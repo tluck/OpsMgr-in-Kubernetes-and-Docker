@@ -17,14 +17,14 @@ source init.conf
 which cfssl > /dev/null
 if [[ $? != 0 ]]
 then
-    printf "%s\n" "Exiting - Missing cfssl tool - run: brew install cfssl"
+    printf "%s\n" "Exiting - Missing cloudformation certificiate tools - install cfssl and cfssljson"
     exit 1
 fi
 
 which kubectl > /dev/null
 if [[ $? != 0 ]]
 then
-    printf "%s\n" "Exiting - Missing kubectl tool - run: brew install kubernetes-cli"
+    printf "%s\n" "Exiting - Missing kubectl tool - (brew) install kubernetes-cli"
     exit 1
 fi
 

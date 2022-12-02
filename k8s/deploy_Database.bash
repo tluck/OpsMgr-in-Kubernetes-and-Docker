@@ -106,6 +106,22 @@ kubectl create secret tls "mdb-${name}-cert" \
     --cert="${PWD}/certs/${name}.crt" \
     --key="${PWD}/certs/${name}.key"
 
+for ctype in agent clusterfile
+do   
+    "${PWD}/certs/make_sharded_certs.bash" "${name}" ${ctype}
+    # Create a secret for the member certs for TLS
+    cert=""
+    if [[ "${ctype}" == "agent" ]]
+    then
+    cert="-certs"
+    fi
+    kubectl delete secret "mdb-${name}-${ctype}${cert}" > /dev/null 2>&1
+    kubectl create secret tls "mdb-${name}-${ctype}${cert}" \
+        --cert="${PWD}/certs/${name}-${ctype}.crt" \
+        --key="${PWD}/certs/${name}-${ctype}.key"
+done
+
+
 # Create a map for the cert
 kubectl delete configmap ca-pem > /dev/null 2>&1
 kubectl create configmap ca-pem \

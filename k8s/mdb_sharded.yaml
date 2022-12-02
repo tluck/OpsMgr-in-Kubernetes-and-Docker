@@ -111,4 +111,7 @@ spec:
         # Where x is all numbers between 0 and the number of shards (excluded)
     authentication:
       enabled : true # false
-      modes: ["SCRAM"]
+      modes: ["SCRAM","X509"]
+      #internalCluster: "X509"
+      agents: 
+        mode: "SCRAM"

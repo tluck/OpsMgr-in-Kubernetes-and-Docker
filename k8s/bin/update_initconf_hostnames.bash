@@ -63,7 +63,7 @@ then
     # replace host entry
     printf "%s" "Replacing /etc/hosts entry: "
     printf "%s\n" "${opsMgrExtIp}${TAB}${name}-svc.mongodb.svc.cluster.local ${name}-svc" 
-    sudo sed -E -i .bak -e "s|^[0-9].*(${name}-svc.mongodb.svc.cluster.local.*)|${opsMgrExtIp}${TAB}\1|" /etc/hosts
+    sudo sed -E -e "s|^[0-9].*(${name}-svc.mongodb.svc.cluster.local.*)|${opsMgrExtIp}${TAB}\1|" /etc/hosts 1>/dev/null
 else
     # add host entry
     printf "%s" "Adding /etc/hosts entry: "
@@ -95,7 +95,7 @@ fi
 #     # replace host entry
 #     printf "%s" "Replacing /etc/hosts entry: "
 #     printf "%s\n" "${queryableBackupIp}${TAB}opsmanager-svc" 
-#     sudo sed -E -i .bak -e "s|^[0-9].*(opsmanager-svc$)|${queryableBackupIp}${TAB}\1|" /etc/hosts
+#     sudo sed -E -e "s|^[0-9].*(opsmanager-svc$)|${queryableBackupIp}${TAB}\1|" /etc/hosts
 # else
 #     # add host entry
 #     printf "%s" "Adding /etc/hosts entry: "
@@ -145,7 +145,7 @@ do
     # replace host entry
     printf "%s" "Replacing /etc/hosts entry: "
     printf "%s\n"                                   "${iplist[$m]}${TAB}${names[$n]} ${dnslist[$m]} ${hostname[$m]}" 
-    sudo sed -E -i .bak -e "s|^[0-9].*${names[$n]}.*|${iplist[$m]}${TAB}${names[$n]} ${dnslist[$m]} ${hostname[$m]}|" /etc/hosts
+    sudo sed -E -e "s|^[0-9].*${names[$n]}.*|${iplist[$m]}${TAB}${names[$n]} ${dnslist[$m]} ${hostname[$m]}|" /etc/hosts 1>/dev/null
   else
     # add host entry
     printf "%s" "Adding /etc/hosts entry: "
@@ -159,7 +159,7 @@ do
   then
     printf "%s" "Replacing /etc/hosts entry: "
     printf "%s\n"                                        "${iplist[$m]}${TAB}${snames[$n]%%.*} ${snames[$n]}"
-    sudo sed -E -i .bak -e "s|^[0-9].*${snames[$n]%%.*}.*|${iplist[$m]}${TAB}${snames[$n]%%.*} ${snames[$n]}|" /etc/hosts
+    sudo sed -E -e "s|^[0-9].*${snames[$n]%%.*}.*|${iplist[$m]}${TAB}${snames[$n]%%.*} ${snames[$n]}|" /etc/hosts 1>/dev/null
   else
     # add host entry
     printf "%s" "Adding /etc/hosts entry: "

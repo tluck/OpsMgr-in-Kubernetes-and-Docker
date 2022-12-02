@@ -41,7 +41,10 @@ spec:
     #TLS     # name: mdb-myreplicaset-cert
     authentication:
       enabled : true # false
-      modes: ["SCRAM"]
+      modes: ["SCRAM","X509"]
+      #internalCluster: "X509"
+      agents: 
+        mode: "SCRAM"
   # The default TLS mode is 'requireTLS' but it can be customized using the
   # the `additionalMongodConfig` structure. Please find more information here:
   # https://docs.mongodb.com/manual/reference/configuration-options/#net.ssl.mode

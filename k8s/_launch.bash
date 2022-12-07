@@ -45,15 +45,6 @@ printf "%s\n" "Deploy the Operator ..."
 deploy_Operator.bash
 
 printf "\n%s\n" "__________________________________________________________________________________________"
-printf "%s\n" "Deploy SMTP relay and until Running status..."
-# Deploy simple SMTP forwarder to a gmail account.
-kubectl get pod smtp > /dev/null 2>&1
-if [[ $? = 1 ]]
-then
-    mail/deploy_SMTP.bash
-fi
-
-printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Deploy OM and wait until Running status..."
 if [[ ${skipMakeCerts} = 1 || ${skipMakeCerts} == "-s" ]]
 then

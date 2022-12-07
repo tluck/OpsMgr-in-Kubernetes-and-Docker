@@ -85,10 +85,12 @@ spec:
 
   configuration:
     mms.ignoreInitialUiSetup: "true"
-    mms.adminEmailAddr:   thomas.luckenbach@mongodb.com
-    mms.fromEmailAddr:    thomas.luckenbach@mongodb.com
-    mms.replyToEmailAddr: thomas.luckenbach@mongodb.com
-    mms.mail.hostname: smtp-svc.mongodb.svc.cluster.local
+    mms.adminEmailAddr:   MMSADMINEMAILADDR
+    mms.fromEmailAddr:    MMSEMAIL
+    mms.replyToEmailAddr: MMSEMAIL
+    mms.mail.hostname: "MMSMAILHOSTNAME"
+    mms.mail.username: "MMSMAILUSERNAME"
+    mms.mail.password: "MMSMAILPASSWORD"
     mms.mail.port: "25"
     mms.mail.ssl: "false"
     mms.mail.transport: smtp
@@ -112,13 +114,13 @@ spec:
         mongodbResourceRef:
           name: NAME-oplog
         mongodbUserRef:
-          name: NAME-oplog-USER
+          name: NAME-oplog-DBUSER
     blockStores:
       - name: blockstore
         mongodbResourceRef:
           name: NAME-blockstore
         mongodbUserRef:
-          name: NAME-blockstore-USER
+          name: NAME-blockstore-DBUSER
     statefulSet:
       spec:
         template:

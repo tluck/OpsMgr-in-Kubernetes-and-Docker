@@ -93,7 +93,12 @@ cat mdbom_template.yaml | sed \
     -e "s/MEM/$mem/" \
     -e "s/CPU/$cpu/" \
     -e "s/DISK/$dsk/" \
-    -e "s/USER/$dbuserlc/" \
+    -e "s/DBUSER/$dbuserlc/" \
+    -e "s/MMSADMINEMAILADDR/$user/" \
+    -e "s/MMSEMAIL/$mmsemail/" \
+    -e "s/MMSMAILHOSTNAME/$mmsmailhostname/" \
+    -e "s/MMSMAILUSERNAME/$mmsmailusername/" \
+    -e "s/MMSMAILPASSWORD/$mmsmailpassword/" \
     -e "s/NAME/$name/" > "${mdbom}"
 
 #  Deploy OpsManager resources

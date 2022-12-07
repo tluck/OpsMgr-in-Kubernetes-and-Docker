@@ -37,7 +37,7 @@ else
     opsMgrExtUrl=${http}://${hostname}:${port}
     if [[ "${hostname}" != "localhost" && "${hostname}" != "" ]]
     then
-        eval list=( $( nslookup ${hostname} | grep Address ) )
+        eval list=( $(nslookup ${hostname} | grep Address ) )
         opsMgrExtIp=${list[3]}
     else
         opsMgrExtIp=127.0.0.1
@@ -63,7 +63,7 @@ then
     # replace host entry
     printf "%s" "Replacing /etc/hosts entry: "
     printf "%s\n" "${opsMgrExtIp}${TAB}${name}-svc.mongodb.svc.cluster.local ${name}-svc" 
-    sudo sed -E -e "s|^[0-9].*(${name}-svc.mongodb.svc.cluster.local.*)|${opsMgrExtIp}${TAB}\1|" /etc/hosts 1>/dev/null
+    sudo ${sed} -E -e "s|^[0-9].*(${name}-svc.mongodb.svc.cluster.local.*)|${opsMgrExtIp}${TAB}\1|" /etc/hosts 1>/dev/null
 else
     # add host entry
     printf "%s" "Adding /etc/hosts entry: "
@@ -95,7 +95,7 @@ fi
 #     # replace host entry
 #     printf "%s" "Replacing /etc/hosts entry: "
 #     printf "%s\n" "${queryableBackupIp}${TAB}opsmanager-svc" 
-#     sudo sed -E -e "s|^[0-9].*(opsmanager-svc$)|${queryableBackupIp}${TAB}\1|" /etc/hosts
+#     sudo ${sed} -E -e "s|^[0-9].*(opsmanager-svc$)|${queryableBackupIp}${TAB}\1|" /etc/hosts
 # else
 #     # add host entry
 #     printf "%s" "Adding /etc/hosts entry: "
@@ -104,28 +104,34 @@ fi
 # fi
 
 # get the node info for creating an external cluster via agent automation
-hostname=( $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="Hostname")].address}') )
-dnslist=(  $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="ExternalDNS")].address}' ) )
-iplist=(   $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="ExternalIP")].address}' ) )
-
-if [[ ${hostname} == "docker-desktop" ]]
+if [[ $serviceType == "NodePort" ]]
 then
-    hostname=(docker-desktop)
+	nodename=( $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="Hostname")].address}') )
+	dnslist=(  $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="ExternalDNS")].address}' ) )
+	iplist=(   $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="ExternalIP")].address}' ) )
+else
+	list=( $( get_hns.bash ) )
+        dnslist=( ${list[*]%:*} ) # strip off port
+	n=0
+	for h in ${dnslist[*]}
+	do
+	ip=( $( nslookup $h | grep Address ) )
+        #iplist[$n]="${ip#*:}"  # strip off Address:
+        iplist[$n]="${ip[3]}"
+        nodename[$n]=""
+	n=$((n+1))
+	done
+fi
+
+if [[ ${nodename} == "docker-desktop" ]]
+then
+    nodename=(docker-desktop)
     dnslist=(docker-desktop)
     iplist=(127.0.0.1)
 fi
 
 # add 3 nodes to the /etc/hosts file
 names=( mongodb1 mongodb2 mongodb3 )  
-
-name=( $( kubectl get svc|grep svc-external ) )
-if [[ $? == 0 ]]
-then
-    name=${name[0]%%-svc*}
-    snames[0]="${name}-mongos-0.${name}-svc.mongodb.svc.cluster.local"
-    snames[1]="${name}-mongos-1.${name}-svc.mongodb.svc.cluster.local"
-    snames[2]="${name}-mongos-2.${name}-svc.mongodb.svc.cluster.local"
-fi
 
 num=${#iplist[@]}
 if [[ ${num} > 0 ]]
@@ -144,27 +150,65 @@ do
   then
     # replace host entry
     printf "%s" "Replacing /etc/hosts entry: "
-    printf "%s\n"                                   "${iplist[$m]}${TAB}${names[$n]} ${dnslist[$m]} ${hostname[$m]}" 
-    sudo sed -E -e "s|^[0-9].*${names[$n]}.*|${iplist[$m]}${TAB}${names[$n]} ${dnslist[$m]} ${hostname[$m]}|" /etc/hosts 1>/dev/null
+    printf "%s\n"                                   "${iplist[$m]}${TAB}${names[$n]} ${dnslist[$m]} ${nodename[$m]}" 
+    sudo ${sed} -E -e "s|^[0-9].*${names[$n]}.*|${iplist[$m]}${TAB}${names[$n]} ${dnslist[$m]} ${nodename[$m]}|" /etc/hosts 
   else
     # add host entry
     printf "%s" "Adding /etc/hosts entry: "
-    printf "%s\n"                                   "${iplist[$m]}${TAB}${names[$n]} ${dnslist[$m]} ${hostname[$m]}" | sudo tee -a /etc/hosts
+    printf "%s\n"                                   "${iplist[$m]}${TAB}${names[$n]} ${dnslist[$m]} ${nodename[$m]}" | sudo tee -a /etc/hosts
   fi
+done
 
-  if [[ "${snames[$n]}" != "" ]] 
-    then
+# sharding mongos
+name=( $( kubectl get svc|grep -v "${name}" | grep svc-external ) )
+name=${name[0]%%-svc*}
+list=( $( get_hns.bash -n ${name} ) )
+dnslist=( ${list[*]%:*} ) # strip off port
+
+n=0
+unset iplist
+for h in ${dnslist[*]}
+do
+    ip=( $( nslookup $h | grep Address ) )
+    iplist[$n]=${ip[3]}  # strip off Address:
+    nodename[$n]=""
+    n=$((n+1))
+done
+num=${#iplist[@]}
+if [[ ${num} > 0 ]]
+then
+    num=$(( $num-1 ))
+else
+    exit
+fi
+
+if [[ $? == 0 ]]
+then
+    name=${name[0]%%-svc*}
+    snames[0]="${name}-mongos-0.${name}-svc.mongodb.svc.cluster.local"
+    snames[1]="${name}-mongos-1.${name}-svc.mongodb.svc.cluster.local"
+    snames[2]="${name}-mongos-2.${name}-svc.mongodb.svc.cluster.local"
+fi
+
+printf "\n" 
+for n in 0 1 2
+do
+  m=$n;  if [[ $m > $num ]]; then m=$num; fi;
+  if [[ "${iplist[$m]}" == "" || "${snames[$n]}" == "" ]] 
+  then
+    printf "skipping mongos %d\n" $n
+  else
   grep "^[0-9].*${snames[$n]%%.*}" /etc/hosts > /dev/null 2>&1
   if [[ $? == 0 ]]
   then
     printf "%s" "Replacing /etc/hosts entry: "
     printf "%s\n"                                        "${iplist[$m]}${TAB}${snames[$n]%%.*} ${snames[$n]}"
-    sudo sed -E -e "s|^[0-9].*${snames[$n]%%.*}.*|${iplist[$m]}${TAB}${snames[$n]%%.*} ${snames[$n]}|" /etc/hosts 1>/dev/null
+    sudo ${sed} -E -e "s|^[0-9].*${snames[$n]%%.*}.*|${iplist[$m]}${TAB}${snames[$n]%%.*} ${snames[$n]}|" /etc/hosts 
   else
     # add host entry
     printf "%s" "Adding /etc/hosts entry: "
     printf "%s\n"                                      "${iplist[$m]}${TAB}${snames[$n]%%.*} ${snames[$n]}" | sudo tee -a /etc/hosts
   fi
-    fi
+  fi
 done
 printf "\n" 

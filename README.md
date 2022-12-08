@@ -16,11 +16,11 @@
 
 ### Step 1. Configure K8s with Docker Desktop
 - Preference setup:
-	* Kubernetes - Check Enable Kubernetes
+	* Kubernetes - Check Enable Kubernetes with Docker or create one in AWS (EKS).
 	* Reources/Advanced: 
 		* Configure 8 Cores
-		* Configure 10GB of Memory
-		* Configure 1GB of swap
+		* Configure 10.5GB of Memory
+		* Configure 2GB of swap
 		* Disk Image size (~40GB)
 		
 - Restart to enable new settings
@@ -40,24 +40,21 @@ the **_launch.bash** script runs several "deploy" scripts for each of the follow
   		- AppDB 
   	- Monitors the progress of OM for Readiness
 
-- Script 3: **deploy_Database.bash**
+- Script 3: **deploy_Database.bash** and **deploy_DatabaseSharded.bash**
 	- Deploy a DB - three more are created
 	- Oplog1 and Blockstore1 dbs complete the Backup setup for OM
 	- myreplicaset is a "Production" DB and has a splitHorizon configuration for external cluster access
 		- connect via ```Misc/connect_external.bash``` script
 	- Monitors the progress until the pods are ready
-
-- Script 4: **mail/deploy_SMTP.bash**
-	- starts a mail relay to send alerts and user invitations
 	
-### Step 3. Login to OM
+### Step 3. Login to Ops Manager
 - login to OM at https://opsmanager-svc.mongodb.svc.cluster.local:8443 
-- Note: the admin credentials are set in ```init.conf```
-	- the scripts also put:
+- the admin user credentials are set in ```init.conf```
+	- the scripts also create a hostname entry such as:
 	```127.0.0.1       opsmanager-svc.mongodb.svc.cluster.local # opsmgr```
 	into the ```/etc/hosts``` file
 
-	- Also add the custom TLS certificate authority (certs/ca.crt) to your keystore to allow secure https without challenge
+	- Note: if you add the custom TLS certificate authority (certs/ca.crt) to your keystore, this allows seamless unchallenged secure https access
 
 # Ops Manager Demo Environment (in Docker)
 

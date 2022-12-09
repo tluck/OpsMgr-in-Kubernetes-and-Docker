@@ -53,9 +53,9 @@ fi
 if [[ "${context}" == "docker-desktop" ]]
 then
 docker pull "quay.io/mongodb/mongodb-enterprise-ops-manager:$omVersion" # issue with docker not (re)pulling the image
-deploy_OM.bash -n opsmanager $skip  # [-n name] [-c cpu] [-m memory] [-d disk] [-v version] [-p] [-s]
+deploy_OM.bash -n "opsmanager" $skip  # [-n name] [-c cpu] [-m memory] [-d disk] [-v version] [-p] [-s]
 else
-deploy_OM.bash -n opsmanager $skip -p -n opsmanager -c 0.5 -m 1Gi -d 4Gi -v "$omVersion"
+deploy_OM.bash -n "opsmanager" $skip -p -c 0.5 -m 1Gi -d 4Gi -v "$omVersion"
 fi
 
 #printf "\n%s\n" "__________________________________________________________________________________________"
@@ -86,8 +86,10 @@ printf "%s\n" "Generate splitHorizon configuration for External access to a Prod
 if [[ "${context}" == "docker-desktop" ]]
 then
     deploy_Database.bash -n "myreplicaset"          -c "0.50" -m "400Mi"        -v "6.0.1-ent"
+    replicasetName="myreplicaset"
 else
     deploy_Database.bash -n "myreplicaset"          -c "1.00" -m "4Gi" -d "4Gi" -v "6.0.1-ent"
+    replicasetName="myreplicaset"
 fi
 
 printf "\n%s\n" "__________________________________________________________________________________________"
@@ -98,10 +100,11 @@ then
     # deploy_DatabaseSharded.bash -n "mysharded"    -c "0.33" -m "400Mi"        -s "1"        -v "$mdbVersion"
 else
     deploy_DatabaseSharded.bash -n "mysharded"      -c "1.00" -m "2Gi" -d "4Gi" -s "3" -r "2" -v "$mdbVersion"
+    shardingName="mysharded"
 fi
 
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Update init.conf with IPs and put k8s internal hostnames in /etc/hosts ..."
-update_initconf_hostnames.bash
+update_initconf_hostnames.bash "opsmanager" "$replicasetName" "$shardedName"
 
 date

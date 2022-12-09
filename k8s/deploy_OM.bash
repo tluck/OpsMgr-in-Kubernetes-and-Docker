@@ -13,7 +13,7 @@ do
     c) cpu="$OPTARG" ;;
     m) mem="$OPTARG" ;;
     d) dsk="$OPTARG" ;;
-    p) prod="#DEMO " ;;
+    p) prod="#Docker " ;;
     s) skipMakeCerts=1 ;; 
     ?|h)
       echo "Usage: $(basename $0) [-n name] [-v omVersion][-a appdbVersion] [-c cpu] [-m memory] [-d disk] [-p] [-s]"
@@ -84,9 +84,15 @@ fi
 
 mdbom="mdbom_${name}.yaml"
 dbuserlc=$( printf "$dbuser" | tr '[:upper:]' '[:lower:]' )
+if [[ "${context}" == "docker-desktop" ]]
+then
+    replace="#Docker"
+else
+    replace="#Prod  "
+fi
 # make manifest from template
 cat mdbom_template.yaml | sed \
-    -e "s/#DEMO /$prod/" \
+    -e "s/#Docker/$prod/" \
     -e "s/$tlsc/$tlsr/" \
     -e "s/VERSION/$omVer/" \
     -e "s/APPDBVER/$appdbVer/" \
@@ -99,6 +105,7 @@ cat mdbom_template.yaml | sed \
     -e "s/MMSMAILHOSTNAME/$mmsmailhostname/" \
     -e "s/MMSMAILUSERNAME/$mmsmailusername/" \
     -e "s/MMSMAILPASSWORD/$mmsmailpassword/" \
+    -e "s/$replace//" \
     -e "s/NAME/$name/" > "${mdbom}"
 
 #  Deploy OpsManager resources

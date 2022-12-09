@@ -9,6 +9,8 @@ TAB=$'\t'
 #else
 
 name="${1:-opsmanager}"
+replicasetName="${2}"
+shardingName="${3}"
 #fi
 
 # get the OpsMgr URL and internal IP
@@ -103,6 +105,8 @@ fi
 # fi
 # fi
 
+if [[ $replicasetName != "" ]]
+then
 # get the node info for creating an external cluster via agent automation
 if [[ $serviceType == "NodePort" ]]
 then
@@ -159,6 +163,10 @@ do
   fi
 done
 
+fi
+
+if [[ $shardingName != "" ]]
+then
 # sharding mongos
 name=( $( kubectl get svc|grep -v "${name}" | grep svc-external ) )
 name=${name[0]%%-svc*}
@@ -211,4 +219,6 @@ do
   fi
   fi
 done
+fi
 printf "\n" 
+

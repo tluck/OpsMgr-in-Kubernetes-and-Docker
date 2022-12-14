@@ -86,9 +86,9 @@ mdbom="mdbom_${name}.yaml"
 dbuserlc=$( printf "$dbuser" | tr '[:upper:]' '[:lower:]' )
 if [[ "${context}" == "docker-desktop" ]]
 then
-    replace="#Docker"
+    replace="#Docker "
 else
-    replace="#Prod  "
+    replace="#Prod   "
 fi
 # make manifest from template
 cat mdbom_template.yaml | sed \

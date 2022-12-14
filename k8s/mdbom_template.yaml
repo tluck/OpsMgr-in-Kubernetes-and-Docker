@@ -18,13 +18,15 @@ spec:
         spec:
           containers:
             - name: mongodb-ops-manager
-              resources:
+              resources:  # 3Gi a good size for docker-desktop - use 5Gi or more for larger clusters in production
                 limits:
                   cpu: "0.75"  # "2.0"
-                  memory: 3Gi  # 3Gi a good size for docker-desktop - use 5Gi or more for larger clusters in production
+                  #Docker memory: 3Gi
+                  #Prod   memory: 5Gi
                 requests:
                   cpu: "0.75"  # "2.0"
-                  memory: 3Gi  # 3Gi a good size for docker-desktop - use 5Gi or more for larger clusters in production
+                  #Docker memory: 3Gi
+                  #Prod   memory: 5Gi
 
   #TLS security: # enables TLS for Ops Manager allowing it to serve traffic over HTTPS
   #TLS   tls:
@@ -127,10 +129,12 @@ spec:
           spec:
             containers:
               - name: mongodb-backup-daemon
-                resources:
+                resources: # 2Gi is good size for docker-desktop -- use 5Gi for larger clusters in production
                   limits:
                     cpu: "1.0"
-                    memory: 1.5Gi # 2Gi is good size for docker-desktop -- use 5Gi for larger clusters in production
+                    #Docker memory: 1.5Gi
+                    #Prod   memory: 5Gi 
                   requests:
                     cpu: "0.5"
-                    memory: 1.5Gi # 2Gi is good size for docker-desktop -- use 5Gi for larger clusters in production
+                    #Docker memory: 1.5Gi
+                    #Prod   memory: 5Gi

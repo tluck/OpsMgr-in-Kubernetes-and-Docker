@@ -99,11 +99,11 @@ spec:
   security:
     #TLS certsSecretPrefix: mdb # provide custom x509 certificates (keys and certs)
     #TLS tls:
-    #TLS   # enabled: true # false # deprecated in 1.16
     #TLS   ca: ca-pem # provide a custom certificate authority (cert in a pem file)
-    #TLS   secretRef:
-    #TLS     prefix: mdb # same as certsSecretPrefix (not needed)
-        # name: mdb-mysharded-cert
+        #  enabled: true # false # deprecated in 1.16
+        #  secretRef:
+        #    prefix: mdb # same as certsSecretPrefix (not needed)
+        #    name: mdb-mysharded-cert
         # The operator will look for secrets with the following names:
         # mdb-${metadata.name}-mongos-cert
         # mdb-${metadata.name}-config-cert

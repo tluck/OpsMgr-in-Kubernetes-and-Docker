@@ -58,18 +58,18 @@ echo  opsMgrExtIp=\""$opsMgrExtIp"\"                | tee -a init.conf
 if [[ ${opsMgrExtIp} != "" ]]
 then
 printf "\n%s\n\n" "*** Note: sudo may ask for your password" 
-# put the internal name opsmanager-svc.mongodb.svc.cluster.local in /etc/hosts
-grep "^[0-9].*${name}-svc.mongodb.svc.cluster.local" /etc/hosts > /dev/null 2>&1
+# put the internal name opsmanager-svc.${namespace}.svc.cluster.local in /etc/hosts
+grep "^[0-9].*${name}-svc.${namespace}.svc.cluster.local" /etc/hosts > /dev/null 2>&1
 if [[ $? == 0 ]]
 then
     # replace host entry
     printf "%s" "Replacing /etc/hosts entry: "
-    printf "%s\n" "${opsMgrExtIp}${TAB}${name}-svc.mongodb.svc.cluster.local ${name}-svc" 
-    sudo ${sed} -E -e "s|^[0-9].*(${name}-svc.mongodb.svc.cluster.local.*)|${opsMgrExtIp}${TAB}\1|" /etc/hosts 1>/dev/null
+    printf "%s\n" "${opsMgrExtIp}${TAB}${name}-svc.${namespace}.svc.cluster.local ${name}-svc" 
+    sudo ${sed} -E -e "s|^[0-9].*(${name}-svc.${namespace}.svc.cluster.local.*)|${opsMgrExtIp}${TAB}\1|" /etc/hosts 1>/dev/null
 else
     # add host entry
     printf "%s" "Adding /etc/hosts entry: "
-    printf "%s\n" "${opsMgrExtIp}${TAB}${name}-svc.mongodb.svc.cluster.local ${name}-svc" | sudo tee -a /etc/hosts
+    printf "%s\n" "${opsMgrExtIp}${TAB}${name}-svc.${namespace}.svc.cluster.local ${name}-svc" | sudo tee -a /etc/hosts
 fi
 fi
 
@@ -193,9 +193,9 @@ fi
 if [[ $? == 0 ]]
 then
     name=${name[0]%%-svc*}
-    snames[0]="${name}-mongos-0.${name}-svc.mongodb.svc.cluster.local"
-    snames[1]="${name}-mongos-1.${name}-svc.mongodb.svc.cluster.local"
-    snames[2]="${name}-mongos-2.${name}-svc.mongodb.svc.cluster.local"
+    snames[0]="${name}-mongos-0.${name}-svc.${namespace}.svc.cluster.local"
+    snames[1]="${name}-mongos-1.${name}-svc.${namespace}.svc.cluster.local"
+    snames[2]="${name}-mongos-2.${name}-svc.${namespace}.svc.cluster.local"
 fi
 
 printf "\n" 

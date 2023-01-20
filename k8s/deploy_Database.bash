@@ -43,6 +43,7 @@ cat mdb_replicaset.yaml | sed \
     -e "s/CPU/$cpu/" \
     -e "s/DISK/$dsk/" \
     -e "s/VERSION/$ver/" \
+    -e "s/NAMESPACE/$namespace/" \
     -e "s/NAME/$name/" > "$mdb"
 
 #dbuserlc=${dbuser,,}

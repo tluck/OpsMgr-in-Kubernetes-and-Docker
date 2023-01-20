@@ -3,7 +3,7 @@ apiVersion: mongodb.com/v1
 kind: MongoDB
 metadata:
   name: NAME
-  namespace: mongodb
+  namespace: NAMESPACE
 spec:
   members: 3
   version: VERSION
@@ -11,7 +11,7 @@ spec:
   opsManager:
     configMapRef:
       name: NAME # Must match metadata.name in ConfigMap file
-  credentials: mongodb-opsmanager-admin-key
+  credentials: NAMESPACE-opsmanager-admin-key
   persistent: true
   podSpec:
     # `podTemplate` allows to set custom fields in PodTemplateSpec for the

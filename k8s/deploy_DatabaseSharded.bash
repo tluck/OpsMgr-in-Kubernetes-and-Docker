@@ -68,6 +68,7 @@ cat mdb_sharded.yaml | sed \
     -e "s/CSMEM/$csmem/" \
     -e "s/MSCPU/$mscpu/" \
     -e "s/MSMEM/$msmem/" \
+    -e "s/NAMESPACE/$namespace/" \
     -e "s/NAME/$name/" > "$mdb"
 
 dbuserlc=$( printf "$dbuser" | tr '[:upper:]' '[:lower:]' )

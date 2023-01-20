@@ -55,7 +55,7 @@ then
 docker pull "quay.io/mongodb/mongodb-enterprise-ops-manager:$omVersion" # issue with docker not (re)pulling the image
 deploy_OM.bash -n "opsmanager" $skip  # [-n name] [-c cpu] [-m memory] [-d disk] [-v version] [-p] [-s]
 else
-deploy_OM.bash -n "opsmanager" $skip -p -c 0.5 -m 1Gi -d 4Gi -v "$omVersion"
+deploy_OM.bash -n "opsmanager" $skip -c 0.5 -m 1Gi -d 4Gi -v "$omVersion"
 fi
 
 #printf "\n%s\n" "__________________________________________________________________________________________"

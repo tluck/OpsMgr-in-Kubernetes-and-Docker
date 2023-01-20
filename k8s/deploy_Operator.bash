@@ -8,14 +8,17 @@ source init.conf
 #kubectl apply -f /opt/Source/metrics-server/components.yaml 
 
 # Create the namespace and context
-kubectl create namespace mongodb
-kubectl config set-context $(kubectl config current-context) --namespace=mongodb
+kubectl create namespace ${namespace}
+kubectl config set-context $(kubectl config current-context) --namespace=${namespace}
 
 # Deploy the MongoDB Enterprise Operator
 kubectl apply -f crds.yaml
 if [[ "${clusterType}" == "openshift" ]]
 then
-kubectl apply -f mongodb-enterprise-openshift.yaml
+    cat mongodb-enterprise-openshift.yaml | sed \
+    -e "s/namespace: mongodb/namespace: $namespace/"  > "mongodb-operator.yaml"
 else
-kubectl apply -f mongodb-enterprise.yaml
+    cat mongodb-enterprise.yaml | sed \
+    -e "s/namespace: mongodb/namespace: $namespace/"  > "mongodb-operator.yaml"
 fi
+kubectl apply -f mongodb-operator.yaml

@@ -4,7 +4,7 @@ d=$( dirname "$0" )
 cd "${d}"
 source init.conf
 
-while getopts 'n:v:a:c:m:d:psh' opt
+while getopts 'n:v:a:c:m:d:sh' opt
 do
   case "$opt" in
     n) name="$OPTARG" ;;
@@ -13,7 +13,6 @@ do
     c) cpu="$OPTARG" ;;
     m) mem="$OPTARG" ;;
     d) dsk="$OPTARG" ;;
-    p) prod="#Docker " ;;
     s) skipMakeCerts=1 ;; 
     ?|h)
       echo "Usage: $(basename $0) [-n name] [-v omVersion][-a appdbVersion] [-c cpu] [-m memory] [-d disk] [-p] [-s]"
@@ -44,8 +43,10 @@ then
     printf "\n%s\n" "__________________________________________________________________________________________"
     printf "%s\n" "Getting Certs status..."
     # Generate CA and create certs for OM and App-db
-    rm "${PWD}/certs/${name}*.pem" "${PWD}/certs/queryable-backup.pem" > /dev/null 2>&1
+    rm "${PWD}/certs/${name}*.*" "${PWD}/certs/queryable-backup.pem" > /dev/null 2>&1
     "${PWD}/certs/make_OM_certs.bash" ${name}
+    appdb=${name}-db
+    "${PWD}/certs/make_db_certs.bash" ${appdb} 
     ls -1 "${PWD}/certs/"*pem "${PWD}/certs/"*crt 
 fi
 
@@ -65,7 +66,6 @@ then
 
 # For enablement of TLS on the appdb - custom certs
 appdb=${name}-db
-"${PWD}/certs/make_db_certs.bash" ${appdb} 
 # Create a secret for the member certs for TLS
 kubectl delete secret ${appdb}-cert > /dev/null 2>&1
 # sleep 3
@@ -84,6 +84,7 @@ fi
 
 mdbom="mdbom_${name}.yaml"
 dbuserlc=$( printf "$dbuser" | tr '[:upper:]' '[:lower:]' )
+context=$( kubectl config current-context )
 if [[ "${context}" == "docker-desktop" ]]
 then
     replace="#Docker "
@@ -92,7 +93,6 @@ else
 fi
 # make manifest from template
 cat mdbom_template.yaml | sed \
-    -e "s/#Docker/$prod/" \
     -e "s/$tlsc/$tlsr/" \
     -e "s/VERSION/$omVer/" \
     -e "s/APPDBVER/$appdbVer/" \

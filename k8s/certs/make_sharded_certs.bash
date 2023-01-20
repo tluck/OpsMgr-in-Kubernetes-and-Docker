@@ -12,4 +12,4 @@ if [[ "$ctype" == [012356] ]] ; then comp="sh" ; fi
 if [[ "$ctype" == "mongos" ]] ; then comp="svc"; fi
 
 # use wildcard vs individual certs now
-generate_cert.bash ${name}-${ctype} "*.${name}-${comp}.mongodb.svc.cluster.local" 
+generate_cert.bash ${name}-${ctype} "*.${name}-${comp}.${namespace}.svc.cluster.local" 

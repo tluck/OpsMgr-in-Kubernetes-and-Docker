@@ -43,7 +43,7 @@ then
     printf "\n%s\n" "__________________________________________________________________________________________"
     printf "%s\n" "Getting Certs status..."
     # Generate CA and create certs for OM and App-db
-    rm "${PWD}/certs/${name}*.*" "${PWD}/certs/queryable-backup.pem" > /dev/null 2>&1
+    rm "${PWD}/certs/${name}"*.* "${PWD}/certs/queryable-backup.pem" > /dev/null 2>&1
     "${PWD}/certs/make_OM_certs.bash" ${name}
     appdb=${name}-db
     "${PWD}/certs/make_db_certs.bash" ${appdb} 

@@ -99,7 +99,7 @@ then
     printf "\n%s\n" " **** skipping sharded deployment - not enough resources ***"
     # deploy_DatabaseSharded.bash -n "mysharded"    -c "0.33" -m "400Mi"        -s "1"        -v "$mdbVersion"
 else
-    deploy_DatabaseSharded.bash -n "mysharded"      -c "1.00" -m "2Gi" -d "4Gi" -s "3" -r "2" -v "$mdbVersion"
+    deploy_DatabaseSharded.bash -n "mysharded"      -c "1.00" -m "2Gi" -d "4Gi" -s "2" -r "2" -v "$mdbVersion"
     shardingName="mysharded"
 fi
 

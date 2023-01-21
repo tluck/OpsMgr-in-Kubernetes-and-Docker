@@ -3,7 +3,6 @@
 d=$( dirname "$0" )
 cd "${d}"
 name=${1:-opsmanager}
-source init.conf
 
 #def_token=( $( kubectl get secrets | grep default-token ) )
 #kubectl get secret ${def_token} -o jsonpath='{.data.ca\.crt}' | base64 -D > ca.crt
@@ -28,7 +27,7 @@ then
 fi
 
 # OM
-generate_cert.bash ${name}-svc ${name}-svc.${namespace}.svc.cluster.local
+generate_cert.bash ${name}-svc ${name}-svc.${namespace}.svc.cluster.local ${om_ext}
 
 # appdb
 generate_cert.bash ${name}-db "*.${name}-db-svc.${namespace}.svc.cluster.local" 

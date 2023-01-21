@@ -2,7 +2,6 @@
 
 d=$( dirname "$0" )
 cd "${d}"
-source init.conf
 
 name=${1:-myreplicaset}
 shift

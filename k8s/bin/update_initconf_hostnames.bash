@@ -34,9 +34,10 @@ fi
 
 if [[ ${hostname} == "null" ]]
 then
-    opsMgrExtUrl=${http}://${opsMgrExtIp}:${port}
+    opsMgrExtUrl1=${http}://${opsMgrExtIp}:${port}
 else
-    opsMgrExtUrl=${http}://${hostname}:${port}
+    opsMgrExtUrl1=${http}://${hostname}:${port}
+    opsMgrExtUrl2=${http}://${om_ext}:${port}
     if [[ "${hostname}" != "localhost" && "${hostname}" != "" ]]
     then
         eval list=( $(nslookup ${hostname} | grep Address ) )
@@ -50,8 +51,9 @@ fi
 initconf=$( sed -e '/opsMgrUrl/d' -e '/opsMgrExt/d' -e '/queryableBackupIp/d' init.conf )
 printf "%s\n" "$initconf" > init.conf
 echo ""
-echo  opsMgrUrl="$opsMgrUrl"                        | tee -a init.conf
-echo  opsMgrExtUrl=\""$opsMgrExtUrl"\"              | tee -a init.conf
+echo  opsMgrUrl=\""$opsMgrUrl"\"                    | tee -a init.conf
+echo  opsMgrExtUrl1=\""$opsMgrExtUrl1"\"              | tee -a init.conf
+echo  opsMgrExtUrl2=\""$opsMgrExtUrl2"\"            | tee -a init.conf
 echo  opsMgrExtIp=\""$opsMgrExtIp"\"                | tee -a init.conf
 # echo  queryableBackupIp=\""$queryableBackupIp"\"    | tee -a init.conf
 
@@ -64,12 +66,12 @@ if [[ $? == 0 ]]
 then
     # replace host entry
     printf "%s" "Replacing /etc/hosts entry: "
-    printf "%s\n" "${opsMgrExtIp}${TAB}${name}-svc.${namespace}.svc.cluster.local ${name}-svc" 
-    sudo ${sed} -E -e "s|^[0-9].*(${name}-svc.${namespace}.svc.cluster.local.*)|${opsMgrExtIp}${TAB}\1|" /etc/hosts 1>/dev/null
+    printf "%s\n" "${opsMgrExtIp}${TAB}${name}-svc.${namespace}.svc.cluster.local ${name}-svc ${om_ext}" 
+    sudo ${sed} -E -e "s|^[0-9].*(${name}-svc.*.svc.cluster.local.*)|${opsMgrExtIp}${TAB}${name}-svc.${namespace}.svc.cluster.local ${name}-svc ${om_ext}|" /etc/hosts 1>/dev/null
 else
     # add host entry
     printf "%s" "Adding /etc/hosts entry: "
-    printf "%s\n" "${opsMgrExtIp}${TAB}${name}-svc.${namespace}.svc.cluster.local ${name}-svc" | sudo tee -a /etc/hosts
+    printf "%s\n" "${opsMgrExtIp}${TAB}${name}-svc.${namespace}.svc.cluster.local ${name}-svc ${om_ext}" | sudo tee -a /etc/hosts
 fi
 fi
 

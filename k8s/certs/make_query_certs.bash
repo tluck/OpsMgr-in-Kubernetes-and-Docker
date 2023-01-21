@@ -4,7 +4,6 @@ d=$( dirname "$0" )
 cd "${d}"
 
 name=${1:-opsmanager}
-source init.conf
 
 # proxy server for backups
 #x.bash

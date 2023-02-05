@@ -82,25 +82,26 @@ fi
 
 
 printf "\n%s\n" "__________________________________________________________________________________________"
-printf "%s\n" "Generate splitHorizon configuration for External access to a Production DB ..."
+printf "%s\n" "Create a Production ReplicaSet Cluster with a splitHorizon configuration for External access ..."
 if [[ "${context}" == "docker-desktop" ]]
 then
-    deploy_Database.bash -n "myreplicaset"          -c "0.50" -m "400Mi"        -v "6.0.1-ent"
+    deploy_Database.bash -n "myreplicaset" -l "${ldapType}" -c "0.50" -m "400Mi"        -v "6.0.1-ent"
     replicasetName="myreplicaset"
 else
-    deploy_Database.bash -n "myreplicaset"          -c "1.00" -m "4Gi" -d "4Gi" -v "6.0.1-ent"
+    deploy_Database.bash -n "myreplicaset" -l "${ldapType}" -c "1.00" -m "4Gi" -d "4Gi" -v "6.0.1-ent"
     replicasetName="myreplicaset"
 fi
 
 printf "\n%s\n" "__________________________________________________________________________________________"
-printf "%s\n" "Generate configuration for External access to a Sharded Production DB ..."
+printf "%s\n" "Create a Production Sharded Cluster  ..."
 if [[ "${context}" == "docker-desktop" ]]
 then
     printf "\n%s\n" " **** skipping sharded deployment - not enough resources ***"
     # deploy_DatabaseSharded.bash -n "mysharded"    -c "0.33" -m "400Mi"        -s "1"        -v "$mdbVersion"
 else
+
     deploy_DatabaseSharded.bash -n "mysharded"      -c "1.00" -m "2Gi" -d "4Gi" -s "2" -r "2" -v "$mdbVersion"
-    shardingName="mysharded"
+    shardedName="mysharded"
 fi
 
 printf "\n%s\n" "__________________________________________________________________________________________"

@@ -41,10 +41,36 @@ spec:
     #    name: mdb-myreplicaset-cert
     authentication:
       enabled : true # false
-      modes: ["SCRAM","X509"]
-      #internalCluster: "X509"
       agents: 
         mode: "SCRAM"
+      #X509  modes: ["SCRAM","X509"]
+      #LDAP  modes: ["SCRAM","LDAP"]
+      #LDAP  ldap:  # Enabled LDAP Authentication Mode # LDAP related configuration
+      #LDAP    # Specify the hostname:port combination of one or more LDAP servers
+      #LDAP    servers:
+      #LDAP      - "LDAPSERVER"
+      #LDAP    # Specify the LDAP Distinguished Name to which MongoDB binds when connecting to the LDAP server
+      #LDAP    bindQueryUser: "LDAPBINDQUERYUSER"
+      #LDAP    # Specify the password with which MongoDB binds when connecting to an LDAP server. 
+      #LDAP    #  This is a reference to a Secret Kubernetes Object containing one "password" key.
+      #LDAP    bindQueryPasswordSecretRef:
+      #LDAP      name: "NAME-ldapsecret"
+      #LDAP    # Select True to validate the LDAP server configuration or False to skip validation.
+      #LDAP    validateLDAPServerConfig: false
+      #LDAP    # LDAP-formatted query URL template executed by MongoDB to obtain the LDAP groups that the user belongs to
+      #LDAP    authzQueryTemplate: "LDAPAUTHZQUERYTEMPLATE"
+      #LDAP    # Maps the username provided to mongod or mongos for authentication to an LDAP Distinguished Name (DN).
+      #LDAP    userToDNMapping: 'LDAPUSERTODNMAPPING'
+      #LDAP    # Specify how long an authentication request should wait before timing out. In milliseconds.
+      #LDAP    timeoutMS: LDAPTIMEOUTMS
+      #LDAP    # Specify how long MongoDB waits to flush the LDAP user cache. In seconds.
+      #LDAP    userCacheInvalidationInterval: LDAPUSERCACHEINVALIDATIONINTERVAL
+      #LDAPT   # Set to "tls" to use LDAP over TLS. Leave blank or set to none if server does not accept TLS.
+      #LDAPT   transportSecurity: "LDAPTLS"
+      #LDAPT   # ConfigMap containing a CA certificate that validates the LDAP server's TLS certificate.
+      #LDAPT   caConfigMapRef:
+      #LDAPT     name: "LDAPCERTMAPNAME"
+      #LDAPT     key: "LDAPKEY"
   # The default TLS mode is 'requireTLS' but it can be customized using the
   # the `additionalMongodConfig` structure. Please find more information here:
   # https://docs.mongodb.com/manual/reference/configuration-options/#net.ssl.mode

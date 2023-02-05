@@ -38,15 +38,6 @@ mscpu="0.5"
 csmem="2Gi"
 cscpu="0.5"
 
-context=$( kubectl config current-context )
-if [[ "${context}" == "docker-desktop" ]]
-then
-    msmem="400Mi"
-    mscpu="0.33"
-    csmem="400Mi"
-    cscpu="0.33"
-fi
-
 # make manifest from template
 mdbuser="mdbuser_${name}.yaml"
 mdb="mdb_${name}.yaml"
@@ -173,9 +164,14 @@ done
 
 sleep 5
 printf "\n"
-bin/get_connection_string.bash -n "${name}"
-printf "\n"
-printf "%s\n" "Wait a minute for the reconfiguration and then connect directly by running: bin/connect_external.bash   -n \"${name}\""
-printf "%s\n" "                                        or connect from the pod by running: bin/kub_connect_to_pod.bash -n \"${name}\""
-
+cs=$( bin/get_connection_string.bash -n "${name}" )
+if [[ "$cs" == *external* ]]
+then
+    printf "\n%s\n\n" "$cs"
+    printf "%s\n" "To see if access is working, connect directly by running: bin/connect_external.bash -n \"${name}\""
+    printf "%s\n" "                      or connect from the pod by running: bin/connect_from_pod.bash -n \"${name}\""
+else
+    printf "\n%s\n\n" "$cs"
+    printf "%s\n" "To see if access is working, connect from the pod by running: bin/connect_from_pod.bash -n \"${name}\""
+fi
 exit 0

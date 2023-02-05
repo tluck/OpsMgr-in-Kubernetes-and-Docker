@@ -36,7 +36,7 @@ ics=$( kubectl get secret ${name}-${name}-${dbuserlc}-admin -o jsonpath="{.data[
 ecs="${ics}"
 if [[ ${serviceType} != "" ]]
 then
-hn=( $( get_hns.bash -n "${name}" -t "${serviceType}" ) )
+hn=( $( bin/get_hns.bash -n "${name}" ) )
 
 if [[ "${sharded}" == "1" ]] 
 then

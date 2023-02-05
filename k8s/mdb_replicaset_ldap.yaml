@@ -1,0 +1,89 @@
+---
+apiVersion: mongodb.com/v1
+kind: MongoDB
+metadata:
+  name: NAME
+  namespace: NAMESPACE
+spec:
+  members: 3
+  version: VERSION
+  type: ReplicaSet
+  opsManager:
+    configMapRef:
+      name: NAME # Must match metadata.name in ConfigMap file
+  credentials: NAMESPACE-opsmanager-admin-key
+  persistent: true
+  podSpec:
+    # `podTemplate` allows to set custom fields in PodTemplateSpec for the
+    # Database Pods.
+    # For more information see:
+    # https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.17/#podtemplatespec-v1-core
+    podTemplate:
+      spec:
+        containers:
+        - name: mongodb-enterprise-database
+          # For more information about Pod and container resource management, see:
+          # https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+          resources:
+            limits:
+              cpu: "CPU"
+              memory: MEM 
+    persistence:
+      single:
+        storage: DISK # 2Gi
+  security:
+    #TLS certsSecretPrefix: mdb # provide custom x509 certificates (keys and certs)
+    #TLS tls:
+    #TLS   ca: ca-pem # provide a custom certificate authority (cert in a pem file)
+    #  enabled: true # false # deprecated in 1.16
+    #  secretRef:
+    #    prefix: mdb # same as certsSecretPrefix (not needed)
+    #    name: mdb-myreplicaset-cert
+    authentication:
+      enabled : true # false
+      modes: ["SCRAM","LDAP"]
+      #internalCluster: "X509"
+      agents:
+        mode: "SCRAM"
+      # Enabled LDAP Authentication Mode # LDAP related configuration
+      ldap:
+        # Specify the hostname:port combination of one or
+        # more LDAP servers
+        servers:
+        - "LDAPSERVER"
+
+        # Set to "tls" to use LDAP over TLS. Leave blank if
+        # LDAP server does not accept TLS.
+        transportSecurity: "LDAPTLS"
+
+        # ConfigMap containing a CA certificate that validates
+        # the LDAP server's TLS certificate.
+        caConfigMapRef:
+          name: "kube-root-ca.crt"
+          key: "ca.crt"
+
+        # Specify the LDAP Distinguished Name to which
+        # MongoDB binds when connecting to the LDAP server
+        bindQueryUser: "LDAPBINDQUERYUSER"
+
+        # Specify the password with which MongoDB binds
+        # when connecting to an LDAP server. This is a
+        # reference to a Secret Kubernetes Object containing
+        # one "password" key.
+        bindQueryPasswordSecretRef:
+          name: "NAME-ldapsecret"
+
+        # Select True to validate the LDAP server configuration or False to skip validation.
+        validateLDAPServerConfig: false
+
+        # LDAP-formatted query URL template executed by MongoDB to obtain the LDAP groups that the user belongs to
+        authzQueryTemplate: "LDAPAUTHZQUERYTEMPLATE"
+
+        # Maps the username provided to mongod or mongos for authentication to an LDAP Distinguished Name (DN).
+        userToDNMapping: 'LDAPUSERTODNMAPPING'
+
+        # Specify how long an authentication request should wait before timing out. In milliseconds.
+        timeoutMS: LDAPTIMEOUTMS
+
+        # Specify how long MongoDB waits to flush the LDAP user cache. In seconds.
+        userCacheInvalidationInterval: LDAPUSERCACHEINVALIDATIONINTERVAL

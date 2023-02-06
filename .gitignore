@@ -6,3 +6,4 @@
 *.key
 *.csr
 *.orig
+k8s/init.conf

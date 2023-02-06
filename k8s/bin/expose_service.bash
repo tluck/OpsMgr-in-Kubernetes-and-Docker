@@ -57,7 +57,8 @@ done
 hn=( $( bin/get_hns.bash -n "${name}" ) )
 if [[ $? != 0 ]]
 then
-    printf "\n%s\n" "* * * - Error cant find names for splitHorizon"
+    printf "\n%s\n" "* * * - Error cannot determine the hostnames for splitHorizon"
+    exit 1
 fi
 
 cat "$fn" | sed -e '/horizon/d' -e '/connectivity:/d' -e '/replicaSetHorizons:/d' > new

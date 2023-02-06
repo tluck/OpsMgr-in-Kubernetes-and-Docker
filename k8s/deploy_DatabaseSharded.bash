@@ -47,7 +47,7 @@ if [[ ${tls} == 1 ]]
 then
 tlsr=""
 fi
-cat mdb_sharded.yaml | sed \
+cat mdb_template_sh.yaml | sed \
     -e "s/$tlsc/$tlsr/" \
     -e "s/VERSION/$ver/" \
     -e "s/DBMEM/$mem/" \

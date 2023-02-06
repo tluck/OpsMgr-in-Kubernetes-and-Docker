@@ -55,7 +55,7 @@ fi
 
 if [[ ${ldap} == 'ldap' || ${ldap} == 'ldaps' ]]
 then
-  cat mdb_replicaset.yaml | sed \
+  cat mdb_template_rs.yaml | sed \
       -e "s|$tlsc|$tlsr|" \
       -e "s|MEM|$mem|" \
       -e "s|CPU|$cpu|" \
@@ -75,7 +75,7 @@ then
       -e "s|LDAPKEY|$ldapKey|" \
       -e "s|NAME|$name|" > "$mdb"
 else
-  cat mdb_replicaset.yaml | sed \
+  cat mdb_template_rs.yaml | sed \
       -e "s|#X509  ||" \
       -e "s|$tlsc|$tlsr|" \
       -e "s|MEM|$mem|" \
@@ -122,13 +122,20 @@ do
   if [[ "$n" == "${name}" ]] 
   then
     printf "%s\n" "Generating ${serviceType} Service ports..."
-    dnsHorizon=( $( bin/expose_service.bash "${mdb}" ${cleanup} |tail -1 ) )
+    serviceOut=$( bin/expose_service.bash "${mdb}" ${cleanup} ) 
+    dnsHorizon=( $( printf "${serviceOut}" | tail -n 1 ) )
+    if [[ $? != 0 ]]
+    then
+        printf "* * * Error - failed to configure splitHorizon for ${name}:\n" 
+        exit 1
+    fi
+    printf "${serviceOut}"| head -n 7
     printf "...added these hostnames to the manifest ${mdb}:\n" 
     printf "\t%s\n" "${dnsHorizon[0]}"
     printf "\t%s\n" "${dnsHorizon[1]}"
     printf "\t%s\n" "${dnsHorizon[2]}"
     printf "\n"
-    eval tail -5 "${mdb}"
+    eval tail -n 5 "${mdb}"
     printf "\n"
   fi
 done

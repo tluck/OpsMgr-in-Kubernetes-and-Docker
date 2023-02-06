@@ -20,20 +20,19 @@ type=$( kubectl get mdb/${name} -o jsonpath='{.spec.type}' 2>/dev/null )
 err1=$?
 if [[ $err1 != 0 ]]
 then
-    om=1
     serviceType=$( kubectl get om/${name} -o jsonpath='{.spec.externalConnectivity.type}' 2>/dev/null )
     err2=$?
     if [[ $err2 == 0 ]] 
     then
+        om=1
         serviceName=${name}-svc-ext
     fi
-else
-
-om=0
-if [[ "${type}" == "ShardedCluster" ]]
-then
-    serviceName=${name}-svc-external
-fi
+else # we assume RepSet but lets check for RepSet vs Sharded
+    om=0
+    if [[ "${type}" == "ShardedCluster" ]]
+    then
+        serviceName=${name}-svc-external
+    fi
 fi
 
 serviceType=$( kubectl get svc/${serviceName} -o jsonpath='{.spec.type}' 2>/dev/null )

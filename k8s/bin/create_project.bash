@@ -8,7 +8,7 @@ project=${1:-DemoProject}
 echo '{ "name" : "PROJECT", "orgId" : "ORGID" }' | sed -e"s/PROJECT/${project}/" -e"s/ORGID/${orgId}/" > data.json
 pid=$( curl --silent --user "${publicKey}:${privateKey}" --digest \
      --header "Content-Type: application/json" \
-     --request POST "${opsMgrUrl}/api/public/v1.0/groups?pretty=true" \
+     --request POST "${opsMgrExtUrl2}/api/public/v1.0/groups?pretty=true" \
      --data @data.json )
 errorCode=$( printf "%s" "$pid" | jq .errorCode )
 rm data.json

@@ -1,6 +1,7 @@
 #!/bin/bash
 
-source ./init.conf
+source init.conf
+source custom.conf
 
 orgname=${1:-DemoOrg}
 
@@ -15,7 +16,7 @@ echo '{
 curl --user "${publicKey}:${privateKey}" --digest \
   --header "Accept: application/json" \
   --header "Content-Type: application/json" \
-     --request PATCH "${opsMgrUrl}/api/public/v1.0/users/${userId}" \
+     --request PATCH "${opsMgrExtUrl2}/api/public/v1.0/users/${userId}" \
      --data @data.json > /dev/null 2>&1
 
 errorCode=$?

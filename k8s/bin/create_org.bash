@@ -12,7 +12,7 @@ echo '{ "name" : "NAME" }' | sed -e"s/ORGID/${orgId}/" -e"s/NAME/${orgname}/" > 
 oid=$( curl --silent --user "${publicKey}:${privateKey}" --digest \
  --header 'Accept: application/json' \
  --header 'Content-Type: application/json' \
- --request POST "${opsMgrUrl}/api/public/v1.0/orgs?pretty=true" \
+ --request POST "${opsMgrExtUrl2}/api/public/v1.0/orgs?pretty=true" \
  --data @data.json ) 
 #\ # -o ${ofile} > /dev/null 2>&1
 errorCode=$( printf "%s" "$oid" | jq .errorCode )

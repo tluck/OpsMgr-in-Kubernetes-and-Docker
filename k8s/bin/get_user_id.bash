@@ -9,7 +9,7 @@ file=/tmp/user.json
 curl --user "${publicKey}:${privateKey}" --digest \
   --header "Accept: application/json" \
   --header "Content-Type: application/json" \
-  --request GET "${opsMgrUrl}/api/public/v1.0/users/byName/${username}?pretty=true" \
+  --request GET "${opsMgrExtUrl2}/api/public/v1.0/users/byName/${username}?pretty=true" \
   -o ${file} > /dev/null 2>&1
 
 errorCode=$?

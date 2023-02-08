@@ -14,7 +14,7 @@ printf "%s\n" '{ "cidrBlock": "MYIP", "description": "my IP"}' | sed -e"s?MYIP?$
 curl --user "${publicApiKey}:${privateApiKey}" --digest \
 --header 'Accept: application/json' \
 --header 'Content-Type: application/json' \
---request POST "${opsMgrUrl}/api/public/v1.0/admin/whitelist?pretty=true" \
+--request POST "${opsMgrExtUrl2}/api/public/v1.0/admin/whitelist?pretty=true" \
 --data @data.json \
 -o "${file}" > /dev/null 2>&1
 rm data.json

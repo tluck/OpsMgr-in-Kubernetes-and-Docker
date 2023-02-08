@@ -14,7 +14,7 @@ echo '{ "username":     "sharath.rao@mongodb.com",
 curl -s --user "${publicKey}:${privateKey}" --digest \
   --header "Accept: application/json" \
   --header "Content-Type: application/json" \
-  --request POST "${opsMgrUrl}/api/public/v1.0/users" \
+  --request POST "${opsMgrExtUrl2}/api/public/v1.0/users" \
   --data @data.json \
   -o newuser.json > /dev/null 2>&1
 

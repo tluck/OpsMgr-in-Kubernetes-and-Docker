@@ -1,7 +1,7 @@
 #!/bin/bash
 
 source init.conf
-source custom.conf
+test -e custom.conf && source custom.conf
 
 adminUser="$(     kubectl get secret admin-user-credentials -o json | jq .data.Username |         sed -e's/"//g'| base64 --decode )"
 publicApiKey="$(  kubectl get secret ${namespace}-opsmanager-admin-key -o json | jq .data.publicKey  | sed -e's/"//g'| base64 --decode )"
@@ -19,7 +19,7 @@ then
 curl --insecure --user "${publicApiKey}:${privateApiKey}" --digest \
   --header "Accept: application/json" \
   --header "Content-Type: application/json" \
-  --request POST "${opsMgrUrl}/api/public/v1.0/admin/apiKeys?pretty=true" \
+  --request POST "${opsMgrExtUrl2}/api/public/v1.0/admin/apiKeys?pretty=true" \
   --data '{
     "desc" : "New API key for Global Testing",
     "roles" : [ "GLOBAL_OWNER" ]

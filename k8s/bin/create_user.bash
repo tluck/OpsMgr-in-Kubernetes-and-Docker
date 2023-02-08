@@ -1,5 +1,6 @@
 #!/bin/bash
 
+source custom.conf
 source init.conf
 
 echo '{ "username":     "sharath.rao@mongodb.com",

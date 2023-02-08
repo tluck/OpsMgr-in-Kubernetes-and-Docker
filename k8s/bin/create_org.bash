@@ -1,9 +1,9 @@
 #!/bin/bash
 
-source ./init.conf
+source init.conf
+source custom.conf
 
 orgname="${1:-DemoOrg}"
-
 ifile=data.json
 
 echo '{ "name" : "NAME" }' | sed -e"s/ORGID/${orgId}/" -e"s/NAME/${orgname}/" > ${ifile}
@@ -21,10 +21,10 @@ orgId=$( eval printf $oid)
 
 if [[ "${errorCode}" == "null" ]]
 then
-    initconf=$( sed -e '/orgId=/d' init.conf )
-    printf "%s\n" "${initconf}" > init.conf
+    conf=$( sed -e '/orgId=/d' custom.conf )
+    printf "%s\n" "${conf}" > custom.conf
     printf "\n%s\n" "Successfully created Organization: $orgName"
-    echo  orgId="$( printf "%s" "$oid" | jq .id )" | tee -a init.conf
+    echo  orgId="$( printf "%s" "$oid" | jq .id )" | tee -a custom.conf
 else
     printf "%s\n" "Error did not create org"
     exit 1

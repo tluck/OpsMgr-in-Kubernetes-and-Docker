@@ -1,6 +1,7 @@
 #!/bin/bash
 
-source ./init.conf
+source init.conf
+source custom.conf
 
 project=${1:-DemoProject}
 
@@ -12,13 +13,14 @@ pid=$( curl --silent --user "${publicKey}:${privateKey}" --digest \
 errorCode=$( printf "%s" "$pid" | jq .errorCode )
 rm data.json
 
+
 if [[ "${errorCode}" == "null" ]]
 then
-    initconf=$( sed -e "/${project}Id/d" -e "/${project}agentApiKey/d" init.conf )
-    printf "%s\n" "${initconf}" > init.conf
+    conf=$( sed -e "/${project}Id/d" -e "/${project}agentApiKey/d" custom.conf )
+    printf "%s\n" "${conf}" > custom.conf
     printf "\n%s\n" "Successfully created Project: $project"
-    echo  ${project}Id="$(          printf "%s" "$pid" | jq .id )"          | tee -a init.conf
-    echo  ${project}agentApiKey="$( printf "%s" "$pid" | jq .agentApiKey )" | tee -a init.conf
+    echo  ${project}Id="$(          printf "%s" "$pid" | jq .id )"          | tee -a custom.conf
+    echo  ${project}agentApiKey="$( printf "%s" "$pid" | jq .agentApiKey )" | tee -a custom.conf
 else
     detail=$( printf "%s" "$pid" | jq .detail )
     printf "%s\n" "Error did not create project: $detail"

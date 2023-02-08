@@ -1,11 +1,13 @@
 #!/bin/bash
 
-initconf=$( sed -e '/myNodeIp/d' init.conf )
-printf "%s\n" "${initconf}" > init.conf
+conf=$( sed -e '/myNodeIp/d' custom.conf )
+printf "%s\n" "${conf}" > custom.conf
 myNodeIp="$( kubectl get node/docker-desktop -o json |jq .status.addresses[0].address)"
-echo myNodeIp="${myNodeIp}" | tee -a init.conf
+echo myNodeIp="${myNodeIp}" | tee -a custom.conf
 
 source init.conf
+source custom.conf
+
 file="whitelist.json"
 
 printf "%s\n" '{ "cidrBlock": "MYIP", "description": "my IP"}' | sed -e"s?MYIP?${myNodeIp}/1?g" > data.json

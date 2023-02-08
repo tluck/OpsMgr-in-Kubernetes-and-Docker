@@ -1,6 +1,7 @@
 #!/bin/bash 
 
 source init.conf
+source custom.conf
 
 username="${1:-$user}"
 file=/tmp/user.json
@@ -13,10 +14,10 @@ curl --user "${publicKey}:${privateKey}" --digest \
 
 errorCode=$?
 
-initconf=$( sed -e '/userId/d' init.conf ) 
-printf "%s\n" "${initconf}" > init.conf
+conf=$( sed -e '/userId/d' custom.conf ) 
+printf "%s\n" "${conf}" > custom.conf
 printf "\n%s\n" "User $username is:"
-echo  userId="$( cat ${file} | jq .id )" | tee -a init.conf
+echo  userId="$( cat ${file} | jq .id )" | tee -a custom.conf
 
 exit $errorCode
 

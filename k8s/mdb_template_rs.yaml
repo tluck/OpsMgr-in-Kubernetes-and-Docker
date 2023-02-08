@@ -2,7 +2,7 @@
 apiVersion: mongodb.com/v1
 kind: MongoDB
 metadata:
-  name: NAME
+  name: PROJECT-NAME
   namespace: NAMESPACE
 spec:
   members: 3
@@ -10,7 +10,7 @@ spec:
   type: ReplicaSet
   opsManager:
     configMapRef:
-      name: NAME # Must match metadata.name in ConfigMap file
+      name: PROJECT-NAME # Must match metadata.name in ConfigMap file
   credentials: NAMESPACE-opsmanager-admin-key
   persistent: true
   podSpec:

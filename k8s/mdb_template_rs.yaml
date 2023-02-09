@@ -54,7 +54,7 @@ spec:
       #LDAP    # Specify the password with which MongoDB binds when connecting to an LDAP server. 
       #LDAP    #  This is a reference to a Secret Kubernetes Object containing one "password" key.
       #LDAP    bindQueryPasswordSecretRef:
-      #LDAP      name: "NAME-ldapsecret"
+      #LDAP      name: "PROJECT-NAME-ldapsecret"
       #LDAP    # Select True to validate the LDAP server configuration or False to skip validation.
       #LDAP    validateLDAPServerConfig: false
       #LDAP    # LDAP-formatted query URL template executed by MongoDB to obtain the LDAP groups that the user belongs to

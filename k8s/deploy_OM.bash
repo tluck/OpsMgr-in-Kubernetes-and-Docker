@@ -85,12 +85,12 @@ fi
 mdbom="mdbom_${name}.yaml"
 dbuserlc=$( printf "$dbuser" | tr '[:upper:]' '[:lower:]' )
 context=$( kubectl config current-context )
-#if [[ "${context}" == "docker-desktop" ]]
-#then
-#    replace="#Demo   "
-#else
+if [[ "${context}" == "docker-desktop" ]]
+then
+    replace="#Demo   "
+else
     replace="#Prod   "
-#fi
+fi
 if [[ $serviceType == "NodePort" ]]
 then 
     LB="#LB  "

@@ -11,7 +11,7 @@ source custom.conf
 file="whitelist.json"
 
 printf "%s\n" '{ "cidrBlock": "MYIP", "description": "my IP"}' | sed -e"s?MYIP?${myNodeIp}/1?g" > data.json
-curl --user "${publicApiKey}:${privateApiKey}" --digest \
+curl $curlOpts --user "${publicApiKey}:${privateApiKey}" --digest \
 --header 'Accept: application/json' \
 --header 'Content-Type: application/json' \
 --request POST "${opsMgrExtUrl2}/api/public/v1.0/admin/whitelist?pretty=true" \

@@ -12,13 +12,14 @@ kubectl create namespace ${namespace}
 kubectl config set-context $(kubectl config current-context) --namespace=${namespace}
 
 # Deploy the MongoDB Enterprise Operator
+myoperator="mongodb-${namespace}-operator.yaml"
 kubectl apply -f crds.yaml
 if [[ "${clusterType}" == "openshift" ]]
 then
     cat mongodb-enterprise-openshift.yaml | sed \
-    -e "s/namespace: mongodb/namespace: $namespace/"  > "mongodb-operator.yaml"
+    -e "s/namespace: mongodb/namespace: $namespace/"  > "${myoperator}"
 else
     cat mongodb-enterprise.yaml | sed \
-    -e "s/namespace: mongodb/namespace: $namespace/"  > "mongodb-operator.yaml"
+    -e "s/namespace: mongodb/namespace: $namespace/"  > "${myoperator}"
 fi
-kubectl apply -f mongodb-operator.yaml
+kubectl apply -f "${myoperator}"

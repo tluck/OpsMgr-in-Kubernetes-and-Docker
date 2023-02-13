@@ -46,66 +46,69 @@ deploy_Operator.bash
 
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Deploy OM and wait until Running status..."
-if [[ ${skipMakeCerts} = 1 || ${skipMakeCerts} == "-s" ]]
+if [[ ${skipMakeCerts} = 1 || ${skipMakeCerts} == "-s" || ${skipMakeCerts} == "-g" ]]
 then
-    skip="-s"
+    export skip="-g"
 fi
+
 if [[ "${context}" == "docker-desktop" ]]
 then
 docker pull "quay.io/mongodb/mongodb-enterprise-ops-manager:$omVersion" # issue with docker not (re)pulling the image
-deploy_OM.bash -n "opsmanager" $skip  # [-n name] [-c cpu] [-m memory] [-d disk] [-v version] [-p] [-s]
+deploy_OM.bash $skip  # [-n name] [-g] [-c cpu] [-m memory] [-d disk] [-v version] 
 else
-deploy_OM.bash -n "opsmanager" $skip -c 0.5 -m 1Gi -d 4Gi -v "$omVersion"
+deploy_OM.bash $skip -n "${omName}" -c "1.00" -m "4Gi" -d "40Gi" -v "$omVersion"
 fi
-
-#printf "\n%s\n" "__________________________________________________________________________________________"
-#printf "%s\n" "Create the first Org in OM ..."
-#deploy_org.bash
 
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Create the Backup Oplog1 DB for OM ..."
 if [[ "${context}" == "docker-desktop" ]]
 then
-    deploy_Database.bash -n "opsmanager-oplog"      -c "0.33" -m "300Mi"        -v "$appdbVersion"
+    deploy_Database.bash -n "${omName}-oplog" $skip      -c "0.33" -m "300Mi"         -v "$appdbVersion"
 else
-    deploy_Database.bash -n "opsmanager-oplog"      -c "0.50" -m "2Gi"          -v "$appdbVersion"
+    deploy_Database.bash -n "${omName}-oplog" $skip      -c "0.50" -m "4Gi" -d "40Gi" -v "$appdbVersion"
 fi
 
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Create the Backup BlockStore1 DB for OM ..."
 if [[ "${context}" == "docker-desktop" ]]
 then
-    deploy_Database.bash -n "opsmanager-blockstore" -c "0.33" -m "300Mi"        -v "$appdbVersion"
+    deploy_Database.bash -n "${omName}-blockstore" $skip -c "0.33" -m "300Mi"         -v "$appdbVersion"
 else
-    deploy_Database.bash -n "opsmanager-blockstore" -c "0.50" -m "2Gi"          -v "$appdbVersion"
+    deploy_Database.bash -n "${omName}-blockstore" $skip -c "0.50" -m "4Gi" -d "40Gi" -v "$appdbVersion"
 fi
 
+printf "\n%s\n" "__________________________________________________________________________________________"
+printf "%s\n" "Create a custom Org to put your projects in ..."
+# Create the Org and put info in custom.conf
+bin/deploy_org.bash # -o NewOrgName
+source custom.conf
 
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Create a Production ReplicaSet Cluster with a splitHorizon configuration for External access ..."
+projectName="myProject1"
 if [[ "${context}" == "docker-desktop" ]]
 then
-    deploy_Database.bash -n "myreplicaset" -l "${ldapType}" -c "0.50" -m "400Mi"        -v "6.0.1-ent"
-    replicasetName="myreplicaset"
+    deploy_Database.bash -n "myreplicaset" $skip -l "${ldapType}" -c "0.50" -m "400Mi"         -v "6.0.1-ent" -o "${orgId}" -p "${projectName}"
+    cluster1="${projectName}-myreplicaset"
 else
-    deploy_Database.bash -n "myreplicaset" -l "${ldapType}" -c "1.00" -m "4Gi" -d "4Gi" -v "6.0.1-ent"
-    replicasetName="myreplicaset"
+    deploy_Database.bash -n "myreplicaset" $skip -l "${ldapType}" -c "1.00" -m "4Gi" -d "20Gi" -v "6.0.1-ent" -o "${orgId}" -p "${projectName}"
+    cluster1="${projectName}-myreplicaset"
 fi
 
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Create a Production Sharded Cluster  ..."
+projectName="myProject2"
 if [[ "${context}" == "docker-desktop" ]]
 then
     printf "\n%s\n" " **** skipping sharded deployment - not enough resources ***"
-    # deploy_DatabaseSharded.bash -n "mysharded"    -c "0.33" -m "400Mi"        -s "1"        -v "$mdbVersion"
+    # deploy_DatabaseSharded.bash -n "mysharded" $skip -l "${ldapType}" -c "0.33" -m "400Mi"        -s "1"        -v "${mdbVersion}" -o "${orgId}" -p "${projectName}"
 else
-
-    deploy_DatabaseSharded.bash -n "mysharded"      -c "1.00" -m "2Gi" -d "4Gi" -s "2" -r "2" -v "$mdbVersion"
-    shardedName="mysharded"
+    deploy_DatabaseSharded.bash -n "mysharded" $skip -l "${ldapType}" -c "1.00" -m "4Gi" -d "4Gi" -s "2" -r "2" -v "${mdbVersion}" -o "${orgId}" -p "${projectName}"
+    cluster2="${projectName}-mysharded"
 fi
 
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Update init.conf with IPs and put k8s internal hostnames in /etc/hosts ..."
-update_initconf_hostnames.bash "opsmanager" "$replicasetName" "$shardedName"
+update_initconf_hostnames.bash "${omName}" "$cluster1" "$cluster2"
 
 date

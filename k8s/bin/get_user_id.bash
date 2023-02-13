@@ -6,7 +6,7 @@ source custom.conf
 username="${1:-$user}"
 file=/tmp/user.json
 
-curl --user "${publicKey}:${privateKey}" --digest \
+curl $curlOpts --user "${publicKey}:${privateKey}" --digest \
   --header "Accept: application/json" \
   --header "Content-Type: application/json" \
   --request GET "${opsMgrExtUrl2}/api/public/v1.0/users/byName/${username}?pretty=true" \
@@ -16,8 +16,8 @@ errorCode=$?
 
 conf=$( sed -e '/userId/d' custom.conf ) 
 printf "%s\n" "${conf}" > custom.conf
-printf "\n%s\n" "User $username is:"
-echo  userId="$( cat ${file} | jq .id )" | tee -a custom.conf
+#printf "\n%s\n" "User $username is:"
+echo  userId="$( cat ${file} | jq .id )" >> custom.conf
 
 exit $errorCode
 

@@ -4,7 +4,7 @@ d=$( dirname "$0" )
 cd "${d}"
 source init.conf
 
-while getopts 'n:v:a:c:m:d:sh' opt
+while getopts 'n:v:a:c:m:d:gh' opt
 do
   case "$opt" in
     n) name="$OPTARG" ;;
@@ -13,15 +13,16 @@ do
     c) cpu="$OPTARG" ;;
     m) mem="$OPTARG" ;;
     d) dsk="$OPTARG" ;;
-    s) skipMakeCerts=1 ;; 
+    g) skipMakeCerts=1 ;;
     ?|h)
-      echo "Usage: $(basename $0) [-n name] [-v omVersion][-a appdbVersion] [-c cpu] [-m memory] [-d disk] [-p] [-s]"
+      echo "Usage: $(basename $0) [-n name] [-g] [-v omVersion][-a appdbVersion] [-c cpu] [-m memory] [-d disk]"
       exit 1
       ;;
   esac
 done
 shift "$(($OPTIND -1))"
 
+# for OM App-DB
 name=${name:-opsmanager}
 cpu="${cpu:-0.25}"
 mem="${mem:-400Mi}"
@@ -43,7 +44,7 @@ then
     printf "\n%s\n" "__________________________________________________________________________________________"
     printf "%s\n" "Getting Certs status..."
     # Generate CA and create certs for OM and App-db
-    rm "${PWD}/certs/${name}"*.* "${PWD}/certs/queryable-backup.pem" > /dev/null 2>&1
+    rm "${PWD}/certs/${name}-[svc,db]".* "${PWD}/certs/queryable-backup.pem" > /dev/null 2>&1
     "${PWD}/certs/make_OM_certs.bash" ${name}
     appdb=${name}-db
     "${PWD}/certs/make_db_certs.bash" ${appdb} 
@@ -100,20 +101,33 @@ fi
 # serviceType="LoadBalancer"
 # make manifest from template
 cat mdbom_template.yaml | sed \
-    -e "s/$tlsc/$tlsr/" \
     -e "s/VERSION/$omVer/" \
     -e "s/APPDBVER/$appdbVer/" \
-    -e "s/MEM/$mem/" \
-    -e "s/CPU/$cpu/" \
-    -e "s/DISK/$dsk/" \
-    -e "s/DBUSER/$dbuserlc/" \
-    -e "s/#NP  /$NP/" \
-    -e "s/#LB  /$LB/" \
     -e "s/MMSADMINEMAILADDR/$user/" \
     -e "s/MMSEMAIL/$mmsemail/" \
     -e "s/MMSMAILHOSTNAME/$mmsmailhostname/" \
     -e "s/MMSMAILUSERNAME/$mmsmailusername/" \
     -e "s/MMSMAILPASSWORD/$mmsmailpassword/" \
+    -e "s/MMSUSERSVCCLASS/$mmsusersvcclass/" \
+    -e "s/MMSLDAPBINDDN/$mmsldapbinddn/" \
+    -e "s/MMSLDAPBINDPASSWORD/$mmsldapbindpassword/" \
+    -e "s/MMSLDAPGLOBALROLEOWNER/$mmsldapglobalroleowner/" \
+    -e "s/MMSLDAPGROUPBASEDN/$mmsldapgroupbasedn/" \
+    -e "s/MMSLDAPGROUPMEMBER/$mmsldapgroupmember/" \
+    -e "s?MMSLDAPURL?$mmsldapurl?" \
+    -e "s/MMSLDAPUSERBASEDN/$mmsldapuserbasedn/" \
+    -e "s/MMSLDAPUSEREMAIL/$mmsldapuseremail/" \
+    -e "s/MMSLDAPUSERFIRSTNAME/$mmsldapuserfirstname/" \
+    -e "s/MMSLDAPUSERLASTNAME/$mmsldapuserlastname/" \
+    -e "s/MMSLDAPUSERGROUP/$mmsldapusergroup/" \
+    -e "s/MMSLDAPUSERSEARCHATTRIBUTE/$mmsldapusersearchattribute/" \
+    -e "s/DBUSER/$dbuserlc/" \
+    -e "s/CPU/$cpu/" \
+    -e "s/MEM/$mem/" \
+    -e "s/DISK/$dsk/" \
+    -e "s/#NP  /$NP/" \
+    -e "s/#LB  /$LB/" \
+    -e "s/$tlsc/$tlsr/" \
     -e "s/$replace//" \
     -e "s/NAME/$name/" > "${mdbom}"
 

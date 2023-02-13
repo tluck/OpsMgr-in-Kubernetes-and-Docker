@@ -13,6 +13,8 @@ spec:
     name: "NAME" # Match to MongoDB resource using authentication
   roles:
     - db: "admin"
+      name: "root"
+    - db: "admin"
       name: "clusterAdmin"
     - db: "admin"
       name: "userAdminAnyDatabase"

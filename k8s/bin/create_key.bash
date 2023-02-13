@@ -9,14 +9,14 @@ privateApiKey="$( kubectl get secret ${namespace}-opsmanager-admin-key -o json |
 
     conf=$( sed -e '/adminUser/d' -e '/privateApiKey/d' -e '/publicApiKey/d'  custom.conf )
     printf "%s\n" "$conf" > custom.conf
-    echo  publicApiKey="${publicApiKey}"   | tee custom.conf
+    echo  publicApiKey="${publicApiKey}"   | tee -a custom.conf
     echo  privateApiKey="${privateApiKey}" | tee -a custom.conf
 
 if [[ $publicKey == "" ]]
 then
     file=/tmp/key.json
     rm "${file}" > /dev/null 2>&1
-curl --insecure --user "${publicApiKey}:${privateApiKey}" --digest \
+curl $curlOpts --insecure --user "${publicApiKey}:${privateApiKey}" --digest \
   --header "Accept: application/json" \
   --header "Content-Type: application/json" \
   --request POST "${opsMgrExtUrl2}/api/public/v1.0/admin/apiKeys?pretty=true" \

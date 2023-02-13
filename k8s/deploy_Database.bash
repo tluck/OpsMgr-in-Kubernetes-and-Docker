@@ -4,7 +4,7 @@ d=$( dirname "$0" )
 cd "${d}"
 source init.conf
 
-while getopts 'n:c:m:d:v:l:o:p:xh' opt
+while getopts 'n:c:m:d:v:l:o:p:g:xh' opt
 do
   case "$opt" in
     n) name="$OPTARG" ;;
@@ -15,9 +15,10 @@ do
     l) ldap="$OPTARG" ;;
     o) orgId="$OPTARG";;
     p) projectName="$OPTARG";;
+    g) skipMakeCerts=1 ;;
     x) x="1" ;; # cleanup
     ?|h)
-      echo "Usage: $(basename $0) [-n name] [-c cpu] [-m memory] [-d disk] [-c arg] [-l ldap[s]] [-o orgId] -p projectName] [-x]"
+      echo "Usage: $(basename $0) [-n name] [-c cpu] [-m memory] [-d disk] [-v ver] [-l ldap[s]] [-o orgId] [-p projectName] [-g] [-x] [-s shards] [-r mongos]"
       exit 1
       ;;
   esac
@@ -32,6 +33,7 @@ ver="${ver:-$mdbVersion}"
 cleanup=${x:-0}
 projectName="${projectName:-$name}"
 fullname=$( printf "${projectName}-${name}"| tr '[:upper:]' '[:lower:]' )
+skipMakeCerts=${skipMakeCerts:-0}
 
 # make manifest from template
 mdb="mdb_${fullname}.yaml"
@@ -61,10 +63,10 @@ if [[ ${ldap} == 'ldap' || ${ldap} == 'ldaps' ]]
 then
   cat mdb_template_rs.yaml | sed \
       -e "s|$tlsc|$tlsr|" \
+      -e "s|VERSION|$ver|" \
       -e "s|MEM|$mem|" \
       -e "s|CPU|$cpu|" \
       -e "s|DISK|$dsk|" \
-      -e "s|VERSION|$ver|" \
       -e "s|NAMESPACE|$namespace|" \
       -e "s|#LDAP  ||" \
       -e "s|#LDAPT |$LDAPT|" \
@@ -80,13 +82,13 @@ then
       -e "s|PROJECT-NAME|$fullname|" > "$mdb"
 else
   cat mdb_template_rs.yaml | sed \
-      -e "s|#X509  ||" \
       -e "s|$tlsc|$tlsr|" \
+      -e "s|VERSION|$ver|" \
       -e "s|MEM|$mem|" \
       -e "s|CPU|$cpu|" \
       -e "s|DISK|$dsk|" \
-      -e "s|VERSION|$ver|" \
       -e "s|NAMESPACE|$namespace|" \
+      -e "s|#X509  ||" \
       -e "s|PROJECT-NAME|$fullname|" > "$mdb"
 fi
 
@@ -109,15 +111,14 @@ fi
 # clean up any previous certs and services
 if [[ ${cleanup} = 1 ]]
 then
-  #kubectl delete secret "${name}-cert" > /dev/null 2>&1
-  #kubectl delete csr $( kubectl get csr | grep "${name}" | awk '{print $1}' )
-  kubectl delete mdb "${fullname}"
-  kubectl delete pvc $( kubectl get pvc | grep "${fullname}-" | awk '{print $1}' )
-  kubectl delete svc $( kubectl get svc | grep "${fullname}-" | awk '{print $1}' )
-  kubectl delete configmaps $( kubectl get configmaps | grep "${fullname} " | awk '{print $1}' )
-  kubectl delete secrets $( kubectl get secrets | grep "${fullname}-" | awk '{print $1}' )
+  #kubectl delete secret "${fullname}-cert" > /dev/null 2>&1
+  #kubectl delete csr $( kubectl get csr | grep "${fullname}" | awk '{print $1}' )
+  kubectl delete mdb "${fullname}" 2>&1 > /dev/null
+  kubectl delete pvc $( kubectl get pvc | grep "${fullname}-" | awk '{print $1}' ) 2>&1 > /dev/null
+  kubectl delete svc $( kubectl get svc | grep "${fullname}-" | awk '{print $1}' ) 2>&1 > /dev/null
+  kubectl delete configmaps $( kubectl get configmaps | grep "${fullname} " | awk '{print $1}' ) 2>&1 > /dev/null
+  kubectl delete secrets $( kubectl get secrets | grep "${fullname}-" | awk '{print $1}' ) 2>&1 > /dev/null
 fi
-sleep 5
 
 # create new certs if the service does not exist
 # check to see if the svc needs to be created
@@ -145,7 +146,7 @@ do
 done
 
 # Create map for OM Org/Project
-if [[ ${tls} == 1 ]]
+if [[ ${tls} == 1 && ${skipMakeCerts} == 0 ]]
 then
 kubectl delete configmap "${fullname}" > /dev/null 2>&1
 if [[ $orgId != "" ]]
@@ -174,9 +175,8 @@ else
   "${PWD}/certs/make_db_certs.bash" "${fullname}"
 fi
 # Create a secret for the member certs for TLS
+# kubectl delete secret "mdb-${fullname}-cert" "mdb-${fullname}-cert-pem" > /dev/null 2>&1
 kubectl delete secret "mdb-${fullname}-cert" > /dev/null 2>&1
-# sleep 3
-# kubectl get secrets
 kubectl create secret tls "mdb-${fullname}-cert" \
     --cert="${PWD}/certs/${fullname}.crt" \
     --key="${PWD}/certs/${fullname}.key"
@@ -196,25 +196,24 @@ do
         --key="${PWD}/certs/${fullname}-${ctype}.key"
 done
 
-
 # Create a map for the cert
 kubectl delete configmap ca-pem > /dev/null 2>&1
 kubectl create configmap ca-pem \
     --from-file="ca-pem=${PWD}/certs/ca.pem"
 else
-if [[ $orgId != "" ]]
-then
-kubectl delete configmap "${fullname}" > /dev/null 2>&1
-kubectl create configmap "${fullname}" \
+  if [[ $orgId != "" ]]
+  then
+    kubectl delete configmap "${fullname}" > /dev/null 2>&1
+    kubectl create configmap "${fullname}" \
     --from-literal="orgId=${orgId}" \
     --from-literal="baseUrl=${opsMgrUrl}" \
     --from-literal="projectName=${projectName}"
-else
-kubectl delete configmap "${fullname}" > /dev/null 2>&1
-kubectl create configmap "${fullname}" \
+  else
+    kubectl delete configmap "${fullname}" > /dev/null 2>&1
+    kubectl create configmap "${fullname}" \
     --from-literal="baseUrl=${opsMgrUrl}" \
     --from-literal="projectName=${projectName}"
-fi
+  fi
 fi # tls
 
 # Create a a secret for db user credentials

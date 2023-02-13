@@ -7,3 +7,4 @@
 *.csr
 *.orig
 k8s/init.conf
+k8s/custom.conf

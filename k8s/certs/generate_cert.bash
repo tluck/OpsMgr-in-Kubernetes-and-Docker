@@ -16,7 +16,7 @@ dnsHorizon=("$@")
 
 if [[ ! -e "${name}.pem" ]]
 then
-printf "%s\n" "Making ${name}.pem for ${cname} and ${dnsHorizon[@]} ..."
+printf "\n%s\n" "Making ${name}.pem for ${cname} and ${dnsHorizon[@]} ..."
 
 # generate request
 if [[ "${dnsHorizon[0]}" != "" ]]
@@ -71,6 +71,6 @@ cat "${name}.key" "${name}.crt" > "${name}.pem"
 #rm ${name}.crt
 #rm ${name}.csr
 
-printf "%s\n\n" "Made ${name}.pem"
+printf "%s\n" "Made ${name}.pem"
 fi
 

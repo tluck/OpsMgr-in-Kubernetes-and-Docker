@@ -21,14 +21,14 @@ spec:
               resources:  # 3Gi a good size for a demo -- use 5Gi or more for larger clusters in production
                 limits:
                   #Demo   cpu: "0.75"
-                  #Prod   cpu: "3.0"
+                  #Prod   cpu: "4.0"
                   #Demo   memory: 3Gi
-                  #Prod   memory: 8Gi
+                  #Prod   memory: 12Gi
                 requests:
                   #Demo   cpu: "0.75"
                   #Prod   cpu: "2.0"
                   #Demo   memory: 3Gi
-                  #Prod   memory: 5Gi
+                  #Prod   memory: 8Gi
 
   #TLS security: # enables TLS for Ops Manager allowing it to serve traffic over HTTPS
   #TLS   tls:
@@ -100,6 +100,19 @@ spec:
     mms.mail.transport: smtp
     mms.user.bypassInviteForExistingUsers: "true"
     mms.publicApi.whitelistEnabled: "false"
+    #mms.userSvcClass: MMSUSERSVCCLASS
+    mms.ldap.bindDn: "MMSLDAPBINDDN"
+    mms.ldap.bindPassword: MMSLDAPBINDPASSWORD
+    mms.ldap.global.role.owner: "MMSLDAPGLOBALROLEOWNER"
+    mms.ldap.group.baseDn: "MMSLDAPGROUPBASEDN"
+    mms.ldap.group.member: MMSLDAPGROUPMEMBER
+    mms.ldap.url: "MMSLDAPURL"
+    mms.ldap.user.baseDn: "MMSLDAPUSERBASEDN"
+    mms.ldap.user.email: "MMSLDAPUSEREMAIL"
+    mms.ldap.user.firstName: MMSLDAPUSERFIRSTNAME
+    mms.ldap.user.lastName: MMSLDAPUSERLASTNAME
+    #mms.ldap.user.group: MMSLDAPUSERGROUP
+    mms.ldap.user.searchAttribute: MMSLDAPUSERSEARCHATTRIBUTE
     automation.versions.source: remote # hybrid
     mongodb.release.autoDownload: "false" # stop downloads of binaries (unless you need to demo recovery)
     mongodb.release.autoDownload.enterprise: "true"

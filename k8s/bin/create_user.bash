@@ -11,7 +11,7 @@ echo '{ "username":     "sharath.rao@mongodb.com",
         "roles": [ { "orgId": "ORGID", "roleName": "ORG_OWNER" } ]
       }' | sed -e"s/ORGID/${orgId}/" > data.json
 
-curl -s --user "${publicKey}:${privateKey}" --digest \
+curl $curlOpts -s --user "${publicKey}:${privateKey}" --digest \
   --header "Accept: application/json" \
   --header "Content-Type: application/json" \
   --request POST "${opsMgrExtUrl2}/api/public/v1.0/users" \

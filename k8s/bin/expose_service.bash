@@ -43,13 +43,13 @@ sleep 5
 n=0
 while [ $n -lt 12 ]
 do
-    kubectl get svc ${name}-0 ${name}-1 ${name}-2 |grep pending
+    kubectl get svc ${name}-0 ${name}-1 ${name}-2 |grep pending 2>&1 > /dev/null
     if [[ $? = 1 ]]
     then
         kubectl get svc ${name}-0 ${name}-1 ${name}-2 
         break
     fi
-    printf "%s\n" "Sleeping 15 seconds to allow IP/Hostnames to be created"
+#    printf "%s\n" "Sleeping 15 seconds to allow IP/Hostnames to be created"
     sleep 15
     n=$((n+1))
 done

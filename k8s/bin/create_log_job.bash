@@ -4,7 +4,7 @@ source init.conf
 
 project=${1:-MYREPLICASET}
 
-pid=$( curl --silent --user "${publicApiKey}:${privateApiKey}" --digest \
+pid=$( curl $curlOpts --silent --user "${publicApiKey}:${privateApiKey}" --digest \
  --header "Accept: application/json" \
  --header "Content-Type: application/json" \
  --request GET "${opsMgrExtUrl2}/api/public/v1.0/groups/byName/${project}?pretty=true" |jq .id )
@@ -12,7 +12,7 @@ pid=$( curl --silent --user "${publicApiKey}:${privateApiKey}" --digest \
 #pid=$( cat p.json| jq .id )
 projectId=$( eval printf $pid)
 
-jobid=$( curl --silent --user "${publicKey}:${privateKey}" --digest \
+jobid=$( curl $curlOpts --silent --user "${publicKey}:${privateKey}" --digest \
  --header "Accept: application/json" \
  --header "Content-Type: application/json" \
  --request POST "${opsMgrExtUrl2}/api/public/v1.0/groups/${projectId}/logCollectionJobs?pretty=true" \
@@ -27,7 +27,7 @@ jobid=$( curl --silent --user "${publicKey}:${privateKey}" --digest \
 
 printf "%s" "$jobid"
 
-curl --silent --user "${publicKey}:${privateKey}" --digest \
+curl $curlOpts --silent --user "${publicKey}:${privateKey}" --digest \
  --header "Accept: application/json" \
  --header "Content-Type: application/json" \
  --request GET "${opsMgrExtUrl2}/api/public/v1.0/groups/${projectId}/logCollectionJobs?pretty=true" 

@@ -82,11 +82,11 @@ spec:
           - name: mongodb-enterprise-database
             resources:
               limits:
-                cpu: "DBCPU"
-                memory: "DBMEM"
+                cpu: "RSCPU"
+                memory: "RSMEM"
     persistence:
       single:
-        storage: DISK
+        storage: RSDISK
       # multiple:
       #   # if the child of "multiple" is omitted then the default size will be used.
       #   # 16G for "data", 1G for "journal", 3Gb for "logs"

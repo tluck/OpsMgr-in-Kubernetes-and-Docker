@@ -4,18 +4,20 @@ d=$( dirname "$0" )
 cd "${d}"
 source init.conf
 
-while getopts 'n:v:a:c:m:d:gh' opt
+while getopts 'n:v:a:c:m:d:gzh' opt
 do
   case "$opt" in
     n) name="$OPTARG" ;;
     v) omVer="$OPTARG" ;;
     a) appdbVer="$OPTARG" ;;
-    c) cpu="$OPTARG" ;;
-    m) mem="$OPTARG" ;;
-    d) dsk="$OPTARG" ;;
+    c) rscpu="$OPTARG" ;;
+    m) rsmem="$OPTARG" ;;
+    d) rsdsk="$OPTARG" ;;
     g) skipMakeCerts=1 ;;
+    t) demo=1 ;;
     ?|h)
-      echo "Usage: $(basename $0) [-n name] [-g] [-v omVersion][-a appdbVersion] [-c cpu] [-m memory] [-d disk]"
+      echo "Usage: $(basename $0) [-n name] [-v omVersion] [-a appdbVersion] [-c cpu] [-m memory] [-d disk] [-g] [-t]"
+      echo "     use -l for limited memory (docker) "
       exit 1
       ;;
   esac
@@ -24,9 +26,26 @@ shift "$(($OPTIND -1))"
 
 # for OM App-DB
 name=${name:-opsmanager}
-cpu="${cpu:-0.25}"
-mem="${mem:-400Mi}"
-dsk="${dsk:-2Gi}"
+if [[ $demo == 1 ]]
+then
+    replace="#Demo   "
+    omcpu=${omcpu:-"0.75"}
+    ommem=${ommem:-"3Gi"}
+    bdcpu=${bdcpu:-"0.75"}
+    bdmem=${bdmem:-"3Gi"}
+    bddsk=${bddsk:-"4Gi"}
+else
+    replace="NOTHING "
+    omcpu=${omcpu:-"2.00"}
+    ommem=${ommem:-"8Gi"}
+    bdcpu=${bdcpu:-"2.00"}
+    bdmem=${bdmem:-"8Gi"}
+    bddsk=${bddsk:-"40Gi"}
+fi
+
+rscpu="${rscpu:-0.25}"
+rsmem="${rsmem:-400Mi}"
+rsdsk="${rsdsk:-2Gi}"
 omVer="${omVer:-$omVersion}"
 appdbVer="${appdbVer:-$appdbVersion}"
 skipMakeCerts=${skipMakeCerts:-0}
@@ -86,12 +105,7 @@ fi
 mdbom="mdbom_${name}.yaml"
 dbuserlc=$( printf "$dbuser" | tr '[:upper:]' '[:lower:]' )
 context=$( kubectl config current-context )
-if [[ "${context}" == "docker-desktop" ]]
-then
-    replace="#Demo   "
-else
-    replace="#Prod   "
-fi
+
 if [[ $serviceType == "NodePort" ]]
 then 
     LB="#LB  "
@@ -122,9 +136,14 @@ cat mdbom_template.yaml | sed \
     -e "s/MMSLDAPUSERGROUP/$mmsldapusergroup/" \
     -e "s/MMSLDAPUSERSEARCHATTRIBUTE/$mmsldapusersearchattribute/" \
     -e "s/DBUSER/$dbuserlc/" \
-    -e "s/CPU/$cpu/" \
-    -e "s/MEM/$mem/" \
-    -e "s/DISK/$dsk/" \
+    -e "s/RSCPU/$rscpu/" \
+    -e "s/RSMEM/$rsmem/" \
+    -e "s/RSDISK/$rsdsk/" \
+    -e "s/BDCPU/$bdcpu/" \
+    -e "s/BDMEM/$bdmem/" \
+    -e "s/BDDISK/$bddsk/" \
+    -e "s/OMCPU/$omcpu/" \
+    -e "s/OMMEM/$ommem/" \
     -e "s/#NP  /$NP/" \
     -e "s/#LB  /$LB/" \
     -e "s/$tlsc/$tlsr/" \

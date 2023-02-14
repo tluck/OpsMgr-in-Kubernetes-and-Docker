@@ -4,13 +4,13 @@
 
 - This demo will install into a Kubernetes cluster:
   * Ops Manager v6 
-  * its app DB
-  * a blockstore DB for backups
-  * an oplog DB for continous backups
-- 2 Production DBs
+  * its Application DB - aka App DB - a Cluster for OM data
+  * a blockstore Cluster for backups
+  * an oplog Cluster for continous backups
+- 2 Production Clusters
   * a example replica set cluster
   * a example sharded cluster.
-  * TLS Certs are created using a self-signed CA.
+  * note: TLS Certs are created using a self-signed CA.
   * queriable backup is available too!
 	  
 
@@ -40,16 +40,20 @@ the **_launch.bash** script runs several "deploy" scripts for each of the follow
   		- AppDB 
   	- Monitors the progress of OM for Readiness
 
-- Script 3: **deploy_Database.bash** and **deploy_DatabaseSharded.bash**
-	- Deploy a DB - three more are created
-	- Oplog1 and Blockstore1 dbs complete the Backup setup for OM
-	- myreplicaset is a "Production" DB and has a splitHorizon configuration for external cluster access
+- Script 3: **deploy_Cluster.bash** 
+	- Deploy a Cluster - a few more clusters are created
+	- the Oplog and Blockstore ReplicaSet Clusters complete the Backup setup for OM
+	- myreplicaset is a "Production" ReplicaSet Cluster and has a splitHorizon configuration for external cluster access
 		- connect via ```Misc/connect_external.bash``` script
+	- mysharded is a "Production" Sharded Cluster using either NodePort or LoadBalancer for external cluster access
 	- Monitors the progress until the pods are ready
 	
 ### Step 3. Login to Ops Manager
-- login to OM at https://opsmanager-svc.mongodb.svc.cluster.local:8443 
-- the admin user credentials are set in ```init.conf```
+- login to OM at 
+    use https://opsmanager-svc.mongodb.svc.cluster.local:8443 if using LoadBalancer method for service exposure
+    or  
+    use https://opsmanager-svc.mongodb.svc.cluster.local:32443 is using NopePort method for service exposure
+- the admin user credentials and various other settings are held in ```init.conf```
 	- the scripts also create a hostname entry such as:
 	```127.0.0.1       opsmanager-svc.mongodb.svc.cluster.local # opsmgr```
 	into the ```/etc/hosts``` file

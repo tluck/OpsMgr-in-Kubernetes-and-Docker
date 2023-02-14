@@ -20,30 +20,41 @@ do
     s) shards="$OPTARG" ;;
     r) mongos="$OPTARG" ;;
     ?|h)
-      echo "Usage: $(basename $0) [-n name] [-c cpu] [-m memory] [-d disk] [-v ver] [-l ldap[s]] [-o orgId] [-p projectName] [-g] [-x] [-s shards] [-r mongos]"
+      echo "Usage: $(basename $0) [-n name] [-c cpu] [-m memory] [-d disk] [-v ver] [-s shards] [-r mongos] [-l ldap[s]] [-o orgId] [-p projectName] [-g] [-x]"
+      echo "Usage:      use -x for total clean up before (re)deployment"
+      echo "Usage:      use -g to not recreate the certs."
       exit 1
       ;;
   esac
 done
 shift "$(($OPTIND -1))"
 
-name="${name:-mysharded}"
+if [[ $shards != "" || $mongos != "" ]]
+then
+    sharded=1
+    shards="${shards:-2}"
+    mongos="${mongos:-1}"
+    name="${name:-mysharded}"
+    template="mdb_template_sh.yaml"
+    # mongos and configServer resources (good for a demo) 
+    msmem="2Gi"
+    mscpu="0.5"
+    csmem="2Gi"
+    cscpu="0.5"
+else
+    name="${name:-myreplicset}"
+    template="${name:-myreplicaset}"
+    template="mdb_template_rs.yaml"
+fi
+
 ver="${ver:-$mdbVersion}"
 mem="${mem:-2Gi}"
 cpu="${cpu:-1.0}"
 dsk="${dsk:-1Gi}"
-shards="${shards:-2}"
-mongos="${mongos:-1}"
 cleanup=${x:-0}
 projectName="${projectName:-$name}"
 fullname=$( printf "${projectName}-${name}"| tr '[:upper:]' '[:lower:]' )
 skipMakeCerts=${skipMakeCerts:-0}
-
-# mongos and configServer resources (good for a demo)
-msmem="2Gi"
-mscpu="0.5"
-csmem="2Gi"
-cscpu="0.5"
 
 # make manifest from template
 mdb="mdb_${fullname}.yaml"
@@ -71,47 +82,47 @@ fi
 
 if [[ ${ldap} == 'ldap' || ${ldap} == 'ldaps' ]]
 then
-    cat mdb_template_sh.yaml | sed \
-      -e "s|$tlsc|$tlsr|" \
-      -e "s|VERSION|$ver|" \
-      -e "s|DBMEM|$mem|" \
-      -e "s|DBCPU|$cpu|" \
-      -e "s|DISK|$dsk|" \
-      -e "s|SHARDS|$shards|" \
-      -e "s|MONGOS|$mongos|" \
-      -e "s|CSCPU|$cscpu|" \
-      -e "s|CSMEM|$csmem|" \
-      -e "s|MSCPU|$mscpu|" \
-      -e "s|MSMEM|$msmem|" \
-      -e "s|NAMESPACE|$namespace|" \
-      -e "s|#LDAP  ||" \
-      -e "s|#LDAPT |$LDAPT|" \
-      -e "s|LDAPTLS|$ldaptls|" \
-      -e "s|LDAPBINDQUERYUSER|$ldapBindQueryUser|" \
-      -e "s|LDAPAUTHZQUERYTEMPLATE|$ldapAuthzQueryTemplate|" \
-      -e "s|LDAPUSERTODNMAPPING|$ldapUserToDNMapping|" \
-      -e "s|LDAPTIMEOUTMS|$ldapTimeoutMS|" \
-      -e "s|LDAPUSERCACHEINVALIDATIONINTERVAL|$ldapUserCacheInvalidationInterval|" \
-      -e "s|LDAPSERVER|$ldapServer|" \
-      -e "s|LDAPCERTMAPNAME|$ldapCertMapName|" \
-      -e "s|LDAPKEY|$ldapKey|" \
-      -e "s|PROJECT-NAME|$fullname|" > "$mdb"
+  cat ${template} | sed \
+    -e "s|$tlsc|$tlsr|" \
+    -e "s|VERSION|$ver|" \
+    -e "s|RSMEM|$mem|" \
+    -e "s|RSCPU|$cpu|" \
+    -e "s|RSDISK|$dsk|" \
+    -e "s|SHARDS|$shards|" \
+    -e "s|MONGOS|$mongos|" \
+    -e "s|CSCPU|$cscpu|" \
+    -e "s|CSMEM|$csmem|" \
+    -e "s|MSCPU|$mscpu|" \
+    -e "s|MSMEM|$msmem|" \
+    -e "s|NAMESPACE|$namespace|" \
+    -e "s|#LDAP  ||" \
+    -e "s|#LDAPT |$LDAPT|" \
+    -e "s|LDAPTLS|$ldaptls|" \
+    -e "s|LDAPBINDQUERYUSER|$ldapBindQueryUser|" \
+    -e "s|LDAPAUTHZQUERYTEMPLATE|$ldapAuthzQueryTemplate|" \
+    -e "s|LDAPUSERTODNMAPPING|$ldapUserToDNMapping|" \
+    -e "s|LDAPTIMEOUTMS|$ldapTimeoutMS|" \
+    -e "s|LDAPUSERCACHEINVALIDATIONINTERVAL|$ldapUserCacheInvalidationInterval|" \
+    -e "s|LDAPSERVER|$ldapServer|" \
+    -e "s|LDAPCERTMAPNAME|$ldapCertMapName|" \
+    -e "s|LDAPKEY|$ldapKey|" \
+    -e "s|PROJECT-NAME|$fullname|" > "$mdb"
 else
-    cat mdb_template_sh.yaml | sed \
-      -e "s|$tlsc|$tlsr|" \
-      -e "s|VERSION|$ver|" \
-      -e "s|DBMEM|$mem|" \
-      -e "s|DBCPU|$cpu|" \
-      -e "s|DISK|$dsk|" \
-      -e "s|SHARDS|$shards|" \
-      -e "s|MONGOS|$mongos|" \
-      -e "s|CSCPU|$cscpu|" \
-      -e "s|CSMEM|$csmem|" \
-      -e "s|MSCPU|$mscpu|" \
-      -e "s|MSMEM|$msmem|" \
-      -e "s|NAMESPACE|$namespace|" \
-      -e "s|#X509  ||" \
-      -e "s|PROJECT-NAME|$fullname|" > "$mdb"
+  cat ${template} | sed \
+    -e "s|$tlsc|$tlsr|" \
+    -e "s|VERSION|$ver|" \
+    -e "s|RSMEM|$mem|" \
+    -e "s|RSCPU|$cpu|" \
+    -e "s|RSDISK|$dsk|" \
+    -e "s|SHARDS|$shards|" \
+    -e "s|MONGOS|$mongos|" \
+    -e "s|CSCPU|$cscpu|" \
+    -e "s|CSMEM|$csmem|" \
+    -e "s|MSCPU|$mscpu|" \
+    -e "s|MSMEM|$msmem|" \
+    -e "s|NAMESPACE|$namespace|" \
+    -e "s|#X509  ||" \
+    -e "s|PROJECT-NAME|$fullname|" > "$mdb"
 fi
 
 dbuserlc=$( printf "$dbuser" | tr '[:upper:]' '[:lower:]' )
@@ -144,7 +155,7 @@ fi
 # Create map for OM Org/Project
 if [[ ${tls} == 1 && ${skipMakeCerts} == 0 ]]
 then
-    kubectl delete configmap "${fullname}" > /dev/null 2>&1
+  kubectl delete configmap "${fullname}" > /dev/null 2>&1
   if [[ $orgId != "" ]]
   then
     kubectl create configmap "${fullname}" \
@@ -161,44 +172,105 @@ then
         --from-literal="sslRequireValidMMSServerCertificates='true'"
   fi
 
-  rm "${PWD}/certs/${fullname}"*  > /dev/null 2>&1
-    # mdb-{metadata.name}-mongos-cert
-    # mdb-{metadata.name}-config-cert
-    # mdb-{metadata.name}-<x>-cert x=0,1 (2 shards)
-  for ctype in agent mongos config $( seq -s " " 0 $(( $shards-1)) )
-  do   
-    "${PWD}/certs/make_sharded_certs.bash" "${fullname}" ${ctype}
-    # Create a secret for the member certs for TLS
-    cert="-cert"
-    if [[ "${ctype}" == "agent" ]]
+  if [[ ${sharded} == 1 ]]
+  then
+    rm "${PWD}/certs/${fullname}"*  > /dev/null 2>&1
+      # mdb-{metadata.name}-mongos-cert
+      # mdb-{metadata.name}-config-cert
+      # mdb-{metadata.name}-<x>-cert x=0,1 (2 shards)
+    for ctype in agent mongos config $( seq -s " " 0 $(( $shards-1)) )
+    do   
+      "${PWD}/certs/make_sharded_certs.bash" "${fullname}" ${ctype}
+      # Create a secret for the member certs for TLS
+      cert="-cert"
+      if [[ "${ctype}" == "agent" ]]
+      then
+      cert="-certs"
+      fi
+      kubectl delete secret "mdb-${fullname}-${ctype}${cert}" > /dev/null 2>&1
+      kubectl create secret tls "mdb-${fullname}-${ctype}${cert}" \
+          --cert="${PWD}/certs/${fullname}-${ctype}.crt" \
+          --key="${PWD}/certs/${fullname}-${ctype}.key"
+    done
+  else 
+    # ReplicaSet
+    # create new certs if the service does not exist
+    # check to see if the external svc needs to be created
+    for n in ${exposed_dbs[@]}
+    do
+      if [[ "$n" == "${fullname}" ]] 
+      then
+        printf "%s\n" "Generating ${serviceType} Service ports..."
+        serviceOut=$( bin/expose_service.bash "${mdb}" ${cleanup} ) 
+        dnsHorizon=( $( printf "${serviceOut}" | tail -n 1 ) )
+        if [[ $? != 0 ]]
+        then
+            printf "* * * Error - failed to configure splitHorizon for ${fullname}:\n" 
+            exit 1
+        fi
+        printf "${serviceOut}"| head -n 7
+        printf "...added these hostnames to the manifest ${mdb}:\n" 
+        printf "\t%s\n" "${dnsHorizon[0]}"
+        printf "\t%s\n" "${dnsHorizon[1]}"
+        printf "\t%s\n" "${dnsHorizon[2]}"
+        printf "\n"
+        eval tail -n 5 "${mdb}"
+        printf "\n"
+      fi
+    done
+    # now make the certs
+    rm "${PWD}/certs/${fullname}"* > /dev/null 2>&1
+    if [[ ${#dnsHorizon[@]} != 0  ]] 
     then
-    cert="-certs"
+      #  dnsHorizon=( $(cat dnsHorizon) )
+      #  rm dnsHorizon
+      "${PWD}/certs/make_db_certs.bash" "${fullname}" ${dnsHorizon[@]}
+      else
+      "${PWD}/certs/make_db_certs.bash" "${fullname}"
     fi
-    kubectl delete secret "mdb-${fullname}-${ctype}${cert}" > /dev/null 2>&1
-    kubectl create secret tls "mdb-${fullname}-${ctype}${cert}" \
-        --cert="${PWD}/certs/${fullname}-${ctype}.crt" \
-        --key="${PWD}/certs/${fullname}-${ctype}.key"
-  done
 
-    # Create a map for the cert
-    kubectl delete configmap ca-pem > /dev/null 2>&1
-    kubectl create configmap ca-pem \
-        --from-file="ca-pem=${PWD}/certs/ca.pem"
+    # Create a secret for the member certs for TLS
+    # kubectl delete secret "mdb-${fullname}-cert" "mdb-${fullname}-cert-pem" > /dev/null 2>&1
+    kubectl delete secret "mdb-${fullname}-cert" > /dev/null 2>&1
+    kubectl create secret tls "mdb-${fullname}-cert" \
+      --cert="${PWD}/certs/${fullname}.crt" \
+      --key="${PWD}/certs/${fullname}.key"
+
+    for ctype in agent clusterfile
+    do   
+      "${PWD}/certs/make_sharded_certs.bash" "${fullname}" ${ctype}
+      # Create a secret for the member certs for TLS
+      cert=""
+      if [[ "${ctype}" == "agent" ]]
+      then
+      cert="-certs"
+      fi
+      kubectl delete secret "mdb-${fullname}-${ctype}${cert}" > /dev/null 2>&1
+      kubectl create secret tls "mdb-${fullname}-${ctype}${cert}" \
+          --cert="${PWD}/certs/${fullname}-${ctype}.crt" \
+          --key="${PWD}/certs/${fullname}-${ctype}.key"
+    done
+
+      # Create a map for the cert
+      kubectl delete configmap ca-pem > /dev/null 2>&1
+      kubectl create configmap ca-pem \
+          --from-file="ca-pem=${PWD}/certs/ca.pem"
+  fi # end if sharded or replicaset
 else
+# no tls here
   if [[ $orgId != "" ]]
   then
     kubectl delete configmap "${fullname}" > /dev/null 2>&1
     kubectl create configmap "${fullname}" \
     --from-literal="orgId=${orgId}" \
-    --from-literal="baseUrl=${opsMgrUrl}" \
-    --from-literal="projectName=${projectName}"
+    --from-literal="projectName=${projectName}" \
+    --from-literal="baseUrl=${opsMgrUrl}"
   else
     kubectl delete configmap "${fullname}" > /dev/null 2>&1
     kubectl create configmap "${fullname}" \
-    --from-literal="baseUrl=${opsMgrUrl}" \
-    --from-literal="projectName=${projectName}"
-fi
-
+    --from-literal="projectName=${projectName}" \
+    --from-literal="baseUrl=${opsMgrUrl}"
+  fi
 fi # tls
 
 # Create a a secret for db user credentials

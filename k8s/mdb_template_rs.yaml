@@ -26,11 +26,11 @@ spec:
           # https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
           resources:
             limits:
-              cpu: "CPU"
-              memory: MEM 
+              cpu: "RSCPU"
+              memory: RSMEM 
     persistence:
       single:
-        storage: DISK # 2Gi
+        storage: RSDISK # 2Gi
   security:
     #TLS certsSecretPrefix: mdb # provide custom x509 certificates (keys and certs)
     #TLS tls:

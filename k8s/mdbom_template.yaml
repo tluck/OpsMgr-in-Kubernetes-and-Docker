@@ -20,15 +20,11 @@ spec:
             - name: mongodb-ops-manager
               resources:  # 3Gi a good size for a demo -- use 5Gi or more for larger clusters in production
                 limits:
-                  #Demo   cpu: "0.75"
-                  #Prod   cpu: "4.0"
-                  #Demo   memory: 3Gi
-                  #Prod   memory: 12Gi
+                  cpu:    "OMCPU"
+                  memory: OMMEM
                 requests:
-                  #Demo   cpu: "0.75"
-                  #Prod   cpu: "2.0"
-                  #Demo   memory: 3Gi
-                  #Prod   memory: 8Gi
+                  cpu:    "OMCPU"
+                  memory: OMMEM
 
   #TLS security: # enables TLS for Ops Manager allowing it to serve traffic over HTTPS
   #TLS   tls:
@@ -54,22 +50,20 @@ spec:
     #TLS     # secretRef:
     #TLS     # name: "NAME-appdb-certs"
     podSpec:
-      # cpu: "0.25"
-      # memory: 500Mi # 4Gi
       persistence:
         single:
-          storage: DISK # 5Gi
+          storage: RSDISK
       podTemplate:
         spec:
           containers:
             - name: mongod
               resources:
                 limits:
-                  cpu: "CPU"
-                  memory: MEM
+                  cpu:    "RSCPU"
+                  memory: RSMEM
                 requests:
-                  cpu: "CPU"
-                  memory: MEM
+                  cpu:    "RSCPU"
+                  memory: RSMEM
             - name: mongodb-agent
               resources:
                 limits:
@@ -123,7 +117,7 @@ spec:
   backup:
     enabled: true
     headDB:
-      storage: "4Gi" # optional. Default storage is 30G
+      storage: BDDISK # optional. Default storage is 30G
     members: 1 # Configures the number of backup daemons to create (default 1)
     #Demo   jvmParameters: ["-Xms1024m", "-Xmx1536m"] # 1M is a good size for a demo -- comment out for larger clusters in production
     opLogStores:
@@ -146,12 +140,8 @@ spec:
               - name: mongodb-backup-daemon
                 resources: # ~2Gi is good size for a demo -- use 5Gi for larger clusters in production
                   limits:
-                    #Demo   cpu: "0.5"
-                    #Prod   cpu: "3.0"
-                    #Demo   memory: 1.7Gi
-                    #Prod   memory: 8Gi 
+                    cpu:    "BDCPU"
+                    memory: BDMEM
                   requests:
-                    #Demo   cpu: "0.5"
-                    #Prod   cpu: "2.0"
-                    #Demo   memory: 1.7Gi
-                    #Prod   memory: 5Gi
+                    cpu:    "BDCPU"
+                    memory: BDMEM

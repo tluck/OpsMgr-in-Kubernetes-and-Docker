@@ -4,7 +4,7 @@ d=$( dirname "$0" )
 cd "${d}"
 source init.conf
 
-while getopts 'n:v:a:c:m:d:gzh' opt
+while getopts 'n:v:a:c:m:d:gth' opt
 do
   case "$opt" in
     n) name="$OPTARG" ;;
@@ -32,7 +32,7 @@ then
     omcpu=${omcpu:-"0.75"}
     ommem=${ommem:-"3Gi"}
     bdcpu=${bdcpu:-"0.75"}
-    bdmem=${bdmem:-"3Gi"}
+    bdmem=${bdmem:-"2Gi"}
     bddsk=${bddsk:-"4Gi"}
 else
     replace="NOTHING "

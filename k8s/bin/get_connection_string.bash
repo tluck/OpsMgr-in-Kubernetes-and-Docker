@@ -19,7 +19,7 @@ shift "$(($OPTIND -1))"
 name=${name:-myreplicaset}
 internal=${internal-0}
 
-dbuserlc=$( printf "$dbuser" | tr '[:upper:]' '[:lower:]' )
+#dbuserlc=$( printf "$dbuser" | tr '[:upper:]' '[:lower:]' )
 type=$( kubectl get mdb/${name} -o jsonpath='{.spec.type}' )
 #if [[ "${sharded}" == "1" ]]
 if [[ "${type}" == "ShardedCluster" ]]
@@ -32,7 +32,7 @@ else
 fi
 
 #cs="mongodb://${dbuser}:${dbpassword}@${hn0}:${np0},${hn1}:${np1},${hn2}:${np2}/?replicaSet=${name}&authSource=admin"
-ics=$( kubectl get secret ${name}-${name}-${dbuserlc}-admin -o jsonpath="{.data['connectionString\.standard']}" | base64 --decode ) 
+ics=$( kubectl get secret ${name}-${name}-admin-admin -o jsonpath="{.data['connectionString\.standard']}" | base64 --decode ) 
 ecs="${ics}"
 if [[ ${serviceType} != "" ]]
 then

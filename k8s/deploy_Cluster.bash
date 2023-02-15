@@ -58,7 +58,7 @@ skipMakeCerts=${skipMakeCerts:-0}
 
 # make manifest from template
 mdb="mdb_${fullname}.yaml"
-mdbuser="mdbuser_${fullname}.yaml"
+mdbuser1="mdbuser_${fullname}_admin.yaml"
 if [[ ${ldap} == 'ldap' || ${ldap} == 'ldaps' ]]
 then
   mdbuser2="mdbuser_${fullname}_ldap.yaml"
@@ -126,16 +126,14 @@ else
 fi
 
 dbuserlc=$( printf "$dbuser" | tr '[:upper:]' '[:lower:]' )
-cat mdbuser_template.yaml | sed \
-    -e "s|NAME-USER|${fullname}-${dbuserlc//_}|" \
+cat mdbuser_template_admin.yaml | sed \
     -e "s|NAME|${fullname}|" \
-    -e "s|USER|${dbuserlc}|" > "$mdbuser"
+    -e "s|USER|${dbuserlc}|" > "$mdbuser1"
 
 if [[ ${ldap} == 'ldap' || ${ldap} == 'ldaps' ]]
 then
   ldapuserlc=$( printf "$ldapUser" | tr '[:upper:]' '[:lower:]' )
   cat mdbuser_template_ldap.yaml | sed \
-      -e "s|NAME-USER|${fullname}-${ldapuserlc//_}|" \
       -e "s|NAME|${fullname}|" \
       -e "s|USER|${ldapuserlc}|" > "$mdbuser2"
 fi
@@ -273,17 +271,19 @@ else
   fi
 fi # tls
 
-# Create a a secret for db user credentials
-kubectl delete secret         ${fullname}-${dbuserlc} > /dev/null 2>&1
-kubectl create secret generic ${fullname}-${dbuserlc} \
+# Create a a secret for a db user credentials
+kubectl delete secret         ${fullname}-admin > /dev/null 2>&1
+kubectl create secret generic ${fullname}-admin \
     --from-literal=name="${dbuser}" \
     --from-literal=password="${dbpassword}"
 
-# Create the User Resource
-kubectl apply -f "${mdbuser}"
+# Create the User Resources
+kubectl delete mdbu ${fullname}-admin > /dev/null 2>&1
+kubectl apply -f "${mdbuser1}"
 
 if [[ ${ldap} == 'ldap' || ${ldap} == 'ldaps' ]]
 then
+  kubectl delete mdbu ${fullname}-ldap > /dev/null 2>&1
   kubectl apply -f "${mdbuser2}"
   kubectl delete secret         "${fullname}-ldapsecret" > /dev/null 2>&1
   kubectl create secret generic "${fullname}-ldapsecret" \

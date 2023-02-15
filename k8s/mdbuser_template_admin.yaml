@@ -2,10 +2,10 @@
 apiVersion: mongodb.com/v1
 kind: MongoDBUser
 metadata:
-  name: NAME-USER
+  name: NAME-admin
 spec:
   passwordSecretKeyRef:
-    name: NAME-USER # Match to metadata.name of the User Secret
+    name: NAME-admin # Match to metadata.name of the User Secret
     key: password
   username: "USER"
   db: "admin" #

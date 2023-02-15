@@ -2,7 +2,7 @@
 apiVersion: mongodb.com/v1
 kind: MongoDBUser
 metadata:
-  name: NAME-USER
+  name: NAME-ldap
 spec:
   username: "USER"
   db: $external  # external auth

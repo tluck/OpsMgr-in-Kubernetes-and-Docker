@@ -94,7 +94,6 @@ spec:
     mms.mail.transport: smtp
     mms.user.bypassInviteForExistingUsers: "true"
     mms.publicApi.whitelistEnabled: "false"
-    #mms.userSvcClass: MMSUSERSVCCLASS
     mms.ldap.bindDn: "MMSLDAPBINDDN"
     mms.ldap.bindPassword: MMSLDAPBINDPASSWORD
     mms.ldap.global.role.owner: "MMSLDAPGLOBALROLEOWNER"
@@ -105,7 +104,7 @@ spec:
     mms.ldap.user.email: "MMSLDAPUSEREMAIL"
     mms.ldap.user.firstName: MMSLDAPUSERFIRSTNAME
     mms.ldap.user.lastName: MMSLDAPUSERLASTNAME
-    #mms.ldap.user.group: MMSLDAPUSERGROUP
+    mms.ldap.user.group: MMSLDAPUSERGROUP # deprecated
     mms.ldap.user.searchAttribute: MMSLDAPUSERSEARCHATTRIBUTE
     automation.versions.source: remote # hybrid
     mongodb.release.autoDownload: "false" # stop downloads of binaries (unless you need to demo recovery)
@@ -115,7 +114,7 @@ spec:
     brs.queryable.expiration: "3600000"
 
   backup:
-    enabled: true
+    enabled: false
     headDB:
       storage: BDDISK # optional. Default storage is 30G
     members: 1 # Configures the number of backup daemons to create (default 1)

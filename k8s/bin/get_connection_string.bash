@@ -19,7 +19,6 @@ shift "$(($OPTIND -1))"
 name=${name:-myreplicaset}
 internal=${internal-0}
 
-#dbuserlc=$( printf "$dbuser" | tr '[:upper:]' '[:lower:]' )
 type=$( kubectl get mdb/${name} -o jsonpath='{.spec.type}' )
 #if [[ "${sharded}" == "1" ]]
 if [[ "${type}" == "ShardedCluster" ]]

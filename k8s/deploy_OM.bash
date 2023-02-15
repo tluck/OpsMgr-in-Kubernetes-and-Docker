@@ -4,7 +4,7 @@ d=$( dirname "$0" )
 cd "${d}"
 source init.conf
 
-while getopts 'n:v:a:c:m:d:gth' opt
+while getopts 'n:v:a:c:m:d:bgth' opt
 do
   case "$opt" in
     n) name="$OPTARG" ;;
@@ -13,6 +13,7 @@ do
     c) rscpu="$OPTARG" ;;
     m) rsmem="$OPTARG" ;;
     d) rsdsk="$OPTARG" ;;
+    b) omBackup="true" ;;
     g) skipMakeCerts=1 ;;
     t) demo=1 ;;
     ?|h)
@@ -47,6 +48,7 @@ rscpu="${rscpu:-0.25}"
 rsmem="${rsmem:-400Mi}"
 rsdsk="${rsdsk:-2Gi}"
 omVer="${omVer:-$omVersion}"
+omBackup="${omBackup:-false}"
 appdbVer="${appdbVer:-$appdbVersion}"
 skipMakeCerts=${skipMakeCerts:-0}
 
@@ -103,7 +105,6 @@ tlsr="$tlsc"
 fi
 
 mdbom="mdbom_${name}.yaml"
-dbuserlc=$( printf "$dbuser" | tr '[:upper:]' '[:lower:]' )
 context=$( kubectl config current-context )
 
 if [[ $serviceType == "NodePort" ]]
@@ -135,7 +136,6 @@ cat mdbom_template.yaml | sed \
     -e "s/MMSLDAPUSERLASTNAME/$mmsldapuserlastname/" \
     -e "s/MMSLDAPUSERGROUP/$mmsldapusergroup/" \
     -e "s/MMSLDAPUSERSEARCHATTRIBUTE/$mmsldapusersearchattribute/" \
-    -e "s/DBUSER/$dbuserlc/" \
     -e "s/RSCPU/$rscpu/" \
     -e "s/RSMEM/$rsmem/" \
     -e "s/RSDISK/$rsdsk/" \
@@ -144,6 +144,7 @@ cat mdbom_template.yaml | sed \
     -e "s/BDDISK/$bddsk/" \
     -e "s/OMCPU/$omcpu/" \
     -e "s/OMMEM/$ommem/" \
+    -e "s/OMBACKUP/$omBackup/" \
     -e "s/#NP  /$NP/" \
     -e "s/#LB  /$LB/" \
     -e "s/$tlsc/$tlsr/" \

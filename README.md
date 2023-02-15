@@ -8,9 +8,10 @@
   * a blockstore Cluster for backups
   * an oplog Cluster for continous backups
 - 2 Production Clusters
-  * a example replica set cluster
+  * a example replica set cluster.
   * a example sharded cluster.
   * note: TLS Certs are created using a self-signed CA.
+  * an openLDAP server is included and configured to support OM users or DB users.
   * queriable backup is available too!
 	  
 
@@ -49,16 +50,28 @@ the **_launch.bash** script runs several "deploy" scripts for each of the follow
 	- Monitors the progress until the pods are ready
 	
 ### Step 3. Login to Ops Manager
-- login to OM at 
-    use https://opsmanager-svc.mongodb.svc.cluster.local:8443 if using LoadBalancer method for service exposure
+- To login to OM, connect with a browser to
+
+	- For a non-TLS set-up, use: 
+		
+		http://opsmanager-svc.mynamespace.svc.cluster.local:8080  
+	
+	- For TLS, use:
+	
+   - if using LoadBalancer method for service exposure, use:
+   		
+   		https://opsmanager-svc.mynamespace.svc.cluster.local:8443 
     or  
-    use https://opsmanager-svc.mongodb.svc.cluster.local:32443 is using NopePort method for service exposure
-- the admin user credentials and various other settings are held in ```init.conf```
+   - if using NopePort method for service exposure, use:
+   
+   		https://opsmanager-svc.mynamespace.svc.cluster.local:32443 exposure
+   		
+- The admin user credentials and various other settings are held in ```init.conf```
 	- the scripts also create a hostname entry such as:
-	```127.0.0.1       opsmanager-svc.mongodb.svc.cluster.local # opsmgr```
+	```127.0.0.1       opsmanager-svc.<namespace>.svc.cluster.local # opsmgr```
 	into the ```/etc/hosts``` file
 
-	- Note: if you add the custom TLS certificate authority (certs/ca.crt) to your keystore, this allows seamless unchallenged secure https access
+	- Note: if you add the custom TLS certificate authority (certs/ca.crt) to your keystore, this allows seamless unchallenged secure https access.
 
 # Ops Manager Demo Environment (in Docker)
 

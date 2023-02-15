@@ -114,7 +114,7 @@ spec:
     brs.queryable.expiration: "3600000"
 
   backup:
-    enabled: false
+    enabled: OMBACKUP
     headDB:
       storage: BDDISK # optional. Default storage is 30G
     members: 1 # Configures the number of backup daemons to create (default 1)
@@ -124,13 +124,13 @@ spec:
         mongodbResourceRef:
           name: NAME-oplog
         mongodbUserRef:
-          name: NAME-oplog-DBUSER
+          name: NAME-oplog-admin
     blockStores:
       - name: blockstore
         mongodbResourceRef:
           name: NAME-blockstore
         mongodbUserRef:
-          name: NAME-blockstore-DBUSER
+          name: NAME-blockstore-admin
     statefulSet:
       spec:
         template:

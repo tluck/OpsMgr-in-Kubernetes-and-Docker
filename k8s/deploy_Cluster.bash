@@ -53,15 +53,15 @@ cpu="${cpu:-1.0}"
 dsk="${dsk:-1Gi}"
 cleanup=${x:-0}
 projectName="${projectName:-$name}"
-fullname=$( printf "${projectName}-${name}"| tr '[:upper:]' '[:lower:]' )
+fullName=$( printf "${projectName}-${name}"| tr '[:upper:]' '[:lower:]' )
 skipMakeCerts=${skipMakeCerts:-0}
 
 # make manifest from template
-mdb="mdb_${fullname}.yaml"
-mdbuser1="mdbuser_${fullname}_admin.yaml"
+mdb="mdb_${fullName}.yaml"
+mdbuser1="mdbuser_${fullName}_admin.yaml"
 if [[ ${ldap} == 'ldap' || ${ldap} == 'ldaps' ]]
 then
-  mdbuser2="mdbuser_${fullname}_ldap.yaml"
+  mdbuser2="mdbuser_${fullName}_ldap.yaml"
 fi
 
 tlsc="#TLS "
@@ -106,7 +106,7 @@ then
     -e "s|LDAPSERVER|$ldapServer|" \
     -e "s|LDAPCERTMAPNAME|$ldapCertMapName|" \
     -e "s|LDAPKEY|$ldapKey|" \
-    -e "s|PROJECT-NAME|$fullname|" > "$mdb"
+    -e "s|PROJECT-NAME|$fullName|" > "$mdb"
 else
   cat ${template} | sed \
     -e "s|$tlsc|$tlsr|" \
@@ -122,48 +122,46 @@ else
     -e "s|MSMEM|$msmem|" \
     -e "s|NAMESPACE|$namespace|" \
     -e "s|#X509  ||" \
-    -e "s|PROJECT-NAME|$fullname|" > "$mdb"
+    -e "s|PROJECT-NAME|$fullName|" > "$mdb"
 fi
 
-dbuserlc=$( printf "$dbuser" | tr '[:upper:]' '[:lower:]' )
 cat mdbuser_template_admin.yaml | sed \
-    -e "s|NAME|${fullname}|" \
-    -e "s|USER|${dbuserlc}|" > "$mdbuser1"
+    -e "s|NAME|${fullName}|" \
+    -e "s|USER|${dbuser}|" > "$mdbuser1"
 
 if [[ ${ldap} == 'ldap' || ${ldap} == 'ldaps' ]]
 then
-  ldapuserlc=$( printf "$ldapUser" | tr '[:upper:]' '[:lower:]' )
   cat mdbuser_template_ldap.yaml | sed \
-      -e "s|NAME|${fullname}|" \
-      -e "s|USER|${ldapuserlc}|" > "$mdbuser2"
+      -e "s|NAME|${fullName}|" \
+      -e "s|USER|${ldapUser}|" > "$mdbuser2"
 fi
 
 # clean up any previous certs and services
 if [[ ${cleanup} = 1 ]]
 then
-  #kubectl delete secret "${fullname}-cert" > /dev/null 2>&1
-  #kubectl delete csr $( kubectl get csr | grep "${fullname}" | awk '{print $1}' )
-  kubectl delete mdb "${fullname}" 2>&1 > /dev/null
-  kubectl delete pvc $( kubectl get pvc | grep "${fullname}-" | awk '{print $1}' ) 2>&1 > /dev/null
-  kubectl delete svc $( kubectl get svc | grep "${fullname}-" | awk '{print $1}' ) 2>&1 > /dev/null
-  kubectl delete configmaps $( kubectl get configmaps | grep "${fullname} " | awk '{print $1}' ) 2>&1 > /dev/null
-  kubectl delete secrets $( kubectl get secrets | grep "${fullname}-" | awk '{print $1}' ) 2>&1 > /dev/null
+  #kubectl delete secret "${fullName}-cert" > /dev/null 2>&1
+  #kubectl delete csr $( kubectl get csr | grep "${fullName}" | awk '{print $1}' )
+  kubectl delete mdb "${fullName}"  > /dev/null 2>&1
+  kubectl delete pvc $( kubectl get pvc | grep "${fullName}-" | awk '{print $1}' ) > /dev/null 2>&1
+  kubectl delete svc $( kubectl get svc | grep "${fullName}-" | awk '{print $1}' ) > /dev/null 2>&1
+  kubectl delete configmaps $( kubectl get configmaps | grep "${fullName} " | awk '{print $1}' )  > /dev/null 2>&1
+  kubectl delete secrets $( kubectl get secrets | grep "${fullName}-" | awk '{print $1}' )  > /dev/null 2>&1
 fi
 
 # Create map for OM Org/Project
 if [[ ${tls} == 1 && ${skipMakeCerts} == 0 ]]
 then
-  kubectl delete configmap "${fullname}" > /dev/null 2>&1
+  kubectl delete configmap "${fullName}" > /dev/null 2>&1
   if [[ $orgId != "" ]]
   then
-    kubectl create configmap "${fullname}" \
+    kubectl create configmap "${fullName}" \
         --from-literal="baseUrl=${opsMgrUrl}" \
         --from-literal="orgId=${orgId}" \
         --from-literal="projectName=${projectName}" \
         --from-literal="sslMMSCAConfigMap=opsmanager-ca" \
         --from-literal="sslRequireValidMMSServerCertificates='true'"
   else
-    kubectl create configmap "${fullname}" \
+    kubectl create configmap "${fullName}" \
         --from-literal="baseUrl=${opsMgrUrl}" \
         --from-literal="projectName=${projectName}" \
         --from-literal="sslMMSCAConfigMap=opsmanager-ca" \
@@ -172,23 +170,23 @@ then
 
   if [[ ${sharded} == 1 ]]
   then
-    rm "${PWD}/certs/${fullname}"*  > /dev/null 2>&1
+    rm "${PWD}/certs/${fullName}"*  > /dev/null 2>&1
       # mdb-{metadata.name}-mongos-cert
       # mdb-{metadata.name}-config-cert
       # mdb-{metadata.name}-<x>-cert x=0,1 (2 shards)
     for ctype in agent mongos config $( seq -s " " 0 $(( $shards-1)) )
     do   
-      "${PWD}/certs/make_sharded_certs.bash" "${fullname}" ${ctype}
+      "${PWD}/certs/make_sharded_certs.bash" "${fullName}" ${ctype}
       # Create a secret for the member certs for TLS
       cert="-cert"
       if [[ "${ctype}" == "agent" ]]
       then
       cert="-certs"
       fi
-      kubectl delete secret "mdb-${fullname}-${ctype}${cert}" > /dev/null 2>&1
-      kubectl create secret tls "mdb-${fullname}-${ctype}${cert}" \
-          --cert="${PWD}/certs/${fullname}-${ctype}.crt" \
-          --key="${PWD}/certs/${fullname}-${ctype}.key"
+      kubectl delete secret "mdb-${fullName}-${ctype}${cert}" > /dev/null 2>&1
+      kubectl create secret tls "mdb-${fullName}-${ctype}${cert}" \
+          --cert="${PWD}/certs/${fullName}-${ctype}.crt" \
+          --key="${PWD}/certs/${fullName}-${ctype}.key"
     done
   else 
     # ReplicaSet
@@ -196,14 +194,14 @@ then
     # check to see if the external svc needs to be created
     for n in ${exposed_dbs[@]}
     do
-      if [[ "$n" == "${fullname}" ]] 
+      if [[ "$n" == "${fullName}" ]] 
       then
         printf "%s\n" "Generating ${serviceType} Service ports..."
         serviceOut=$( bin/expose_service.bash "${mdb}" ${cleanup} ) 
         dnsHorizon=( $( printf "${serviceOut}" | tail -n 1 ) )
         if [[ $? != 0 ]]
         then
-            printf "* * * Error - failed to configure splitHorizon for ${fullname}:\n" 
+            printf "* * * Error - failed to configure splitHorizon for ${fullName}:\n" 
             exit 1
         fi
         printf "${serviceOut}"| head -n 7
@@ -217,36 +215,36 @@ then
       fi
     done
     # now make the certs
-    rm "${PWD}/certs/${fullname}"* > /dev/null 2>&1
+    rm "${PWD}/certs/${fullName}"* > /dev/null 2>&1
     if [[ ${#dnsHorizon[@]} != 0  ]] 
     then
       #  dnsHorizon=( $(cat dnsHorizon) )
       #  rm dnsHorizon
-      "${PWD}/certs/make_db_certs.bash" "${fullname}" ${dnsHorizon[@]}
+      "${PWD}/certs/make_db_certs.bash" "${fullName}" ${dnsHorizon[@]}
       else
-      "${PWD}/certs/make_db_certs.bash" "${fullname}"
+      "${PWD}/certs/make_db_certs.bash" "${fullName}"
     fi
 
     # Create a secret for the member certs for TLS
-    # kubectl delete secret "mdb-${fullname}-cert" "mdb-${fullname}-cert-pem" > /dev/null 2>&1
-    kubectl delete secret "mdb-${fullname}-cert" > /dev/null 2>&1
-    kubectl create secret tls "mdb-${fullname}-cert" \
-      --cert="${PWD}/certs/${fullname}.crt" \
-      --key="${PWD}/certs/${fullname}.key"
+    # kubectl delete secret "mdb-${fullName}-cert" "mdb-${fullName}-cert-pem" > /dev/null 2>&1
+    kubectl delete secret "mdb-${fullName}-cert" > /dev/null 2>&1
+    kubectl create secret tls "mdb-${fullName}-cert" \
+      --cert="${PWD}/certs/${fullName}.crt" \
+      --key="${PWD}/certs/${fullName}.key"
 
     for ctype in agent clusterfile
     do   
-      "${PWD}/certs/make_sharded_certs.bash" "${fullname}" ${ctype}
+      "${PWD}/certs/make_sharded_certs.bash" "${fullName}" ${ctype}
       # Create a secret for the member certs for TLS
       cert=""
       if [[ "${ctype}" == "agent" ]]
       then
       cert="-certs"
       fi
-      kubectl delete secret "mdb-${fullname}-${ctype}${cert}" > /dev/null 2>&1
-      kubectl create secret tls "mdb-${fullname}-${ctype}${cert}" \
-          --cert="${PWD}/certs/${fullname}-${ctype}.crt" \
-          --key="${PWD}/certs/${fullname}-${ctype}.key"
+      kubectl delete secret "mdb-${fullName}-${ctype}${cert}" > /dev/null 2>&1
+      kubectl create secret tls "mdb-${fullName}-${ctype}${cert}" \
+          --cert="${PWD}/certs/${fullName}-${ctype}.crt" \
+          --key="${PWD}/certs/${fullName}-${ctype}.key"
     done
 
       # Create a map for the cert
@@ -258,40 +256,40 @@ else
 # no tls here
   if [[ $orgId != "" ]]
   then
-    kubectl delete configmap "${fullname}" > /dev/null 2>&1
-    kubectl create configmap "${fullname}" \
+    kubectl delete configmap "${fullName}" > /dev/null 2>&1
+    kubectl create configmap "${fullName}" \
     --from-literal="orgId=${orgId}" \
     --from-literal="projectName=${projectName}" \
     --from-literal="baseUrl=${opsMgrUrl}"
   else
-    kubectl delete configmap "${fullname}" > /dev/null 2>&1
-    kubectl create configmap "${fullname}" \
+    kubectl delete configmap "${fullName}" > /dev/null 2>&1
+    kubectl create configmap "${fullName}" \
     --from-literal="projectName=${projectName}" \
     --from-literal="baseUrl=${opsMgrUrl}"
   fi
 fi # tls
 
 # Create a a secret for a db user credentials
-kubectl delete secret         ${fullname}-admin > /dev/null 2>&1
-kubectl create secret generic ${fullname}-admin \
+kubectl delete secret         ${fullName}-admin > /dev/null 2>&1
+kubectl create secret generic ${fullName}-admin \
     --from-literal=name="${dbuser}" \
     --from-literal=password="${dbpassword}"
 
 # Create the User Resources
-kubectl delete mdbu ${fullname}-admin > /dev/null 2>&1
+kubectl delete mdbu ${fullName}-admin > /dev/null 2>&1
 kubectl apply -f "${mdbuser1}"
 
 if [[ ${ldap} == 'ldap' || ${ldap} == 'ldaps' ]]
 then
-  kubectl delete mdbu ${fullname}-ldap > /dev/null 2>&1
+  kubectl delete mdbu ${fullName}-ldap > /dev/null 2>&1
   kubectl apply -f "${mdbuser2}"
-  kubectl delete secret         "${fullname}-ldapsecret" > /dev/null 2>&1
-  kubectl create secret generic "${fullname}-ldapsecret" \
+  kubectl delete secret         "${fullName}-ldapsecret" > /dev/null 2>&1
+  kubectl create secret generic "${fullName}-ldapsecret" \
     --from-literal=password="${ldapBindQueryPassword}" 
 fi
 
 # remove any certificate requests
-list=( $( kubectl get csr 2>/dev/null | grep "${fullname}" | awk '{print $1}' ) )
+list=( $( kubectl get csr 2>/dev/null | grep "${fullName}" | awk '{print $1}' ) )
 if [[ ${#list[@]} > 0 ]]
 then
     kubectl delete csr ${list[@]} > /dev/null 2>&1
@@ -301,7 +299,7 @@ fi
 kubectl apply -f "${mdb}"
 
 # Monitor the progress
-resource="mongodb/${fullname}"
+resource="mongodb/${fullName}"
 printf "\n%s\n" "Monitoring the progress of resource ${resource} ..."
 notapproved="Not all certificates have been approved"
 certificate="Certificate"
@@ -327,14 +325,14 @@ done
 
 sleep 5
 printf "\n"
-cs=$( bin/get_connection_string.bash -n "${fullname}" )
+cs=$( bin/get_connection_string.bash -n "${fullName}" )
 if [[ "$cs" == *external* ]]
 then
     printf "\n%s\n\n" "$cs"
-    printf "%s\n" "To see if access is working, connect directly by running: bin/connect_external.bash -n \"${fullname}\""
-    printf "%s\n" "                      or connect from the pod by running: bin/connect_from_pod.bash -n \"${fullname}\""
+    printf "%s\n" "To see if access is working, connect directly by running: bin/connect_external.bash -n \"${fullName}\""
+    printf "%s\n" "                      or connect from the pod by running: bin/connect_from_pod.bash -n \"${fullName}\""
 else
     printf "\n%s\n\n" "$cs"
-    printf "%s\n" "To see if access is working, connect from the pod by running: bin/connect_from_pod.bash -n \"${fullname}\""
+    printf "%s\n" "To see if access is working, connect from the pod by running: bin/connect_from_pod.bash -n \"${fullName}\""
 fi
 exit 0

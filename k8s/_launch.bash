@@ -59,6 +59,8 @@ else
 deploy_OM.bash $skip -n "${omName}" -c "1.00" -m "4Gi" -d "40Gi" -v "$omVersion"
 fi
 
+if [[ ${omBackup} == "true" ]]
+then
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Create the Backup Oplog1 DB for OM ..."
 if [[ "${context}" == "docker-desktop" ]]
@@ -75,6 +77,7 @@ then
     deploy_Cluster.bash -n "${omName}-blockstore" $skip -c "0.33" -m "300Mi"         -v "$appdbVersion"
 else
     deploy_Cluster.bash -n "${omName}-blockstore" $skip -c "0.50" -m "2Gi" -d "40Gi" -v "$appdbVersion"
+fi
 fi
 
 printf "\n%s\n" "__________________________________________________________________________________________"

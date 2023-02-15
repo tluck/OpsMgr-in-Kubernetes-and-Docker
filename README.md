@@ -20,7 +20,7 @@
 	* Kubernetes - Check Enable Kubernetes with Docker or create one in AWS (EKS).
 	* Reources/Advanced: 
 		* Configure 8 Cores
-		* Configure 10.5GB of Memory
+		* Configure 10-11GB of Memory
 		* Configure 2GB of swap
 		* Disk Image size (~40GB)
 		
@@ -45,7 +45,7 @@ the **_launch.bash** script runs several "deploy" scripts for each of the follow
 	- Deploy a Cluster - a few more clusters are created
 	- the Oplog and Blockstore ReplicaSet Clusters complete the Backup setup for OM
 	- myreplicaset is a "Production" ReplicaSet Cluster and has a splitHorizon configuration for external cluster access
-		- connect via ```Misc/connect_external.bash``` script
+		- connect via ```bin/connect_external.bash``` script
 	- mysharded is a "Production" Sharded Cluster using either NodePort or LoadBalancer for external cluster access
 	- Monitors the progress until the pods are ready
 	
@@ -60,11 +60,11 @@ the **_launch.bash** script runs several "deploy" scripts for each of the follow
 	
    - if using LoadBalancer method for service exposure, use:
    		
-   		https://opsmanager-svc.mynamespace.svc.cluster.local:8443 
-    or  
+   		https://opsmanager-svc.mynamespace.svc.cluster.local:8443
+   		 
    - if using NopePort method for service exposure, use:
    
-   		https://opsmanager-svc.mynamespace.svc.cluster.local:32443 exposure
+   		https://opsmanager-svc.mynamespace.svc.cluster.local:32443
    		
 - The admin user credentials and various other settings are held in ```init.conf```
 	- the scripts also create a hostname entry such as:
@@ -72,6 +72,10 @@ the **_launch.bash** script runs several "deploy" scripts for each of the follow
 	into the ```/etc/hosts``` file
 
 	- Note: if you add the custom TLS certificate authority (certs/ca.crt) to your keystore, this allows seamless unchallenged secure https access.
+	
+### Step 4: LDAP Server (Optional)
+- Run ```bin/deploy_ldap.bash``` to create the server
+- Run ```bin/ldap_configure.bash``` - you may need to wait about a minute or so for the service and DNS to get going.
 
 # Ops Manager Demo Environment (in Docker)
 

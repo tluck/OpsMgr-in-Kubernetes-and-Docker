@@ -1,6 +1,8 @@
 #!/bin/bash
 
 source init.conf
+kubectl config set-context $(kubectl config current-context) --namespace=${namespace}
+
 kubectl -n $namespace delete secret openldap  > /dev/null 2>&1 
 kubectl -n $namespace create secret generic openldap \
     --from-literal=adminpassword=adminpassword \

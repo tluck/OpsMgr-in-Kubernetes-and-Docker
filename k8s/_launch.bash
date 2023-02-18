@@ -59,7 +59,7 @@ else
 deploy_OM.bash $skip -n "${omName}" -c "1.00" -m "4Gi" -d "40Gi" -v "$omVersion"
 fi
 
-if [[ ${omBackup} == "true" ]]
+if [[ ${omBackup} == true ]]
 then
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Create the Backup Oplog1 DB for OM ..."
@@ -82,32 +82,35 @@ fi
 
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Create a custom Org to put your projects in ..."
-# Create the Org and put info in custom.conf
-bin/deploy_org.bash # -o NewOrgName
+# Create the Org and put the orgId info in custom.conf
+bin/deploy_org.bash -o "${orgName}" # -o newOrgName
 test -e custom.conf && source custom.conf
 
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Create a Production ReplicaSet Cluster with a splitHorizon configuration for External access ..."
-projectName="myProject1"
 if [[ "${context}" == "docker-desktop" ]]
 then
-    deploy_Cluster.bash -n "myreplicaset" $skip -l "${ldapType}" -c "0.50" -m "400Mi"         -v "6.0.1-ent" -o "${orgId}" -p "${projectName}"
-    cluster1="${projectName}-myreplicaset"
+set -x
+    deploy_Cluster.bash -n "myreplicaset" -e -l "${ldapType}" -c "0.50" -m "400Mi"         -v "6.0.1-ent" -o "${orgId}" -p "myProject1" ${skip}
+set +x
 else
-    deploy_Cluster.bash -n "myreplicaset" $skip -l "${ldapType}" -c "1.00" -m "4Gi" -d "20Gi" -v "6.0.1-ent" -o "${orgId}" -p "${projectName}"
-    cluster1="${projectName}-myreplicaset"
+set -x
+    deploy_Cluster.bash -n "myreplicaset" -e -l "${ldapType}" -c "1.00" -m "4Gi" -d "20Gi" -v "6.0.1-ent" -o "${orgId}" -p "myProject1" ${skip}
+set +x
 fi
+cluster1="myProject1-myreplicaset"
 
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Create a Production Sharded Cluster  ..."
-projectName="myProject2"
 if [[ "${context}" == "docker-desktop" ]]
 then
     printf "\n%s\n" " **** skipping sharded deployment - not enough resources ***"
     # deploy_Cluster.bash -n "mysharded" $skip -l "${ldapType}" -c "0.33" -m "400Mi"        -s "1"        -v "${mdbVersion}" -o "${orgId}" -p "${projectName}"
 else
-deploy_Cluster.bash -n "mysharded" $skip -l "${ldapType}" -c "0.50" -m "2Gi" -d "4Gi" -s "2" -r "2" -v "${mdbVersion}" -o "${orgId}" -p "${projectName}"
-    cluster2="${projectName}-mysharded"
+set -x
+    deploy_Cluster.bash -n "mysharded" -l "${ldapType}" -c "0.50" -m "2Gi" -d "4Gi" -s "2" -r "2" -v "${mdbVersion}" -o "${orgId}" -p "myProject2" ${skip}
+    cluster2="myProject2-mysharded"
+set +x
 fi
 
 printf "\n%s\n" "__________________________________________________________________________________________"

@@ -8,6 +8,7 @@
 #   -p "389:1389" bitnami/openldap:latest
 
 source init.conf
+kubectl config set-context $(kubectl config current-context) --namespace=${namespace}
 hostName=$( kubectl get svc openldap-svc-ext -o jsonpath={.status.loadBalancer.ingress[].hostname} )
 
 # add User TL

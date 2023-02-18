@@ -4,7 +4,7 @@ d=$( dirname "$0" )
 cd "${d}"
 source init.conf
 
-while getopts 'n:c:m:d:v:l:s:r:o:p:g:xh' opt
+while getopts 'n:c:m:d:v:l:s:r:i:o:p:egxh' opt
 do
   case "$opt" in
     n) name="$OPTARG" ;;
@@ -12,17 +12,19 @@ do
     m) mem="$OPTARG" ;;
     d) dsk="$OPTARG" ;;
     v) ver="$OPTARG" ;;
+    e) expose=true ;;
     l) ldap="$OPTARG" ;;
-    o) orgId="$OPTARG";;
+    i|o) orgId="$OPTARG";;
     p) projectName="$OPTARG";;
     g) skipMakeCerts=1 ;; 
-    x) x="1" ;; # cleanup
+    x) x=1 ;; # cleanup
     s) shards="$OPTARG" ;;
     r) mongos="$OPTARG" ;;
     ?|h)
-      echo "Usage: $(basename $0) [-n name] [-c cpu] [-m memory] [-d disk] [-v ver] [-s shards] [-r mongos] [-l ldap[s]] [-o orgId] [-p projectName] [-g] [-x]"
-      echo "Usage:      use -x for total clean up before (re)deployment"
-      echo "Usage:      use -g to not recreate the certs."
+      echo "Usage: $(basename $0) [-n name] [-c cpu] [-m memory] [-d disk] [-v ver] [ -e ] [-s shards] [-r mongos] [-l ldap[s]] [-o orgId] [-p projectName] [-g] [-x]"
+      echo "Usage:       -e to generate the splitHorizon configuration for the Replica Set"
+      echo "Usage:       -x for total clean up before (re)deployment"
+      echo "Usage:       -g to not recreate the certs."
       exit 1
       ;;
   esac
@@ -31,7 +33,7 @@ shift "$(($OPTIND -1))"
 
 if [[ $shards != "" || $mongos != "" ]]
 then
-    sharded=1
+    sharded=true
     shards="${shards:-2}"
     mongos="${mongos:-1}"
     name="${name:-mysharded}"
@@ -42,6 +44,7 @@ then
     csmem="2Gi"
     cscpu="0.5"
 else
+    sharded=false
     name="${name:-myreplicset}"
     template="${name:-myreplicaset}"
     template="mdb_template_rs.yaml"
@@ -168,7 +171,7 @@ then
         --from-literal="sslRequireValidMMSServerCertificates='true'"
   fi
 
-  if [[ ${sharded} == 1 ]]
+  if [[ ${sharded} == true ]]
   then
     rm "${PWD}/certs/${fullName}"*  > /dev/null 2>&1
       # mdb-{metadata.name}-mongos-cert
@@ -192,12 +195,10 @@ then
     # ReplicaSet
     # create new certs if the service does not exist
     # check to see if the external svc needs to be created
-    for n in ${exposed_dbs[@]}
-    do
-      if [[ "$n" == "${fullName}" ]] 
-      then
+    if [[ $expose == true && ${sharded} == false ]] 
+    then
         printf "%s\n" "Generating ${serviceType} Service ports..."
-        serviceOut=$( bin/expose_service.bash "${mdb}" ${cleanup} ) 
+        serviceOut=$( bin/expose_service.bash "${mdb}" ) 
         dnsHorizon=( $( printf "${serviceOut}" | tail -n 1 ) )
         if [[ $? != 0 ]]
         then
@@ -212,14 +213,12 @@ then
         printf "\n"
         eval tail -n 5 "${mdb}"
         printf "\n"
-      fi
-    done
+    fi
+    
     # now make the certs
     rm "${PWD}/certs/${fullName}"* > /dev/null 2>&1
     if [[ ${#dnsHorizon[@]} != 0  ]] 
     then
-      #  dnsHorizon=( $(cat dnsHorizon) )
-      #  rm dnsHorizon
       "${PWD}/certs/make_db_certs.bash" "${fullName}" ${dnsHorizon[@]}
       else
       "${PWD}/certs/make_db_certs.bash" "${fullName}"

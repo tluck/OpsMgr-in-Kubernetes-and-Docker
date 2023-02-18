@@ -3,8 +3,22 @@
 source init.conf
 source custom.conf
 
-orgId=${1:-myOrg}
-projectName=${2:-myProject}
+while getopts 'i:o:p:u:h' opt
+do
+  case "$opt" in
+    i|o) orgId="$OPTARG";;
+    p) projectName="$OPTARG";;
+    u) user="$OPTARG";;
+    ?|h)
+      echo "Usage: $(basename $0) -o orgName [-h]"
+      exit 1
+      ;;
+  esac
+done
+shift "$(($OPTIND -1))"
+
+#orgId=${}
+projectName=${projectName:-myProject}
 
 echo '{ "name" : "PROJECT", "orgId" : "ORGID" }' | sed -e"s/PROJECT/${projectName}/" -e"s/ORGID/${orgId}/" > data.json
 pid=$( curl $curlOpts --silent --user "${publicKey}:${privateKey}" --digest \
@@ -13,7 +27,6 @@ pid=$( curl $curlOpts --silent --user "${publicKey}:${privateKey}" --digest \
      --data @data.json )
 errorCode=$( printf "%s" "$pid" | jq .errorCode )
 rm data.json
-
 
 if [[ "${errorCode}" == "null" ]]
 then

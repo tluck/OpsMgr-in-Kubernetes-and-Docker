@@ -3,37 +3,32 @@
 source init.conf
 test -f custom.conf && source custom.conf
 
-while getopts 'i:h' opt
+while getopts 'i:o:h' opt
 do
   case "$opt" in
-    i) orgId="$OPTARG";;
+    o) orgName="$OPTARG";;
     ?|h)
-      echo "Usage: $(basename $0) -i orgId [-h]"
+      echo "Usage: $(basename $0) -o orgName [-h]"
       exit 1
       ;;
   esac
 done
 
-if [[ $orgId == "" ]]
-then
-    printf "%s\n" "none"
-    exit
-fi
+orgName=${orgName:-myOrg}
 
 oid=$( curl $curlOpts --silent --user "${publicKey}:${privateKey}" --digest \
  --header 'Accept: application/json' \
  --header 'Content-Type: application/json' \
- --request GET "${opsMgrExtUrl2}/api/public/v1.0/orgs/$orgId?pretty=true" )
+ --request GET "${opsMgrExtUrl2}/api/public/v1.0/orgs/?pretty=true" )
 
 errorCode=$( printf "%s" "$oid" | jq .errorCode )
-orgId=$( eval printf $oid)
+
+out=( $( printf "%s" "$oid" | jq --arg orgName "$orgName" '.results[]| select( .name == $orgName ) | .name,.id' ))
+eval out=( $( printf '%s ' "${out[*]}" ) )
 
 if [[ "${errorCode}" == "null" ]]
 then
-#    conf=$( sed -e '/orgId=/d' custom.conf )
-#    printf "%s\n" "${conf}" > custom.conf
-    name=( $( printf "%s" "$oid" | jq ".name,.id" ))
-    eval echo ${name[*]}
+    printf  "${out[*]}"
 else
     printf "%s\n" "none"
     exit 0

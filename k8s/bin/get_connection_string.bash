@@ -16,7 +16,7 @@ do
 done
 shift "$(($OPTIND -1))"
 
-name=${name:-myreplicaset}
+name=${name:-myproject1-myreplicaset}
 internal=${internal-0}
 
 type=$( kubectl get mdb/${name} -o jsonpath='{.spec.type}' )

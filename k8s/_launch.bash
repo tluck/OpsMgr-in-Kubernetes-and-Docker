@@ -42,7 +42,9 @@ printf "\n%s\n" "Using context: ${context}"
 
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Deploy the Operator ..."
+(set -x;
 deploy_Operator.bash
+)
 
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Deploy OM and wait until Running status..."
@@ -51,32 +53,42 @@ then
     export skip="-g"
 fi
 
-if [[ "${context}" == "docker-desktop" ]]
+if [[ "${context}" == "docker-desktop" || "${context}" == "minikube" ]]
 then
-docker pull "quay.io/mongodb/mongodb-enterprise-ops-manager:$omVersion" # issue with docker not (re)pulling the image
-deploy_OM.bash $skip -t # [-n name] [-g] [-c cpu] [-m memory] [-d disk] [-v version] 
+[[ "${context}" == "docker-desktop" ]] && docker pull "quay.io/mongodb/mongodb-enterprise-ops-manager:$omVersion" # issue with docker not (re)pulling the image
+(set -x; 
+deploy_OM.bash $skip -t  # [-n name] [-g] [-c cpu] [-m memory] [-d disk] [-v version] 
+)
 else
-deploy_OM.bash $skip -n "${omName}" -c "1.00" -m "4Gi" -d "40Gi" -v "$omVersion"
+(set -x; deploy_OM.bash $skip -n "${omName}" -c "1.00" -m "4Gi" -d "40Gi" -v "$omVersion" )
 fi
 
 if [[ ${omBackup} == true ]]
 then
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Create the Backup Oplog1 DB for OM ..."
-if [[ "${context}" == "docker-desktop" ]]
+if [[ "${context}" == "docker-desktop" || "${context}" == "minikube" ]]
 then
-    deploy_Cluster.bash -n "${omName}-oplog" $skip -c "0.33" -m "300Mi"         -v "$appdbVersion"
+(set -x;
+    deploy_Cluster.bash -n "${omName}-oplog" -c "0.33" -m "300Mi"         -v "${appdbVersion}" ${skip}
+)
 else
-    deploy_Cluster.bash -n "${omName}-oplog" $skip -c "0.50" -m "2Gi" -d "40Gi" -v "$appdbVersion"
+(set -x;
+    deploy_Cluster.bash -n "${omName}-oplog" -c "0.50" -m "2Gi" -d "40Gi" -v "${appdbVersion}" ${skip}
+)
 fi
 
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Create the Backup BlockStore1 DB for OM ..."
-if [[ "${context}" == "docker-desktop" ]]
+if [[ "${context}" == "docker-desktop" || "${context}" == "minikube" ]]
 then
-    deploy_Cluster.bash -n "${omName}-blockstore" $skip -c "0.33" -m "300Mi"         -v "$appdbVersion"
+(set -x;
+    deploy_Cluster.bash -n "${omName}-blockstore" -c "0.33" -m "300Mi"         -v "${appdbVersion}" ${skip}
+)
 else
-    deploy_Cluster.bash -n "${omName}-blockstore" $skip -c "0.50" -m "2Gi" -d "40Gi" -v "$appdbVersion"
+(set -x;
+    deploy_Cluster.bash -n "${omName}-blockstore" -c "0.50" -m "2Gi" -d "40Gi" -v "${appdbVersion}" ${skip}
+)
 fi
 fi
 
@@ -88,29 +100,30 @@ test -e custom.conf && source custom.conf
 
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Create a Production ReplicaSet Cluster with a splitHorizon configuration for External access ..."
-if [[ "${context}" == "docker-desktop" ]]
+if [[ "${context}" == "docker-desktop" || "${context}" == "minikube" ]]
 then
-set -x
+(set -x
     deploy_Cluster.bash -n "myreplicaset" -e -l "${ldapType}" -c "0.50" -m "400Mi"         -v "6.0.1-ent" -o "${orgId}" -p "myProject1" ${skip}
-set +x
+)
 else
-set -x
+(set -x
     deploy_Cluster.bash -n "myreplicaset" -e -l "${ldapType}" -c "1.00" -m "4Gi" -d "20Gi" -v "6.0.1-ent" -o "${orgId}" -p "myProject1" ${skip}
-set +x
+)
 fi
 cluster1="myProject1-myreplicaset"
 
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Create a Production Sharded Cluster  ..."
-if [[ "${context}" == "docker-desktop" ]]
+if [[ "${context}" == "docker-desktop" || "${context}" == "minikube" ]]
 then
     printf "\n%s\n" " **** skipping sharded deployment - not enough resources ***"
-    # deploy_Cluster.bash -n "mysharded" $skip -l "${ldapType}" -c "0.33" -m "400Mi"        -s "1"        -v "${mdbVersion}" -o "${orgId}" -p "${projectName}"
+    # deploy_Cluster.bash -n "mysharded" -l "${ldapType}" -c "0.33" -m "400Mi" -d "1Gi" -s "1" -r "1" -v "${mdbVersion}" -o "${orgId}" -p "myProject2" ${skip}
 else
-set -x
-    deploy_Cluster.bash -n "mysharded" -l "${ldapType}" -c "0.50" -m "2Gi" -d "4Gi" -s "2" -r "2" -v "${mdbVersion}" -o "${orgId}" -p "myProject2" ${skip}
+(set -x
+    deploy_Cluster.bash -n "mysharded" -l "${ldapType}" -c "0.50" -m "2Gi"   -d "4Gi" -s "2" -r "2" -v "${mdbVersion}" -o "${orgId}" -p "myProject2" ${skip}
+)
     cluster2="myProject2-mysharded"
-set +x
+
 fi
 
 printf "\n%s\n" "__________________________________________________________________________________________"

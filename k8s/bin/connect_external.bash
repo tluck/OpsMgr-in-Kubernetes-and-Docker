@@ -14,7 +14,7 @@ do
 done
 shift "$(($OPTIND -1))"
 
-name=${name:-myreplicaset}
+name=${name:-myproject1-myreplicaset}
 export PATH=.:bin:$PATH
 
 cs=$( get_connection_string.bash -n "${name}" )

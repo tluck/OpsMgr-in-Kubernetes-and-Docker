@@ -13,7 +13,7 @@ spec:
   selector:
     #statefulset.kubernetes.io/name: openldap
     app.kubernetes.io/name: openldap
-  type: LoadBalancer
+  type: PORTTYPE
 ---
 apiVersion: v1
 kind: Service

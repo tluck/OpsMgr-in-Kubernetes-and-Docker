@@ -122,15 +122,15 @@ spec:
     opLogStores:
       - name: oplog
         mongodbResourceRef:
-          name: NAME-oplog
+          name: NAME-oplog-NAME-oplog
         mongodbUserRef:
-          name: NAME-oplog-admin
+          name: NAME-oplog-NAME-oplog-admin
     blockStores:
       - name: blockstore
         mongodbResourceRef:
-          name: NAME-blockstore
+          name: NAME-blockstore-NAME-blockstore
         mongodbUserRef:
-          name: NAME-blockstore-admin
+          name: NAME-blockstore-NAME-blockstore-admin
     statefulSet:
       spec:
         template:

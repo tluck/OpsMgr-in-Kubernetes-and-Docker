@@ -18,7 +18,7 @@ do
     t) demo=1 ;;
     ?|h)
       echo "Usage: $(basename $0) [-n name] [-v omVersion] [-a appdbVersion] [-c cpu] [-m memory] [-d disk] [-g] [-t]"
-      echo "     use -l for limited memory (docker) "
+      echo "     use -t for k8s clusters with limited memory such as docker or minikube, etc "
       exit 1
       ;;
   esac
@@ -75,6 +75,8 @@ fi
 tlsc="#TLS "
 if [[ ${tls} == 1 ]]
 then
+    if [[ ${skipMakeCerts} == 0 ]]
+    then
 # For enablement of TLS (https) - provide certs and certificate authority
     kubectl delete secret         ${name}-cert > /dev/null 2>&1
     kubectl create secret generic ${name}-cert \
@@ -87,21 +89,24 @@ then
         --from-file="mms-ca.crt=${PWD}/certs/ca.pem" # need specific keynames ca-pem and mms-ca.crt
 
 # For enablement of TLS on the appdb - custom certs
-appdb=${name}-db
+    appdb=${name}-db
 # Create a secret for the member certs for TLS
-kubectl delete secret ${appdb}-cert > /dev/null 2>&1
+    kubectl delete secret ${appdb}-cert > /dev/null 2>&1
 # sleep 3
 # kubectl get secrets
-kubectl create secret tls ${appdb}-cert \
-    --cert="${PWD}/certs/${appdb}.crt" \
-    --key="${PWD}/certs/${appdb}.key"
-
+    kubectl create secret tls ${appdb}-cert \
+        --cert="${PWD}/certs/${appdb}.crt" \
+        --key="${PWD}/certs/${appdb}.key"
+    fi
 tlsr=""
 else
 tlsr="$tlsc"
+    if [[ ${skipMakeCerts} == 0 ]]
+    then
     kubectl delete secret         ${name}-cert > /dev/null 2>&1
     kubectl create secret generic ${name}-cert \
         --from-file="${PWD}/certs/queryable-backup.pem"
+    fi
 fi
 
 mdbom="mdbom_${name}.yaml"
@@ -149,7 +154,7 @@ cat mdbom_template.yaml | sed \
     -e "s/#LB  /$LB/" \
     -e "s/$tlsc/$tlsr/" \
     -e "s/$replace//" \
-    -e "s/NAME/$name/" > "${mdbom}"
+    -e "s/NAME/$name/g" > "${mdbom}"
 
 #  Deploy OpsManager resources
 kubectl apply -f "${mdbom}"

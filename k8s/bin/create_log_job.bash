@@ -2,7 +2,7 @@
 
 source init.conf
 
-project=${1:-MYREPLICASET}
+project=${1:-myProject1}
 
 pid=$( curl $curlOpts --silent --user "${publicApiKey}:${privateApiKey}" --digest \
  --header "Accept: application/json" \

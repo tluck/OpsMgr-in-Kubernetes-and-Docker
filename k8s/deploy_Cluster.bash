@@ -152,9 +152,11 @@ then
 fi
 
 # Create map for OM Org/Project
-if [[ ${tls} == 1 && ${skipMakeCerts} == 0 ]]
+if [[ ${tls} == 1 ]]
 then
-  kubectl delete configmap "${fullName}" > /dev/null 2>&1
+  kubectl get configmap "${fullName}" > /dev/null 2>&1
+  if [[ $? != 0 ]]
+  then
   if [[ $orgId != "" ]]
   then
     kubectl create configmap "${fullName}" \
@@ -170,15 +172,18 @@ then
         --from-literal="sslMMSCAConfigMap=opsmanager-ca" \
         --from-literal="sslRequireValidMMSServerCertificates='true'"
   fi
+  fi
 
   if [[ ${sharded} == true ]]
   then
-    rm "${PWD}/certs/${fullName}"*  > /dev/null 2>&1
+    if [[ ${skipMakeCerts} == 0 ]]
+    then 
+      rm "${PWD}/certs/${fullName}"*  > /dev/null 2>&1
       # mdb-{metadata.name}-mongos-cert
       # mdb-{metadata.name}-config-cert
       # mdb-{metadata.name}-<x>-cert x=0,1 (2 shards)
-    for ctype in agent mongos config $( seq -s " " 0 $(( $shards-1)) )
-    do   
+      for ctype in agent mongos config $( seq -s " " 0 $(( $shards-1)) )
+      do   
       "${PWD}/certs/make_sharded_certs.bash" "${fullName}" ${ctype}
       # Create a secret for the member certs for TLS
       cert="-cert"
@@ -190,7 +195,8 @@ then
       kubectl create secret tls "mdb-${fullName}-${ctype}${cert}" \
           --cert="${PWD}/certs/${fullName}-${ctype}.crt" \
           --key="${PWD}/certs/${fullName}-${ctype}.key"
-    done
+      done
+    fi
   else 
     # ReplicaSet
     # create new certs if the service does not exist
@@ -216,6 +222,8 @@ then
     fi
     
     # now make the certs
+    if [[ ${skipMakeCerts} == 0 ]]
+    then
     rm "${PWD}/certs/${fullName}"* > /dev/null 2>&1
     if [[ ${#dnsHorizon[@]} != 0  ]] 
     then
@@ -245,14 +253,21 @@ then
           --cert="${PWD}/certs/${fullName}-${ctype}.crt" \
           --key="${PWD}/certs/${fullName}-${ctype}.key"
     done
-
-      # Create a map for the cert
-      kubectl delete configmap ca-pem > /dev/null 2>&1
-      kubectl create configmap ca-pem \
-          --from-file="ca-pem=${PWD}/certs/ca.pem"
+    fi
   fi # end if sharded or replicaset
+
+  if [[ ${skipMakeCerts} == 0 ]]
+  then
+    # Create a map for the cert
+    kubectl delete configmap ca-pem > /dev/null 2>&1
+    kubectl create configmap ca-pem \
+       --from-file="ca-pem=${PWD}/certs/ca.pem"
+  fi
 else
 # no tls here
+  kubectl get configmap "${fullName}" > /dev/null 2>&1
+  if [[ $? != 0 ]]
+  then
   if [[ $orgId != "" ]]
   then
     kubectl delete configmap "${fullName}" > /dev/null 2>&1
@@ -265,6 +280,7 @@ else
     kubectl create configmap "${fullName}" \
     --from-literal="projectName=${projectName}" \
     --from-literal="baseUrl=${opsMgrUrl}"
+  fi
   fi
 fi # tls
 

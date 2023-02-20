@@ -1,9 +1,10 @@
 #!/bin/bash
 
-while getopts 'n:h' opts
+while getopts 'n:s:h' opts
 do
   case "$opts" in
     n) name="$OPTARG" ;;
+    s) sName="$OPTARG" ;;
     ?|h)
       echo "Usage: $(basename $0) -n Name "
       exit 1
@@ -12,10 +13,14 @@ do
 done
 shift "$(($OPTIND -1))"
 
-#name=${name:-myreplicaset}
+#name=${name:-myproject1-myreplicaset}
 
 # Check if this is for a cluster otherwise assume it is the OM
-serviceName=${name}-0
+
+serviceName=""
+if [[ $name != "" ]] 
+then
+    serviceName=${name}-0
 type=$( kubectl get mdb/${name} -o jsonpath='{.spec.type}' 2>/dev/null )
 err1=$?
 if [[ $err1 != 0 ]]
@@ -33,6 +38,10 @@ else # we assume RepSet but lets check for RepSet vs Sharded
     then
         serviceName=${name}-svc-external
     fi
+fi
+else
+    serviceName=$sName
+    om=1
 fi
 
 serviceType=$( kubectl get svc/${serviceName} -o jsonpath='{.spec.type}' 2>/dev/null )

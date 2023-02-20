@@ -19,6 +19,7 @@ then
     slist=( $(bin/get_hns.bash -n "${name}" ) ) 
     hostname="${slist[0]%:*}"
     slist=( $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="ExternalIP")].address}' ) )
+    [[ ${slist[0]} == "" ]] && slist=( $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="InternalIP")].address}' ) )
     opsMgrExtIp=${slist[0]}
 else
     eval hostname=$(    kubectl get svc/${name}-svc-ext -o jsonpath={.status.loadBalancer.ingress[0].hostname} ) 
@@ -41,7 +42,7 @@ then
 else
     opsMgrExtUrl1=${http}://${hostname}:${port}
     opsMgrExtUrl2=${http}://${om_ext}:${port}
-    if [[ "${hostname}" != "localhost" && "${hostname}" != "" ]]
+    [[ $opsMgrExtIp == "" ]] && if [[ "${hostname}" != "localhost" && "${hostname}" != "" ]]
     then
         eval list=( $(nslookup ${hostname} | grep Address ) )
         opsMgrExtIp=${list[3]}
@@ -105,6 +106,13 @@ then
     nodename=(docker-desktop)
     dnslist=(docker-desktop)
     iplist=(127.0.0.1)
+fi
+
+if [[ ${nodename} == "minikube" ]]
+then
+    nodename=(minikube)
+    dnslist=(minikube)
+    iplist=(   $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="InternalIP")].address}' ) )
 fi
 
 # add 3 nodes to the /etc/hosts file

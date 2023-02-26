@@ -2,10 +2,11 @@
 
 source init.conf
 
-while getopts 'n:h' opt
+while getopts 'n:lh' opt
 do
   case "$opt" in
     n) name="$OPTARG" ;;
+    l) ldap="-l"      ;;
     ?|h)
       echo "Usage: $(basename $0) [-n clusterName] "
       exit 1
@@ -31,13 +32,13 @@ then
 mongo=mongosh
 fi
 
-ics=$( get_connection_string.bash -n "${name}" -i )
+ics=$( get_connection_string.bash -n "${name}" -i $ldap )
 fcs=${ics#*:}
 printf "\n%s %s\n\n" "Connect String: ${fcs} "
 
 # update old mongosh
-kubectl exec ${name}${mongos}-0 -i -t -- bash -c "curl -s https://downloads.mongodb.com/compass/mongosh-1.6.2-linux-x64.tgz -o /var/lib/mongodb-mms-automation/mongosh-1.6.2-linux-x64.tgz; cd /var/lib/mongodb-mms-automation/ ; tar -zxvf mongosh-1.6.2-linux-x64.tgz; rm mongosh-1.6.2-linux-x64.tgz"
+kubectl exec ${name}${mongos}-0 -i -t -- bash -c "curl -s https://downloads.mongodb.com/compass/mongosh-${mongoshVersion}-linux-x64.tgz -o /var/lib/mongodb-mms-automation/mongosh-${mongoshVersion}-linux-x64.tgz; cd /var/lib/mongodb-mms-automation/ ; tar -zxvf mongosh-${mongoshVersion}-linux-x64.tgz; rm mongosh-${mongoshVersion}-linux-x64.tgz"
 
-path="$( kubectl exec ${name}${mongos}-0  -- find /var/lib/ -name ${mongo} |grep "1.6.2")"
+path="$( kubectl exec ${name}${mongos}-0  -- find /var/lib/ -name ${mongo} |grep "${mongoshVersion}")"
 mongosh=$( printf "%s" $path)
 eval "kubectl exec ${name}${mongos}-0 -i -t -- ${mongosh} ${fcs} "

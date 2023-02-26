@@ -12,7 +12,7 @@ kubectl create namespace ${namespace}
 kubectl config set-context $(kubectl config current-context) --namespace=${namespace}
 
 # Deploy the MongoDB Enterprise Operator
-myoperator="mongodb-${namespace}-operator.yaml"
+myoperator="${namespace}-myoperator.yaml"
 kubectl apply -f crds.yaml
 if [[ "${clusterType}" == "openshift" ]]
 then

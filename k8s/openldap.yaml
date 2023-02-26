@@ -56,6 +56,8 @@ spec:
               value: "admin"
             - name: LDAP_PORT_NUMBER
               value: "389"
+            - name: LDAP_CONFIG_ADMIN_ENABLED
+              value: "yes"
             - name: LDAP_ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:

@@ -71,6 +71,15 @@ spec:
       #LDAPT   caConfigMapRef:
       #LDAPT     name: "LDAPCERTMAPNAME"
       #LDAPT     key: "LDAPKEY"
+    #LDAP  roles:
+    #LDAP    - role: cn=dbusers,ou=users,dc=example,dc=org
+    #LDAP      db: admin
+    #LDAP      privileges: []
+    #LDAP      roles:
+    #LDAP        - db: admin
+    #LDAP          role: dbAdminAnyDatabase
+    #LDAP        - db: admin
+    #LDAP          role: readWriteAnyDatabase
   # The default TLS mode is 'requireTLS' but it can be customized using the
   # the `additionalMongodConfig` structure. Please find more information here:
   # https://docs.mongodb.com/manual/reference/configuration-options/#net.ssl.mode

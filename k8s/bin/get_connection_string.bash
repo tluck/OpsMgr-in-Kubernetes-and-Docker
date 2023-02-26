@@ -3,11 +3,12 @@
 source init.conf
 PATH=.:bin:$PATH
 
-while getopts 'n:ih' opt
+while getopts 'n:lih' opt
 do
   case "$opt" in
     n) name="$OPTARG" ;;
     i) internal=1     ;;
+    l) ldap=1         ;;
     ?|h)
       echo "Usage: $(basename $0) [-n clusterName] "
       exit 1
@@ -32,6 +33,11 @@ fi
 
 #cs="mongodb://${dbuser}:${dbpassword}@${hn0}:${np0},${hn1}:${np1},${hn2}:${np2}/?replicaSet=${name}&authSource=admin"
 ics=$( kubectl get secret ${name}-${name}-admin-admin -o jsonpath="{.data['connectionString\.standard']}" | base64 --decode ) 
+if [[ $ldap == 1 ]]
+then
+    ics=${ics/SCRAM-SHA-256/PLAIN}
+    ics=${ics/admin/\%24external}
+fi
 ecs="${ics}"
 if [[ ${serviceType} != "" ]]
 then
@@ -39,9 +45,9 @@ hn=( $( bin/get_hns.bash -n "${name}" ) )
 
 if [[ "${sharded}" == "1" ]] 
 then
-    ecs=$( printf $ics | sed -e "s?:2701.?:${hn#*:}?g" )
+    ecs=$( printf "%s" "$ics" | sed -e "s?:2701.?:${hn#*:}?g" )
 else
-    ecs=$( printf $ics | sed -e "s?@.*/?@${hn[0]},${hn[1]},${hn[2]}/?" )
+    ecs=$( printf "%s" "$ics" | sed -e "s?@.*/?@${hn[0]},${hn[1]},${hn[2]}/?" )
 fi
 fi
 
@@ -55,10 +61,10 @@ then
     eval version=$( kubectl get mdb ${name} -o jsonpath={.spec.version} )
     if [[ ${version%%.*} = 3 ]]
     then
-        ssltls_options=" --ssl --sslCAFile \"${PWD}/certs/ca.pem\" --sslPEMKeyFile \"${PWD}/certs/${name}${mongos}.pem\" "
+        ssltls_options=" --sslCAFile \"${PWD}/certs/ca.pem\" --sslPEMKeyFile \"${PWD}/certs/${name}${mongos}.pem\" "
         ssltls_enabled="&ssl=true"
     else
-        ssltls_options=" --tls --tlsCAFile \"${PWD}/certs/ca.pem\" --tlsCertificateKeyFile \"${PWD}/certs/${name}${mongos}.pem\" "
+        ssltls_options=" --tlsCAFile \"${PWD}/certs/ca.pem\" --tlsCertificateKeyFile \"${PWD}/certs/${name}${mongos}.pem\" "
         ssltls_enabled="&tls=true"
     fi
 fi
@@ -73,10 +79,10 @@ then
     serverpem=$( eval printf ${kv%:*} )
     if [[ ${version%%.*} = 3 ]]
     then
-        ssltls_options=" --ssl --sslCAFile /mongodb-automation/tls/ca/ca-pem --sslPEMKeyFile /mongodb-automation/tls/${serverpem}"
+        ssltls_options=" --sslCAFile /mongodb-automation/tls/ca/ca-pem --sslPEMKeyFile /mongodb-automation/tls/${serverpem}"
         ssltls_enabled="&ssl=true"
     else
-        ssltls_options=" --tls --tlsCAFile /mongodb-automation/tls/ca/ca-pem --tlsCertificateKeyFile /mongodb-automation/tls/${serverpem}"
+        ssltls_options=" --tlsCAFile /mongodb-automation/tls/ca/ca-pem --tlsCertificateKeyFile /mongodb-automation/tls/${serverpem}"
         ssltls_enabled="&tls=true"
     fi
 fi

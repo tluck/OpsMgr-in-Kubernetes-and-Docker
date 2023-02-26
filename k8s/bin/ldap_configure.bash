@@ -26,6 +26,22 @@ else
 fi
 ldapServer="ldap://${hostName}:${port}"
 
+ldapadd -H ${ldapServer} -x -c -w configpassword -D cn=admin,cn=config <<EOF
+dn: cn=module,cn=config
+cn: module 
+objectClass: olcModuleList
+olcModulePath: /opt/bitnami/openldap/lib/openldap
+olcModuleLoad: memberof.so
+EOF
+
+ldapadd -H ${ldapServer} -x -c -w configpassword -D cn=admin,cn=config <<EOF
+dn: olcOverlay=memberof,olcDatabase={2}mdb,cn=config
+objectClass: olcOverlayConfig
+objectClass: olcMemberOf
+olcOverlay: memberof
+olcMemberOfRefint: TRUE
+EOF
+
 # add User TL
 ldapmodify -H ${ldapServer} -x -a -w adminpassword -D cn=admin,dc=example,dc=org <<EOF
 dn: cn=Thomas.Luckenbach,ou=users,dc=example,dc=org
@@ -58,10 +74,30 @@ gidNumber: 1003
 homeDirectory: /Users/suzanne
 EOF
 
-# put TL in readers group -  DB users
+#ldapmodify -H ${ldapServer} -x -c -w adminpassword -D cn=admin,dc=example,dc=org <<EOF
+#dn: cn=readers,ou=users,dc=example,dc=org
+#changetype: modify
+#delete: member
+#member: cn=dbAdmin,ou=users,dc=example,dc=org
+#member: cn=User01,ou=users,dc=example,dc=org
+#member: cn=User02,ou=users,dc=example,dc=org
+#EOF
+
+# put users in readers group -  DB users
 ldapmodify -H ${ldapServer} -x -c -w adminpassword -D cn=admin,dc=example,dc=org <<EOF
 dn: cn=readers,ou=users,dc=example,dc=org
 add: member
+member: cn=Thomas.Luckenbach,ou=users,dc=example,dc=org
+EOF
+
+# create dbusers group and add users  - org ossociations
+ldapadd -H ${ldapServer} -x -c -w adminpassword -D cn=admin,dc=example,dc=org <<EOF
+dn: cn=dbusers,ou=users,dc=example,dc=org
+cn: dbusers
+objectClass: groupOfNames
+member: cn=dbAdmin,ou=users,dc=example,dc=org
+member: cn=User01,ou=users,dc=example,dc=org
+member: cn=User02,ou=users,dc=example,dc=org
 member: cn=Thomas.Luckenbach,ou=users,dc=example,dc=org
 EOF
 
@@ -74,5 +110,7 @@ member: cn=Thomas.Luckenbach,ou=users,dc=example,dc=org
 member: cn=Suzanne.Luckenbach,ou=users,dc=example,dc=org
 EOF
 
-ldapsearch -H ${ldapServer} -x -b 'dc=example,dc=org' 
+#ldapsearch -H ${ldapServer} -x -b 'dc=example,dc=org' 
+#ldapsearch -H ${ldapServer} -x -b 'dc=example,dc=org' dn cn=Thomas.Luckenbach,ou=users,dc=example,dc=org dn memberof
 
+printf "%s\n" "created ldapServer=ldap://${hostName}:${port}"

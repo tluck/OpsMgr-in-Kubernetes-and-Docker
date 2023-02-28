@@ -21,10 +21,10 @@ spec:
               resources:  # 3Gi a good size for a demo -- use 5Gi or more for larger clusters in production
                 limits:
                   cpu:    "OMCPU"
-                  memory: OMMEM
+                  memory: OMMEMLIM
                 requests:
                   cpu:    "OMCPU"
-                  memory: OMMEM
+                  memory: OMMEMREQ 
 
   #TLS security: # enables TLS for Ops Manager allowing it to serve traffic over HTTPS
   #TLS   tls:
@@ -107,7 +107,7 @@ spec:
     mms.ldap.user.group: MMSLDAPUSERGROUP # deprecated
     mms.ldap.user.searchAttribute: MMSLDAPUSERSEARCHATTRIBUTE
     automation.versions.source: remote # hybrid
-    mongodb.release.autoDownload: "false" # stop downloads of binaries (unless you need to demo recovery)
+    mongodb.release.autoDownload: "true" # stop downloads of binaries (unless you need to demo recovery)
     mongodb.release.autoDownload.enterprise: "true"
     mongodb.release.modulePreference: enterpriseRequired
     #TLS brs.queryable.pem: /opt/mongodb/mms/secrets/queryable-backup.pem # stored in a secret
@@ -140,7 +140,7 @@ spec:
                 resources: # ~2Gi is good size for a demo -- use 5Gi for larger clusters in production
                   limits:
                     cpu:    "BDCPU"
-                    memory: BDMEM
+                    memory: BDMEMLIM
                   requests:
                     cpu:    "BDCPU"
-                    memory: BDMEM
+                    memory: BDMEMREQ

@@ -31,26 +31,40 @@ if [[ $demo == 1 ]]
 then
     replace="#Demo   "
     omcpu=${omcpu:-"0.75"}
-    ommem=${ommem:-"3Gi"}
+    ommemlim=${ommemlim:-"3Gi"}
+    ommemreq=${ommemreq:-"3Gi"}
     bdcpu=${bdcpu:-"0.75"}
-    bdmem=${bdmem:-"2Gi"}
+    bdmemlim=${bdmemlim:-"3Gi"}
+    bdmemreq=${bdmemreq:-"2Gi"}
     bddsk=${bddsk:-"4Gi"}
+    rscpu=${rscpu:-"0.25"}
+    rsmem=${rsmem:-"400Mi"}
+    rsdsk=${rsdsk:-"2Gi"}
 else
     replace="NOTHING "
-    omcpu=${omcpu:-"2.00"}
-    ommem=${ommem:-"8Gi"}
-    bdcpu=${bdcpu:-"2.00"}
-    bdmem=${bdmem:-"8Gi"}
-    bddsk=${bddsk:-"40Gi"}
+    omcpu=${omcpu:-"4.00"}
+    ommemlim=${ommemlim:-"16Gi"}
+    ommemreq=${ommemreq:-"8Gi"}
+    bdcpu=${bdcpu:-"4.00"}
+    bdmemlim=${bdmemlim:-"16Gi"}
+    bdmemreq=${bdmemreq:-"8Gi"}
+    bddsk=${bddsk:-"100Gi"}
+    rscpu=${rscpu:-"4.00"}
+    rsmem=${rsmem:-"16Gi"}
+    rsdsk=${rsdsk:-"50Gi"}
 fi
 
-rscpu="${rscpu:-0.25}"
-rsmem="${rsmem:-400Mi}"
-rsdsk="${rsdsk:-2Gi}"
 omVer="${omVer:-$omVersion}"
 omBackup="${omBackup:-false}"
 appdbVer="${appdbVer:-$appdbVersion}"
 skipMakeCerts=${skipMakeCerts:-0}
+
+printf "\n"
+printf "%s\n" "Deploying OM Application   with $ommemlim Maximum Memory, $ommemreq Requested Memory, and $omcpu Cores"
+printf "%s\n" "Deploying OM ApplicationDB with $rsmem Maximum Memory, $rsmem Requested Memory, $rscpu Cores, and $rsdsk Disk"
+[[ $omBackup == "true" ]] && 
+printf "%s\n" "Deploying OM Backup Daemon with $bdmemlim Maximum Memory, $bdmemreq Requested Memory, $bdcpu Cores, and $bddsk Disk"
+printf "\n"
 
 # Create the credentials for main admin user
 kubectl delete secret         admin-user-credentials > /dev/null 2>&1
@@ -144,12 +158,14 @@ cat mdbom_template.yaml | sed \
     -e "s/RSCPU/$rscpu/" \
     -e "s/RSMEM/$rsmem/" \
     -e "s/RSDISK/$rsdsk/" \
-    -e "s/BDCPU/$bdcpu/" \
-    -e "s/BDMEM/$bdmem/" \
-    -e "s/BDDISK/$bddsk/" \
     -e "s/OMCPU/$omcpu/" \
-    -e "s/OMMEM/$ommem/" \
+    -e "s/OMMEMLIM/$ommemlim/" \
+    -e "s/OMMEMREQ/$ommemreq/" \
     -e "s/OMBACKUP/$omBackup/" \
+    -e "s/BDCPU/$bdcpu/" \
+    -e "s/BDMEMLIM/$bdmemlim/" \
+    -e "s/BDMEMREQ/$bdmemreq/" \
+    -e "s/BDDISK/$bddsk/" \
     -e "s/#NP  /$NP/" \
     -e "s/#LB  /$LB/" \
     -e "s/$tlsc/$tlsr/" \

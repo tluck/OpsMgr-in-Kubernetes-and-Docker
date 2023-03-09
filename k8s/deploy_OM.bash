@@ -180,6 +180,7 @@ printf "\n%s\n" "Monitoring the progress of resource om/${name} ..."
 sleep 10
 while true
 do
+    sleep 15
     kubectl get om/${name}
     pstatus=$( kubectl get om/${name} -o jsonpath={.status.opsManager.phase} )
     message=$( kubectl get om/${name} -o jsonpath={.status.opsManager.message} )
@@ -188,7 +189,6 @@ do
     then
         break
     fi
-    sleep 15
 done
 
 # pre v1.8.2 - fix to expose port 25999 for queryable backup

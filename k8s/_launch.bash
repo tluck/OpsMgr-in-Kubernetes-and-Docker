@@ -97,6 +97,8 @@ printf "%s\n" "Create a custom Org to put your projects in ..."
 # Create the Org and put the orgId info in custom.conf
 bin/deploy_org.bash -o "${orgName}" # -o newOrgName
 test -e custom.conf && source custom.conf
+orgId="${orgName}_orgId"
+orgId="${!orgId}"
 
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Create a Production ReplicaSet Cluster with a splitHorizon configuration for External access ..."

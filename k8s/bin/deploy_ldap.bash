@@ -17,13 +17,13 @@ resource="deployment/openldap"
 printf "%s\n" "Waiting on ldapServer Readiness..."
 while true
 do
+    sleep 20
     eval pstatus=$( kubectl get "${resource}" -o jsonpath={'.status.conditions[0].status'} )
     if [[ "$pstatus" == "True" ]];
     then
         printf "Status: %s\n" "ldapServer is ready: $pstatus"
         break
     fi
-    sleep 20
 done
 
 bin/ldap_configure.bash

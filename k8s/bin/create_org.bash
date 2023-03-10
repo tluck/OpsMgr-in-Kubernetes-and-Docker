@@ -43,7 +43,7 @@ fi
 
 if [[ "${errorCode}" == "null" ]]
 then
-    conf=$( sed -e '/orgName=/d' -e '/orgId=/d' custom.conf )
+    conf=$( sed -e "/${orgName}_orgId=/d" custom.conf )
     printf "%s\n" "${conf}" > custom.conf
     if [[ ${orgExists} == 1 ]]
     then
@@ -51,8 +51,8 @@ then
     else
     printf "\n%s\n" "Created a new Organization: ${orgName} with orgId: ${orgId}"
     fi
-    echo  orgName=\"${orgName}\" >> custom.conf
-    echo  orgId=\"${orgId}\"     >> custom.conf
+    #echo  orgName=\"${orgName}\" >> custom.conf
+    echo  ${orgName}_orgId=${orgId}     >> custom.conf
 else
     printf "%s\n" "* * * Error - Organiztion creation failed"
     exit 1

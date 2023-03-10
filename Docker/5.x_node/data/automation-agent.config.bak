@@ -6,18 +6,16 @@
 #
 #
 
-mmsGroupId=5f45e5afe5fa82007e391696
-mmsApiKey=5f459304e5fa82007e35c86b5721a3a321bb2ef16486a51ebf28b11f
+mmsGroupId=640b7fb45e0df828cedbff22
+mmsApiKey=640b7fb45e0df828cedbff319e05b3dace815bc58316fff47de597ea
 
 # Hostname of the Ops Manager web server. The hostname will match what is used
 # to access the Ops Manager UI. The default port for an Ops Manager install
 # is 8080.
 #
 # ex. http://opsmanaager.<company>.com:8080
-## mmsBaseUrl=http://localhost:8080
-###mmsBaseUrl=http://opsmgr:8080
-#mmsBaseUrl=http://opsmanager-svc.mongodb.svc.cluster.local:8080
-mmsBaseUrl=https://opsmanager-svc.mongodb.svc.cluster.local:8443
+
+mmsBaseUrl=https://opsmanager-svc.mynamespace.svc.cluster.local:8443
 sslTrustedMMSServerCertificate=/shareddata/ca.pem
 #
 # Path to log file
@@ -43,26 +41,3 @@ maxLogFiles=10
 # Maximum size in bytes of a log file (before rotating)
 #
 maxLogFileSize=268435456
-
-#
-# URL to proxy all HTTP requests through
-#
-#httpProxy=
-
-#
-# Server pool key to register a server to the pool
-#
-serverPoolKey=
-
-#
-# Path to file that agent uses to keep track of data directories per group
-#
-serverPoolStateFile=/var/lib/mongodb-mms-automation/server-pool.state
-
-#
-# Path to file that contains all properties of this agent (server)
-#
-serverPoolPropertiesFile=/etc/mongodb-mms/server-pool.properties
-
-# For additional optional settings, please see
-# https://docs.opsmanager.mongodb.com/current/reference/automation-agent/

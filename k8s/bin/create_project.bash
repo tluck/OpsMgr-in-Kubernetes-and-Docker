@@ -30,12 +30,12 @@ rm data.json
 
 if [[ "${errorCode}" == "null" ]]
 then
-    conf=$( sed -e "/${projectName}Id/d" -e "/${projectName}agentApiKey/d" custom.conf )
+    conf=$( sed -e "/${projectName}_Id/d" -e "/${projectName}_agentApiKey/d" custom.conf )
     printf "%s\n" "${conf}" > custom.conf
-    printf "\n%s\n" "Successfully created Project: $projectName"
-    echo  projectName=\"${projectName}\"                                        >> custom.conf
-    echo  ${projectName}Id="$(          printf "%s" "$pid" | jq .id )"          >> custom.conf
-    echo  ${projectName}agentApiKey="$( printf "%s" "$pid" | jq .agentApiKey )" >> custom.conf
+    printf "%s\n" "Successfully created Project: $projectName in OrgId: ${orgId}"
+#    echo  projectName=\"${projectName}\"                                        >> custom.conf
+    echo  ${projectName}_Id="$(          printf "%s" "$pid" | jq .id )"          >> custom.conf
+    echo  ${projectName}_agentApiKey="$( printf "%s" "$pid" | jq .agentApiKey )" >> custom.conf
 else
     detail=$( printf "%s" "$pid" | jq .detail )
     printf "%s\n" "Error did not create projectName: $detail"

@@ -15,7 +15,6 @@ do
   esac
 done
 shift "$(($OPTIND -1))"
-
 projectName="${projectName:-Demo}"
 
 # get latest cert
@@ -28,11 +27,32 @@ kubectl create configmap shareddata \
     --from-file=data/mongod.conf
 
 name=node-
-for i in 1 2 3 #4 5 6 7 8 9 0
+for i in 3 2 1
 do
 fullName=$( printf "${projectName}-${name}${i}"| tr '[:upper:]' '[:lower:]' )
 kubectl delete pod ${fullName} > /dev/null 2>&1
 kubectl delete svc ${fullName} > /dev/null 2>&1
 sleep 5
 cat node.yaml | sed -e "s/PROJECT-NAME/${fullName}/" -e "s/NAMESPACE/${namespace}/" -e "s/NAME/${name}${i}/" | kubectl apply -f -
+done
+
+# external nodeport
+i=1
+fullName=$( printf "${projectName}-${name}${i}"| tr '[:upper:]' '[:lower:]' )
+kubectl delete svc ${fullName}-ext > /dev/null 2>&1
+kubectl expose pod ${fullName} --name="${fullName}-ext" --type="NodePort" --port 27017 -n ${namespace}
+
+pod=pod/${fullName}
+while true
+do
+    kubectl get ${pod}
+    eval status=$(  kubectl get ${pod} -o json| jq '.status.phase' )
+    eval message=$( kubectl get ${pod} -o json| jq '.status.message')
+    printf "%s\n" "$message"
+    if [[ "$status" == "Running" ]];
+    then
+        printf "%s\n" "$status"
+        break
+    fi
+    sleep 15
 done

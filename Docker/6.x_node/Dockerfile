@@ -4,7 +4,8 @@
 # PLEASE DO NOT EDIT IT DIRECTLY.
 #
 
-FROM ubuntu:jammy
+#FROM ubuntu:jammy
+FROM ubuntu:focal
 
 # add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
 RUN set -eux; \
@@ -22,6 +23,8 @@ RUN set -eux; \
 		jq \
 		numactl \
 		procps \
+                curl \
+                net-tools \
 	; \
 	rm -rf /var/lib/apt/lists/*
 
@@ -82,7 +85,7 @@ ARG MONGO_REPO=repo.mongodb.org
 ENV MONGO_PACKAGE=${MONGO_PACKAGE} MONGO_REPO=${MONGO_REPO}
 
 ENV MONGO_MAJOR 6.0
-RUN echo "deb [ signed-by=/etc/apt/keyrings/mongodb.gpg ] http://$MONGO_REPO/apt/ubuntu jammy/${MONGO_PACKAGE%-unstable}/$MONGO_MAJOR multiverse" | tee "/etc/apt/sources.list.d/${MONGO_PACKAGE%-unstable}.list"
+RUN echo "deb [ signed-by=/etc/apt/keyrings/mongodb.gpg ] http://$MONGO_REPO/apt/ubuntu focal/${MONGO_PACKAGE%-unstable}/$MONGO_MAJOR multiverse" | tee "/etc/apt/sources.list.d/${MONGO_PACKAGE%-unstable}.list"
 
 # https://docs.mongodb.org/master/release-notes/6.0/
 ENV MONGO_VERSION 6.0.4
@@ -102,6 +105,17 @@ RUN set -x \
 	&& rm -rf /var/lib/mongodb \
 	&& mv /etc/mongod.conf /etc/mongod.conf.orig
 
+#ARG DOWNLOAD
+ARG PACKAGE
+
+#RUN set -x \
+#    && curl -OL ${DOWNLOAD}/${PACKAGE} \
+#    && dpkg --install ${PACKAGE}
+COPY ${PACKAGE} /tmp/${PACKAGE}
+RUN  dpkg --install /tmp/${PACKAGE}
+RUN  rm /tmp/${PACKAGE}
+RUN  apt-get clean
+
 VOLUME /data/db /data/configdb
 
 # ensure that if running as custom user that "mongosh" has a valid "HOME"
@@ -109,7 +123,7 @@ VOLUME /data/db /data/configdb
 ENV HOME /data/db
 
 COPY docker-entrypoint.sh /usr/local/bin/
-ENTRYPOINT ["docker-entrypoint.sh"]
+#ENTRYPOINT ["docker-entrypoint.sh"]
 
 EXPOSE 27017
-CMD ["mongod"]
+CMD ["/bin/bash"]

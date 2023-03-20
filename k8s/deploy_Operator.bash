@@ -23,3 +23,5 @@ else
     -e "s/namespace: mongodb/namespace: $namespace/"  > "${myoperator}"
 fi
 kubectl apply -f "${myoperator}"
+
+[[ ${tls} == 1 ]] && certs/make_cert_issuer.bash $namespace $issuerName

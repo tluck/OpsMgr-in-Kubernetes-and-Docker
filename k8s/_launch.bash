@@ -1,7 +1,27 @@
 #!/bin/bash
 
 # argument if set to 1 will skip creating new certs for OM and the App DB
-skipMakeCerts=${1:-0} 
+while getopts 'odsgth' opt
+do
+  case "$opt" in
+    o)   OM="true"; Clusters="false" ;;
+    d)   Clusters="true"; OM="false" ;;
+    s|g) skip="-g" ;;
+    t)   demo="-t" ;;
+    ?|h)
+      echo "Usage: $(basename $0) [-o ] [-s|-g] [-t]"
+      echo "     use -o to deploy the OM resource"
+      echo "     use -d to deploy the Cluster resources"
+      echo "     use -t for k8s clusters with limited memory such as docker or minikube, etc "
+      echo "     use -s -g to skip cert generation"
+      exit 1
+      ;;
+  esac
+done
+shift "$(($OPTIND -1))"
+
+OM=${OM:-true}
+Clusters=${Clusters:-true}
 
 d=$( dirname "$0" )
 cd "${d}"
@@ -40,24 +60,23 @@ printf "\n%s\n" "_______________________________________________________________
 context=$( kubectl config current-context )
 printf "\n%s\n" "Using context: ${context}"
 
+[[ "${context}" == "docker-desktop" || "${context}" == "minikube" ]] && demo="-t"
+
+if [[ $OM == 'true' ]]
+then
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Deploy the Operator ..."
 (set -x;
 deploy_Operator.bash
 )
-
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Deploy OM and wait until Running status..."
-if [[ ${skipMakeCerts} = 1 || ${skipMakeCerts} == "-s" || ${skipMakeCerts} == "-g" ]]
-then
-    export skip="-g"
-fi
 
 if [[ "${context}" == "docker-desktop" || "${context}" == "minikube" ]]
 then
 [[ "${context}" == "docker-desktop" ]] && docker pull "quay.io/mongodb/mongodb-enterprise-ops-manager:$omVersion" # issue with docker not (re)pulling the image
 (set -x; 
-deploy_OM.bash $skip -t  # [-n name] [-g] [-c cpu] [-m memory] [-d disk] [-v version] 
+deploy_OM.bash $skip $demo # [-n name] [-g] [-c cpu] [-m memory] [-d disk] [-v version] 
 )
 else
 (set -x; deploy_OM.bash $skip -n "${omName}" -c "1.00" -m "4Gi" -d "40Gi" -v "$omVersion" )
@@ -91,6 +110,8 @@ else
 )
 fi
 fi
+fi # OM
+[[ $OM == 'true' && $Clusters == 'false' ]] && exit
 
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Create a custom Org to put your projects in ..."

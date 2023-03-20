@@ -41,7 +41,7 @@ then
     opsMgrExtUrl1=${http}://${opsMgrExtIp}:${port}
 else
     opsMgrExtUrl1=${http}://${hostname}:${port}
-    opsMgrExtUrl2=${http}://${om_ext}:${port}
+    opsMgrExtUrl2=${http}://${omExternalName}:${port}
     [[ $opsMgrExtIp == "" ]] && if [[ "${hostname}" != "localhost" && "${hostname}" != "" ]]
     then
         eval list=( $(nslookup ${hostname} | grep Address ) )
@@ -70,12 +70,12 @@ if [[ $? == 0 ]]
 then
     # replace host entry
     printf "%s" "Replacing /etc/hosts entry: "
-    printf "%s\n" "${opsMgrExtIp}${TAB}${name}-svc.${namespace}.svc.cluster.local ${name}-svc ${om_ext}" 
-    sudo ${sed} -E -e "s|^[0-9].*(${name}-svc.*.svc.cluster.local.*)|${opsMgrExtIp}${TAB}${name}-svc.${namespace}.svc.cluster.local ${name}-svc ${om_ext}|" /etc/hosts 1>/dev/null
+    printf "%s\n" "${opsMgrExtIp}${TAB}${name}-svc.${namespace}.svc.cluster.local ${name}-svc ${omExternalName}" 
+    sudo ${sed} -E -e "s|^[0-9].*(${name}-svc.*.svc.cluster.local.*)|${opsMgrExtIp}${TAB}${name}-svc.${namespace}.svc.cluster.local ${name}-svc ${omExternalName}|" /etc/hosts 1>/dev/null
 else
     # add host entry
     printf "%s" "Adding /etc/hosts entry: "
-    printf "%s\n" "${opsMgrExtIp}${TAB}${name}-svc.${namespace}.svc.cluster.local ${name}-svc ${om_ext}" | sudo tee -a /etc/hosts
+    printf "%s\n" "${opsMgrExtIp}${TAB}${name}-svc.${namespace}.svc.cluster.local ${name}-svc ${omExternalName}" | sudo tee -a /etc/hosts
 fi
 fi
 

@@ -1,0 +1,27 @@
+--- ## Create a MongoDB Server Certificate
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: CERTNAME
+  namespace: NAMESPACE
+spec:
+  issuerRef:
+    name: ISSUERNAME
+    kind: Issuer
+    group: cert-manager.io
+
+  ## secretName is alwayse required
+  secretName: CERTNAME
+  subject:
+    organizationalUnits:
+     - MongodDB Cluster
+  duration: 2160h # 90d
+  renewBefore: 360h # 15d
+  usages:
+    - server auth
+    - client auth
+  isCA: false
+  privateKey:
+    algorithm: RSA
+    size: 2048
+  dnsNames:

@@ -26,11 +26,13 @@ spec:
                   cpu:    "OMCPU"
                   memory: OMMEMREQ 
 
+  # secret containing the TLS certificate signed by known or custom CA. The secret must have a key "server.pem"
   #TLS security: # enables TLS for Ops Manager allowing it to serve traffic over HTTPS
+  #TLS   # certsSecretPrefix: "om"
   #TLS   tls:
   #TLS     # enabled: true (on by default here)
-  #TLS     ca: "NAME-ca" 
-  #TLS     secretRef: # secret containing the TLS certificate signed by known or custom CA. The secret must have a key "server.pem"
+  #TLS     ca: "NAME-ca"
+  #TLS     secretRef: 
   #TLS       name: "NAME-cert"
 
   externalConnectivity:
@@ -43,12 +45,12 @@ spec:
     version: APPDBVER # 5.0.9-ent # 4.4.4-ent
     # persistent: true
     #TLS security:
-    #TLS # certsSecretPrefix: <prefix>
+    #TLS   # certsSecretPrefix: "om"
     #TLS   tls:
-    #TLS     enabled: true
+    #TLS     # enabled: true
     #TLS     ca: "NAME-ca" # needs to be mms-ca.crt
     #TLS     # secretRef:
-    #TLS     # name: "NAME-appdb-certs"
+    #TLS     #   name: "NAME-db-cert"
     podSpec:
       persistence:
         single:

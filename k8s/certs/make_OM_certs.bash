@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source init.conf
+
 d=$( dirname "$0" )
 cd "${d}"
 name=${1:-opsmanager}
@@ -8,30 +10,41 @@ name=${1:-opsmanager}
 #kubectl get secret ${def_token} -o jsonpath='{.data.ca\.crt}' | base64 -D > ca.crt
 #kubectl get secret -n default -o jsonpath="{.items[?(@.type==\"kubernetes.io/service-account-token\")].data['ca\.crt']}" | base64 --decode > ca.crt
 
-# creates ca.crt ca.key ca.csr
-[[ ! -e ca.crt ]] && generate_ca.bash
-
-if [[ ! -e ca.pem ]]
-then
-    # download.com cert
-    openssl s_client -showcerts -verify 2 -connect downloads.mongodb.com:443 \
-        -servername downloads.mongodb.com </dev/null | awk '/BEGIN/,/END/{ if(/BEGIN/){a++}; out="dlcert"a".crt"; print >out}' || true
-    cat dlcert?.crt > downloads.crt 
-    rm dlcert?.crt
-    # add MongoDB Downloads cert to the k8s root cert (agents and opsmanager)
-    cat downloads.crt ca.crt > ca.pem
-fi
+cert="${name}-svc"
 
 # certs for the proxy server for queryable backup
 if [[ ! -e queryable-backup.pem ]]
 then
-    generate_cert.bash ${name}-svc ${name}-svc.${namespace}.svc.cluster.local ${name}-svc ${name}-backup-daemon-0.${name}-backup-daemon-svc.${namespace}.svc.cluster.local ${name}-backup-daemon-0
-    cat ${name}-svc.pem ca.key ca.crt > queryable-backup.pem
-    rm ${name}-svc.pem
+    "$PWD/gen_cert.bash" ${cert} ${name}-svc ${name}-svc.${namespace}.svc.cluster.local ${name}-backup-daemon-0 ${name}-backup-daemon-0.${name}-backup-daemon-svc.${namespace}.svc.cluster.local 
+    kubectl apply -f "$PWD/certs_${cert}.yaml"
+    while true
+    do
+    sleep 5
+    kubectl get secret/"${cert}" > /dev/null 2>&1
+    [[ $? == 0 ]] && break
+    done
+    kubectl get secret "${cert}" -o jsonpath="{.data.tls\.crt}"|base64 -d > "${cert}.crt"
+    kubectl get secret "${cert}" -o jsonpath="{.data.tls\.key}"|base64 -d > "${cert}.key"
+    cat "${cert}.key" "${cert}.crt" ca.key ca.crt > queryable-backup.pem
+    rm "${cert}.key" "${cert}.crt" 
+    [[ -e "queryable-backup.pem" ]] && printf "%s\n" "Made queryable-backup.pem" 
 fi
 
 # OM
-generate_cert.bash ${name}-svc ${name}-svc.${namespace}.svc.cluster.local ${om_ext}
+# makes opmanager-svc.pem
+"$PWD/gen_cert.bash" "${cert}" "${name}-svc" "${name}-svc.${namespace}.svc.cluster.local" "${omExternalName}"
+kubectl apply -f "$PWD/certs_${cert}.yaml"
+    while true
+    do
+    sleep 5
+    kubectl get secret/"${cert}" > /dev/null 2>&1
+    [[ $? == 0 ]] && break
+    done
+kubectl get secret "${cert}" -o jsonpath="{.data.tls\.crt}"|base64 -d > "${cert}.crt"
+kubectl get secret "${cert}" -o jsonpath="{.data.tls\.key}"|base64 -d > "${cert}.key"
+cat "${cert}.key" "${cert}.crt" > "${cert}.pem"
+[[ -e "${cert}.pem" ]] && printf "%s\n" "Made ${cert}.pem"
 
 # appdb
-generate_cert.bash ${name}-db "*.${name}-db-svc.${namespace}.svc.cluster.local" 
+# use prefix om
+"$PWD/gen_cert.bash" ${name}-db-cert "*.${name}-db-svc.${namespace}.svc.cluster.local" 

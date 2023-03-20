@@ -139,24 +139,23 @@ then
       -e "s|USER|${ldapUser}|" > "$mdbuser2"
 fi
 
-# clean up any previous certs and services
+# clean up old stuff
 if [[ ${cleanup} = 1 ]]
 then
-  #kubectl delete secret "${fullName}-cert" > /dev/null 2>&1
-  #kubectl delete csr $( kubectl get csr | grep "${fullName}" | awk '{print $1}' )
-  kubectl delete mdb "${fullName}"  > /dev/null 2>&1
-  kubectl delete pvc $( kubectl get pvc | grep "${fullName}-" | awk '{print $1}' ) > /dev/null 2>&1
-  kubectl delete svc $( kubectl get svc | grep "${fullName}-" | awk '{print $1}' ) > /dev/null 2>&1
-  kubectl delete configmaps $( kubectl get configmaps | grep "${fullName} " | awk '{print $1}' )  > /dev/null 2>&1
-  kubectl delete secrets $( kubectl get secrets | grep "${fullName}-" | awk '{print $1}' )  > /dev/null 2>&1
+  for type in mdb configmaps csr
+  do
+    kubectl delete $type "${fullName}" --now > /dev/null 2>&1
+  done
+  for type in pvc pv svc secrets certificaterequests certificates
+  do
+    kubectl delete $type "${fullName}-" --now > /dev/null 2>&1
+  done
 fi
 
 # Create map for OM Org/Project
 if [[ ${tls} == 1 ]]
 then
-  kubectl get configmap "${fullName}" > /dev/null 2>&1
-  if [[ $? != 0 ]]
-  then
+  kubectl delete configmap "${fullName}" > /dev/null 2>&1
   if [[ $orgId != "" ]]
   then
     kubectl create configmap "${fullName}" \
@@ -172,29 +171,21 @@ then
         --from-literal="sslMMSCAConfigMap=opsmanager-ca" \
         --from-literal="sslRequireValidMMSServerCertificates='true'"
   fi
-  fi
 
   if [[ ${sharded} == true ]]
   then
     if [[ ${skipMakeCerts} == 0 ]]
     then 
-      rm "${PWD}/certs/${fullName}"*  > /dev/null 2>&1
       # mdb-{metadata.name}-mongos-cert
       # mdb-{metadata.name}-config-cert
       # mdb-{metadata.name}-<x>-cert x=0,1 (2 shards)
       for ctype in agent mongos config $( seq -s " " 0 $(( $shards-1)) )
       do   
-      "${PWD}/certs/make_sharded_certs.bash" "${fullName}" ${ctype}
       # Create a secret for the member certs for TLS
       cert="-cert"
-      if [[ "${ctype}" == "agent" ]]
-      then
-      cert="-certs"
-      fi
-      kubectl delete secret "mdb-${fullName}-${ctype}${cert}" > /dev/null 2>&1
-      kubectl create secret tls "mdb-${fullName}-${ctype}${cert}" \
-          --cert="${PWD}/certs/${fullName}-${ctype}.crt" \
-          --key="${PWD}/certs/${fullName}-${ctype}.key"
+      [[ "${ctype}" == "agent" ]] && cert="-certs"
+      "${PWD}/certs/make_sharded_certs.bash" "${fullName}" ${ctype} ${cert}
+      kubectl apply -f "${PWD}/certs/certs_mdb-${fullName}-${ctype}${cert}.yaml"
       done
     fi
   else 
@@ -224,50 +215,19 @@ then
     # now make the certs
     if [[ ${skipMakeCerts} == 0 ]]
     then
-    rm "${PWD}/certs/${fullName}"* > /dev/null 2>&1
     if [[ ${#dnsHorizon[@]} != 0  ]] 
     then
-      "${PWD}/certs/make_db_certs.bash" "${fullName}" ${dnsHorizon[@]}
+      "${PWD}/certs/make_cluster_certs.bash" "${fullName}" ${dnsHorizon[@]}
       else
-      "${PWD}/certs/make_db_certs.bash" "${fullName}"
+      "${PWD}/certs/make_cluster_certs.bash" "${fullName}"
     fi
-
-    # Create a secret for the member certs for TLS
-    # kubectl delete secret "mdb-${fullName}-cert" "mdb-${fullName}-cert-pem" > /dev/null 2>&1
-    kubectl delete secret "mdb-${fullName}-cert" > /dev/null 2>&1
-    kubectl create secret tls "mdb-${fullName}-cert" \
-      --cert="${PWD}/certs/${fullName}.crt" \
-      --key="${PWD}/certs/${fullName}.key"
-
-    for ctype in agent clusterfile
-    do   
-      "${PWD}/certs/make_sharded_certs.bash" "${fullName}" ${ctype}
-      # Create a secret for the member certs for TLS
-      cert=""
-      if [[ "${ctype}" == "agent" ]]
-      then
-      cert="-certs"
-      fi
-      kubectl delete secret "mdb-${fullName}-${ctype}${cert}" > /dev/null 2>&1
-      kubectl create secret tls "mdb-${fullName}-${ctype}${cert}" \
-          --cert="${PWD}/certs/${fullName}-${ctype}.crt" \
-          --key="${PWD}/certs/${fullName}-${ctype}.key"
-    done
+    kubectl apply -f "${PWD}/certs/certs_mdb-${fullName}-cert.yaml"
     fi
   fi # end if sharded or replicaset
 
-  if [[ ${skipMakeCerts} == 0 ]]
-  then
-    # Create a map for the cert
-    kubectl delete configmap ca-pem > /dev/null 2>&1
-    kubectl create configmap ca-pem \
-       --from-file="ca-pem=${PWD}/certs/ca.pem"
-  fi
 else
 # no tls here
-  kubectl get configmap "${fullName}" > /dev/null 2>&1
-  if [[ $? != 0 ]]
-  then
+  kubectl delete configmap "${fullName}" > /dev/null 2>&1
   if [[ $orgId != "" ]]
   then
     kubectl delete configmap "${fullName}" > /dev/null 2>&1
@@ -280,7 +240,6 @@ else
     kubectl create configmap "${fullName}" \
     --from-literal="projectName=${projectName}" \
     --from-literal="baseUrl=${opsMgrUrl}"
-  fi
   fi
 fi # tls
 
@@ -303,15 +262,12 @@ then
     --from-literal=password="${ldapBindQueryPassword}" 
 fi
 
-# remove any certificate requests
-list=( $( kubectl get csr 2>/dev/null | grep "${fullName}" | awk '{print $1}' ) )
-if [[ ${#list[@]} > 0 ]]
-then
-    kubectl delete csr ${list[@]} > /dev/null 2>&1
-fi
-
 # Create the DB Resource
 kubectl apply -f "${mdb}"
+
+# remove any certificate requests
+kubectl delete csr $( kubectl get csr -o name | grep "${fullName}" ) > /dev/null 2>&1
+kubectl delete certificaterequest $( kubectl get certificaterequest -o name | grep "${fullName}" ) > /dev/null 2>&1
 
 # Monitor the progress
 resource="mongodb/${fullName}"
@@ -324,11 +280,11 @@ do
     pstatus=$( kubectl get "${resource}" -o jsonpath={'.status.phase'} )
     message=$( kubectl get "${resource}" -o jsonpath={'.status.message'} )
     printf "%s\n" "status.message: $message"
-    if [[ "${message:0:39}" == "${notapproved}" ||  "${message:0:11}" == "${certificate}" ]]
-    then
-        # TLS Cert approval (if using autogenerated certs -- deprecated)
-        kubectl certificate approve $( kubectl get csr | grep "Pending" | awk '{print $1}' )
-    fi
+    # if [[ "${message:0:39}" == "${notapproved}" ||  "${message:0:11}" == "${certificate}" ]]
+    # then
+    #     # TLS Cert approval (if using autogenerated certs -- deprecated)
+    #     kubectl certificate approve $( kubectl get csr | grep "Pending" | awk '{print $1}' )
+    # fi
     #if [[ "$pstatus" == "Pending" || "$pstatus" == "Running" ]];
     if [[ "$pstatus" == "Running" ]];
     then

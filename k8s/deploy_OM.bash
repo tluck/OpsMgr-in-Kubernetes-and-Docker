@@ -73,50 +73,36 @@ kubectl create secret generic admin-user-credentials \
     --from-literal=Password="${password}" \
     --from-literal=FirstName="${firstName}" \
     --from-literal=LastName="${lastName}"
-  
-if [[ ${tls} == 1 && ${skipMakeCerts} == 0 ]]
-then
-    printf "\n%s\n" "__________________________________________________________________________________________"
-    printf "%s\n" "Getting Certs status..."
-    # Generate CA and create certs for OM and App-db
-    rm "${PWD}/certs/${name}-[svc,db]".* "${PWD}/certs/queryable-backup.pem" > /dev/null 2>&1
-    "${PWD}/certs/make_OM_certs.bash" ${name}
-    appdb=${name}-db
-    "${PWD}/certs/make_db_certs.bash" ${appdb} 
-    ls -1 "${PWD}/certs/"*pem "${PWD}/certs/"*crt 
-fi
 
 tlsc="#TLS "
 if [[ ${tls} == 1 ]]
 then
     if [[ ${skipMakeCerts} == 0 ]]
     then
-# For enablement of TLS (https) - provide certs and certificate authority
+    printf "%s\n" "Making various certs for OM and the OM AppDB ..."
+    # Create certs for OM and App-db
+    rm "${PWD}/certs/${name}-[svc,db]".* "${PWD}/certs/queryable-backup.pem" > /dev/null 2>&1
+    "${PWD}/certs/make_OM_certs.bash" ${name}
+    # create appdb cert request
+    kubectl apply -f "${PWD}/certs/certs_${name}-db-cert.yaml" 
+    # For enablement of TLS (https) - provide certs and certificate authority
+    # <prefix>-<metadata.name>-cert - need the specific keyname server.pem and queryable-backup.pem
     kubectl delete secret         ${name}-cert > /dev/null 2>&1
     kubectl create secret generic ${name}-cert \
         --from-file="server.pem=${PWD}/certs/${name}-svc.pem" \
-        --from-file="${PWD}/certs/queryable-backup.pem" # need specific keyname server.pem
-    # CA used to define the projects configmap and agent ca for OM dbs
+        --from-file="${PWD}/certs/queryable-backup.pem" 
+    # Configmap used for OM to get the CA - need specific keynames ca-pem and mms-ca.crt
     kubectl delete configmap ${name}-ca > /dev/null 2>&1
     kubectl create configmap ${name}-ca \
         --from-file="ca-pem=${PWD}/certs/ca.pem" \
-        --from-file="mms-ca.crt=${PWD}/certs/ca.pem" # need specific keynames ca-pem and mms-ca.crt
-
-# For enablement of TLS on the appdb - custom certs
-    appdb=${name}-db
-# Create a secret for the member certs for TLS
-    kubectl delete secret ${appdb}-cert > /dev/null 2>&1
-# sleep 3
-# kubectl get secrets
-    kubectl create secret tls ${appdb}-cert \
-        --cert="${PWD}/certs/${appdb}.crt" \
-        --key="${PWD}/certs/${appdb}.key"
+        --from-file="mms-ca.crt=${PWD}/certs/ca.pem" 
     fi
 tlsr=""
 else
 tlsr="$tlsc"
     if [[ ${skipMakeCerts} == 0 ]]
     then
+    # <prefix>-<metadata.name>-cert
     kubectl delete secret         ${name}-cert > /dev/null 2>&1
     kubectl create secret generic ${name}-cert \
         --from-file="${PWD}/certs/queryable-backup.pem"
@@ -124,7 +110,6 @@ tlsr="$tlsc"
 fi
 
 mdbom="mdbom_${name}.yaml"
-context=$( kubectl config current-context )
 
 if [[ $serviceType == "NodePort" ]]
 then 
@@ -175,6 +160,9 @@ cat mdbom_template.yaml | sed \
 #  Deploy OpsManager resources
 kubectl apply -f "${mdbom}"
 
+# remove any certificate requests
+kubectl delete certificaterequest $( kubectl get certificaterequest -o name | grep "${name}" ) > /dev/null 2>&1
+
 # Monitor the progress until the OpsMgr app is ready
 printf "\n%s\n" "Monitoring the progress of resource om/${name} ..."
 sleep 10
@@ -212,6 +200,7 @@ do
     sleep 15
     n=$((n+1))
 done
+
 bin/update_initconf_hostnames.bash
 
 exit 0

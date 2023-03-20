@@ -69,9 +69,9 @@ kubectl create configmap "${name}" \
 # then
 #   dnsHorizon=( $(cat dnsHorizon) )
 #   rm dnsHorizon
-#   certs/make_db_certs.bash "${name}" ${dnsHorizon[@]}
+#   certs/make_cluster_certs.bash "${name}" ${dnsHorizon[@]}
 # else
-#   certs/make_db_certs.bash ${name}
+#   certs/make_cluster_certs.bash ${name}
 # fi
 # # Create a secret for the member certs for TLS
 # kubectl delete secret mdb-${name}-cert > /dev/null 2>&1

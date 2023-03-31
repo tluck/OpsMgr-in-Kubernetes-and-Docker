@@ -1,0 +1,21 @@
+version: '2'
+
+services:
+  opsmgr:
+    image: "tjluckenbach/mongodb:opsmgr-6.0.11"
+    environment:
+      - DOWNLOAD="https://downloads.mongodb.com/on-prem-mms/deb"
+      - OPSMGR="http://opsmgr:8080/download/agent/automation"
+      - MMSPACKAGE="mongodb-mms-6.0.11.100.20230310T0141Z.amd64.deb"
+      - AGENTPACKAGE="mongodb-mms-automation-agent-manager_12.0.17.7665-1_amd64.ubuntu1604.deb"
+    command:
+        echo
+    ulimits:
+        memlock: -1
+    ports:
+      - "27017:27017"
+      - "8080:8080"
+    volumes:
+      - ./data:/shareddata
+    container_name: "opsmgr"
+

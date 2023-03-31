@@ -1,0 +1,25 @@
+#!/bin/bash
+
+source docker.conf
+
+n=${1:-1}
+export MONGO_VERSION=${2:-$MONGO_VERSION}
+
+if [[ "$n" == "" || "$n" > 6 ]]
+then 
+    echo Need server number - from 1 to 6
+    exit
+fi
+
+data="$(pwd)/data"
+
+ports=(27016 27017 27018 27019 27020 27021 27022 27023)
+
+docker run \
+        --init \
+        --network mongonet \
+        --name mongodb-${n}-${MONGO_VERSION} -h mongodb-${n}-${MONGO_VERSION} -p ${ports[$n]}:27017 \
+        --mount type=bind,source=${data},target=/shareddata  \
+        -itd --privileged $DOCKER_USERNAME/mongodb:${MONGO_VERSION}-ent docker-entrypoint.sh #startmdb
+
+

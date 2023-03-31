@@ -1,0 +1,18 @@
+#!/bin/bash
+
+source docker.conf
+source ../../k8s/init.conf
+
+# AGENTPACKAGE=$AGENTPACKAGE6
+# MONGO_VERSION=$MONGO_VERSION6
+
+docker build \
+        --network mongonet \
+        --add-host opsmanager-svc.${namespace}.svc.cluster.local:${opsMgrExtIp} \
+        --build-arg MONGO_PACKAGE=mongodb-enterprise \
+        --build-arg DOWNLOAD=$OPSMGR_K8S \
+        --build-arg PACKAGE=$AGENTPACKAGE \
+        --build-arg MONGO_VERSION=$MONGO_VERSION \
+        --build-arg MONGO_REPO=repo.mongodb.com \
+        -t $DOCKER_USERNAME/mongodb:${MONGO_VERSION}-ent .
+

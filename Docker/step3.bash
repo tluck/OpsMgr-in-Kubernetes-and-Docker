@@ -1,6 +1,7 @@
-# wait until opsmgr starts
-# edit data/automation config file for API info
-cd 4.x_automation_node
+#!/bin/bash
+
+printf "Starting up 3 nodes\n"
+cd node
 ./run 1 
 ./run 2 
 ./run 3 

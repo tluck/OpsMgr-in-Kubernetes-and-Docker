@@ -1,0 +1,22 @@
+#!/bin/bash
+
+source docker.conf
+
+data="$(pwd)/data"
+
+#if [[ $1 == "" || $1 > 6 ]]
+#then 
+#    echo Need server number - from 0 to 2
+#    exit
+#fi
+
+docker run \
+        --init \
+        --network mongonet \
+        --name bic -h bic -p 3307 \
+        $DOCKER_USERNAME/bic:latest --config /etc/mongosqld.conf
+
+docker exec -it mongodb /usr/bin/mongosh -u dbAdmin -p Mongodb1 --eval "rs.initiate()" 
+
+
+

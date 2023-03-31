@@ -1,0 +1,37 @@
+#
+# REQUIRED
+#
+# Enter your Project ID - It can be found in the Ops Manager UI under Settings ->
+# Group and ApiKey Settings.
+#
+#
+
+mmsGroupId=64275fb9ac968d54b6b8cf02
+mmsApiKey=64275fb9ac968d54b6b8cf0f33d39f19219b3819c3290b09058626de
+mmsBaseUrl=https://opsmanager-svc.mynamespace.svc.cluster.local:8443
+# k8s mmsBaseUrl=https://opsmanager-svc.mynamespace.svc.cluster.local:8443
+sslTrustedMMSServerCertificate=/shareddata/ca.pem
+
+# Path to log file
+#
+logFile=/var/log/mongodb-mms-automation/automation-agent.log
+
+#
+# Path to backup cluster config to
+#
+mmsConfigBackup=/var/lib/mongodb-mms-automation/mms-cluster-config-backup.json
+
+#
+# Lowest log level to log.  Can be (in order): DEBUG, ROUTINE, INFO, WARN, ERROR, DOOM
+#
+logLevel=INFO
+
+#
+# Maximum number of rotated log files
+#
+maxLogFiles=10
+
+#
+# Maximum size in bytes of a log file (before rotating)
+#
+maxLogFileSize=268435456

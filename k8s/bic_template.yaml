@@ -1,0 +1,68 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: bic-NAME
+  namespace: NAMESPACE
+  labels:
+    app: bic-NAME-svc
+spec:
+  containers:
+  - image: tjluckenbach/bic:2.14
+    imagePullPolicy: IfNotPresent #imagePullPolicy: Always
+    name: mongodb
+    resources:
+      limits:
+        cpu: "0.50"
+        memory: "400Mi"
+      requests:
+        cpu: "0.33"
+        memory: "400Mi"
+    ports:
+    - containerPort: 3307
+    volumeMounts:
+    - mountPath: /shareddata
+      name: shareddata
+    command: [ "docker-entrypoint.sh" ]
+    # command: [ "sleep" ]
+    # args: [ "infinity" ]
+  volumes:
+  - name: shareddata
+    configMap:
+      name: shareddata
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: bic-NAME-svc
+  name: bic-NAME-svc
+  namespace: NAMESPACE
+spec:
+  clusterIP: None
+  ports:
+  - name: bic
+    port: 3307 
+    protocol: TCP
+    targetPort: 3307
+  selector:
+    app: NAME-svc
+  sessionAffinity: None
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: bic-NAME-svc
+  name: bic-NAME-svc-ext
+  namespace: NAMESPACE
+spec:
+  ports:
+  - nodePort: PORT
+    port: PORT 
+    protocol: TCP
+    targetPort: 3307
+  selector:
+    app: bic-NAME-svc
+  sessionAffinity: None
+  type: NodePort

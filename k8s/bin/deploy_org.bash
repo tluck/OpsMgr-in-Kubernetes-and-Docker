@@ -18,14 +18,14 @@ shift "$(($OPTIND -1))"
 
 orgName="${orgName:-myOrg}"
 
-#bin/create_key.bash
-bin/get_key.bash
+#create_key.bash
+get_key.bash
 if [[ $? != 0 ]]
 then
     exit 1
 fi
 # create the newOrg with the key
-bin/create_org.bash -o "${orgName}"
+create_org.bash -o "${orgName}"
 if [[ $? != 0 ]]
 then
     rm custom.conf
@@ -36,5 +36,5 @@ source custom.conf
 # add user to the org (orgId is in custom.conf)
 orgId="${orgName}_orgId"
 orgId="${!orgId}"
-bin/add_user_to_org.bash -u "${user}" -i "${orgId}"
+add_user_to_org.bash -u "${user}" -i "${orgId}"
 #cat custom.conf

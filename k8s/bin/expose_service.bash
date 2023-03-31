@@ -37,7 +37,7 @@ do
     n=$((n+1))
 done
 
-hn=( $( bin/get_hns.bash -n "${name}" ) )
+hn=( $( get_hns.bash -n "${name}" ) )
 if [[ $? != 0 ]]
 then
     printf "\n%s\n" "* * * - Error cannot determine the hostnames for splitHorizon"

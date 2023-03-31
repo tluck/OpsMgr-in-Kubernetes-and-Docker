@@ -26,4 +26,4 @@ do
     fi
 done
 
-bin/ldap_configure.bash
+ldap_configure.bash

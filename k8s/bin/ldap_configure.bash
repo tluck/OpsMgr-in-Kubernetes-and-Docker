@@ -12,14 +12,14 @@ kubectl config set-context $(kubectl config current-context) --namespace=${names
 serviceName="openldap-svc-ext"
 if [[ $serviceType == "NodePort" ]]
 then
-    slist=( $(bin/get_hns.bash -s "${serviceName}" ) ) 
+    slist=( $(get_hns.bash -s "${serviceName}" ) ) 
     hostName="${slist[0]%:*}"
     eval port=$(    kubectl get svc/${serviceName} -o jsonpath={.spec.ports[0].nodePort} )
 else
     eval hostName=$(    kubectl get svc/${serviceName} -o jsonpath={.status.loadBalancer.ingress[0].hostname} ) 
     if [[ $hostName == "" ]]
     then
-    slist=( $(bin/get_hns.bash -s "${serviceName}" ) ) 
+    slist=( $(get_hns.bash -s "${serviceName}" ) ) 
     hostName="${slist[0]%:*}"
     fi
     eval port=$(  kubectl get svc/${serviceName} -o jsonpath={.spec.ports[0].targetPort} )

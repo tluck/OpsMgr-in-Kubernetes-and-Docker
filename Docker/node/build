@@ -1,0 +1,14 @@
+#!/bin/bash
+
+source docker.conf
+
+MONGO_VERSION=${1:-$MONGO_VERSION}
+
+chmod 755 ./docker-entrypoint.sh
+docker build \
+        --build-arg MONGO_PACKAGE=mongodb-enterprise \
+        --build-arg PACKAGE=$AGENTPACKAGE \
+        --build-arg MONGO_VERSION=$MONGO_VERSION \
+        --build-arg MONGO_REPO=repo.mongodb.com \
+        -t $DOCKER_USERNAME/mongodb:${MONGO_VERSION}-ent .
+

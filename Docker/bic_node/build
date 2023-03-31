@@ -1,0 +1,11 @@
+#!/bin/bash
+
+source docker.conf
+source ../../k8s/init.conf
+
+        #--add-host opsmanager-svc.${namespace}.svc.cluster.local:${opsMgrExtIp} \
+docker build \
+        --build-arg DOWNLOAD=$DOWNLOAD \
+        --build-arg PACKAGE=$PACKAGE \
+        -t $DOCKER_USERNAME/bic:2.14 .
+

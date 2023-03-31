@@ -195,7 +195,7 @@ then
     if [[ $expose == true && ${sharded} == false ]] 
     then
         printf "%s\n" "Generating ${serviceType} Service ports..."
-        serviceOut=$( bin/expose_service.bash "${mdb}" ) 
+        serviceOut=$( expose_service.bash "${mdb}" ) 
         dnsHorizon=( $( printf "${serviceOut}" | tail -n 1 ) )
         if [[ $? != 0 ]]
         then
@@ -296,14 +296,14 @@ done
 
 sleep 5
 printf "\n"
-cs=$( bin/get_connection_string.bash -n "${fullName}" )
+cs=$( get_connection_string.bash -n "${fullName}" )
 if [[ "$cs" == *external* ]]
 then
     printf "\n%s\n\n" "$cs"
-    printf "%s\n" "To see if access is working, connect directly by running: bin/connect_external.bash -n \"${fullName}\""
-    printf "%s\n" "                      or connect from the pod by running: bin/connect_from_pod.bash -n \"${fullName}\""
+    printf "%s\n" "To see if access is working, connect directly by running: connect_external.bash -n \"${fullName}\""
+    printf "%s\n" "                      or connect from the pod by running: connect_from_pod.bash -n \"${fullName}\""
 else
     printf "\n%s\n\n" "$cs"
-    printf "%s\n" "To see if access is working, connect from the pod by running: bin/connect_from_pod.bash -n \"${fullName}\""
+    printf "%s\n" "To see if access is working, connect from the pod by running: connect_from_pod.bash -n \"${fullName}\""
 fi
 exit 0

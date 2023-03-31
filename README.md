@@ -12,7 +12,8 @@ This demo will install OM and a few MDB Clusters into a Kubernetes cluster.
   * an example sharded cluster.
   * TLS Certs are created using a self-signed CA.
 - An openLDAP server is included and configured to support OM users and/or DB users.
-- Queriable backup is available too!  
+- There is the option to deploy a BiConnector for each cluster.
+- And Queriable backup is available too!  
 
 ### Step 1. Configure a K8s Cluster
 - Setup the K8s cluster and install the needed command tools: kubectl, jq, cfssl.
@@ -50,7 +51,7 @@ the **_launch.bash** script runs several "deploy" scripts for each of the follow
 ### Step 3. Login to Ops Manager
 - To login to OM, connect with a browser using the user/password in init.conf.
 
-	- Access of OM depends on wether TLS is used and the port exposure methods.  
+	- The URL to OM depends on two things: (1) TLS is used and (2) the port exposure methods.  
 	- When TLS is configured, use port 8443 (port 8080 is for a non-secure setup).
    		- If using a LoadBalancer, use: https://opsmanager-svc.mynamespace.svc.cluster.local:8443
    		- Or with NodePort, use: https://opsmanager-svc.mynamespace.svc.cluster.local:32443
@@ -74,36 +75,34 @@ the **_launch.bash** script runs several "deploy" scripts for each of the follow
 	- The "manager" group is intended for configuring LDAP for OM users
 	- The "dbusers" group is intended for configuring LDAP for DBusers
 
-# Ops Manager Demo Environment (in Docker)
+### Step 5: BiConnector Server (Optional)
+- Run ```bin/deploy_BIC.bash -n <cluster> -p <NodePort> ``` to create the connector server 
+   - This creates and configures a BiConnector server for a Cluster on NodePort N (e.g. 30307).
 
-GitHub Repo:             https://github.com/tluck/OpsMgrDocker
+# Ops Manager Demo Environment (in Docker)
 Docker Image Repo:     https://hub.docker.com/repository/docker/tjluckenbach/mongodb
 
 ## In Docker Summary:
-Runs OpsManager 4.3 with severval agent-ready "empty nodes" to demo Automation and Backup
+These scripts run/deploy several containers in Docker. They create an OpsManager instance with severval agent-ready "empty nodes" to provision a cluster - leverage the Automation, Backup, etc.
 
-### Step 1. StartUp OpsMgr
-- Build or pull the image
-- Run the opsmgr_4.2 image
-- Will create network mongo and install OpsMgr 4.3 and Backing DB Mongodb 4.2
+### Step 1. StartUp OpsMgr (step1.bash)
+- Build or pull the image (add -b option to build a new image with step1.bash script)
+- Will create a docker network called mongonet and deploy OpsMgr and its AppDB
 
-### Step 2. Configure OpsMgr
+### Step 2. Configure OpsMgr and get API key for the agent (step2.bash)
 - Add host alias to 127.0.0.1 localhost as OpsMgr in /etc/hosts
 - Login and configure OpsMgr 
   - Set the server to http://opsmgr:8080
   - Use a fake mail server, smtp, port 25, and use defaults for other values
   - Click on Admin to et up Backup DB blockstore (localhost:27017)
+- In OpsMgr, to the project and create an API key
+- Add this Group key and API key to the file 6.x_node/data/automation-agent.config
 
-### Step 3. Configure the Agent
-- In OpsMgr in the Server function, create an API key
-- Add the Group and API key to the file 4.2_node/data/automation-agent.config
-
-### Step 4. Run nodes
-- Wait for opsmgr to start
-- Build/Run the node_4.2 image
+### Step 3. Create the containers for a replicaSet - 3 nodes (step3.bash)
+- Create some nodes - their agent will "register" with OM as available servers.
 - For 3 nodes: 
     - run these commands: run 1; run 2; run 3
 
-### Step 5.
+### Step 4.
 - Login in to http://localhost:8080 (localhost)
 - Provision a cluster on the 3 nodes

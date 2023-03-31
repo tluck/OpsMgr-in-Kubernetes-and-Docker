@@ -201,6 +201,6 @@ do
     n=$((n+1))
 done
 
-bin/update_initconf_hostnames.bash
+update_initconf_hostnames.bash
 
 exit 0

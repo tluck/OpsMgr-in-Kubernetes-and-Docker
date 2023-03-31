@@ -1,7 +1,6 @@
 #!/bin/bash
 
 source init.conf
-PATH=.:bin:$PATH
 
 while getopts 'n:lih' opt
 do
@@ -41,7 +40,7 @@ fi
 ecs="${ics}"
 if [[ ${serviceType} != "" ]]
 then
-hn=( $( bin/get_hns.bash -n "${name}" ) )
+hn=( $( get_hns.bash -n "${name}" ) )
 
 if [[ "${sharded}" == "1" ]] 
 then

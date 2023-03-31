@@ -18,7 +18,7 @@ shift "$(($OPTIND -1))"
 # check to see if the org (still) exists
 orgName="${orgName:-myOrg}"
 # test to see if the org already exits if so get the orgId
-name=( $( bin/get_org.bash -o ${orgName} ) )
+name=( $( get_org.bash -o ${orgName} ) )
 
 if [[ ${name[0]} == $orgName ]]
 then

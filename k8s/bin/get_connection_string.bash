@@ -25,7 +25,7 @@ if [[ "${type}" == "ShardedCluster" ]]
 then
     sharded=1
     mongos="-mongos"
-    serviceType=$( kubectl get svc/${name}-svc-external -o jsonpath='{.spec.type}' 2>/dev/null )
+    serviceType=$( kubectl get svc/${name}${mongos}-0-svc-external -o jsonpath='{.spec.type}' 2>/dev/null )
 else
     serviceType=$( kubectl get svc/${name}-0 -o jsonpath='{.spec.type}' 2>/dev/null )
 fi
@@ -40,12 +40,13 @@ fi
 ecs="${ics}"
 if [[ ${serviceType} != "" ]]
 then
-hn=( $( get_hns.bash -n "${name}" ) )
 
 if [[ "${sharded}" == "1" ]] 
 then
+    hn=( $( get_hns.bash -s "${name}${mongos}-0-svc-external" ) )
     ecs=$( printf "%s" "$ics" | sed -e "s?:2701.?:${hn#*:}?g" )
 else
+    hn=( $( get_hns.bash -n "${name}" ) )
     ecs=$( printf "%s" "$ics" | sed -e "s?@.*/?@${hn[0]},${hn[1]},${hn[2]}/?" )
 fi
 fi

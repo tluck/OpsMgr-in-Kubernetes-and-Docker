@@ -60,7 +60,7 @@ printf "\n%s\n" "_______________________________________________________________
 context=$( kubectl config current-context )
 printf "\n%s\n" "Using context: ${context}"
 
-[[ "${context}" == "docker-desktop" || "${context}" == "minikube" ]] && demo="-t"
+[[ "${context}" == "docker"* || "${context}" == "minikube" || "${context}" == "colima" ]] && demo="-t"
 
 if [[ $OM == 'true' ]]
 then
@@ -69,12 +69,14 @@ printf "%s\n" "Deploy the Operator ..."
 (set -x;
 deploy_Operator.bash
 )
+[[ $? != 0 ]] && exit 1
+
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Deploy OM and wait until Running status..."
 
-if [[ "${context}" == "docker-desktop" || "${context}" == "minikube" ]]
+if [[ "${demo}"  == "-t" ]]
 then
-[[ "${context}" == "docker-desktop" ]] && docker pull "quay.io/mongodb/mongodb-enterprise-ops-manager:$omVersion" # issue with docker not (re)pulling the image
+[[ "${context}" == "docker"* ]] && docker pull "quay.io/mongodb/mongodb-enterprise-ops-manager:$omVersion" # issue with docker not (re)pulling the image
 (set -x; 
 deploy_OM.bash $skip $demo # [-n name] [-g] [-c cpu] [-m memory] [-d disk] [-v version] 
 )
@@ -86,7 +88,7 @@ if [[ ${omBackup} == true ]]
 then
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Create the Backup Oplog1 DB for OM ..."
-if [[ "${context}" == "docker-desktop" || "${context}" == "minikube" ]]
+if [[ "${demo}"  == "-t" ]]
 then
 (set -x;
     deploy_Cluster.bash -n "${omName}-oplog" -c "0.33" -m "300Mi"         -v "${appdbVersion}" ${skip}
@@ -99,7 +101,7 @@ fi
 
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Create the Backup BlockStore1 DB for OM ..."
-if [[ "${context}" == "docker-desktop" || "${context}" == "minikube" ]]
+if [[ "${demo}"  == "-t" ]]
 then
 (set -x;
     deploy_Cluster.bash -n "${omName}-blockstore" -c "0.33" -m "300Mi"         -v "${appdbVersion}" ${skip}
@@ -116,14 +118,16 @@ fi # OM
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Create a custom Org to put your projects in ..."
 # Create the Org and put the orgId info in custom.conf
+(set -x
 deploy_org.bash -o "${orgName}" # -o newOrgName
+)
 test -e custom.conf && source custom.conf
 orgId="${orgName}_orgId"
 orgId="${!orgId}"
 
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Create a Production ReplicaSet Cluster with a splitHorizon configuration for External access ..."
-if [[ "${context}" == "docker-desktop" || "${context}" == "minikube" ]]
+if [[ "${demo}"  == "-t" ]]
 then
 (set -x
     deploy_Cluster.bash -n "myreplicaset" -e -l "${ldapType}" -c "0.50" -m "400Mi"         -v "6.0.1-ent" -o "${orgId}" -p "myProject1" ${skip}
@@ -137,7 +141,7 @@ cluster1="myProject1-myreplicaset"
 
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Create a Production Sharded Cluster  ..."
-if [[ "${context}" == "docker-desktop" || "${context}" == "minikube" ]]
+if [[ "${demo}"  == "-t" ]]
 then
     printf "\n%s\n" " **** skipping sharded deployment - not enough resources ***"
     # deploy_Cluster.bash -n "mysharded" -l "${ldapType}" -c "0.33" -m "400Mi" -d "1Gi" -s "1" -r "1" -v "${mdbVersion}" -o "${orgId}" -p "myProject2" ${skip}
@@ -151,6 +155,6 @@ fi
 
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Update init.conf with IPs and put k8s internal hostnames in /etc/hosts ..."
-update_initconf_hostnames.bash "${omName}" "$cluster1" "$cluster2"
+update_initconf_hostnames.bash -o "${omName}" -r "${cluster1}" -s "${cluster2}"
 
 date

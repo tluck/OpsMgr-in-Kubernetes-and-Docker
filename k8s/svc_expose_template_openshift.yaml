@@ -11,7 +11,7 @@ spec:
     targetPort: 27017
   selector:
     statefulset.kubernetes.io/pod-name: NAME-0
-  #type: PORTTYPE
+  #type: SERVICETYPE
 ---
 apiVersion: v1
 kind: Service
@@ -25,7 +25,7 @@ spec:
     targetPort: 27017
   selector:
     statefulset.kubernetes.io/pod-name: NAME-1
-  #type: PORTTYPE
+  #type: SERVICETYPE
 ---
 apiVersion: v1
 kind: Service
@@ -39,4 +39,4 @@ spec:
     targetPort: 27017
   selector:
     statefulset.kubernetes.io/pod-name: NAME-2
-  #type: PORTTYPE
+  #type: SERVICETYPE

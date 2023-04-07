@@ -201,6 +201,7 @@ do
     n=$((n+1))
 done
 
-update_initconf_hostnames.bash
+# this is critical to get the name and IP for OM for the rest of the deployment
+update_initconf_hostnames.bash -o ${name}
 
 exit 0

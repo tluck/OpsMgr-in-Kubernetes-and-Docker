@@ -3,16 +3,14 @@
 source init.conf
 TAB=$'\t'
 
-name="${1:-opsmanager}"
-replicasetName="${2}"
-shardedName="${3}"
-
+getOMname() {
+name=$1
 # get the OpsMgr URL and internal IP
 opsMgrUrl=$(        kubectl get om/${name}          -o jsonpath={.status.opsManager.url} )
 eval port=$(        kubectl get svc/${name}-svc-ext -o jsonpath={.spec.ports[0].port} )
 eval targetPort=$(  kubectl get svc/${name}-svc-ext -o jsonpath={.spec.ports[0].targetPort} )
 eval nodePort=$(    kubectl get svc/${name}-svc-ext -o jsonpath={.spec.ports[0].nodePort} )
-eval portType=$(    kubectl get svc/${name}-svc-ext -o jsonpath={.spec.type} )
+eval serviceType=$( kubectl get svc/${name}-svc-ext -o jsonpath={.spec.type} )
 
 if [[ $serviceType == "NodePort" ]]
 then
@@ -31,7 +29,7 @@ if [[ ${targetPort} == "8443" ]]
 then
     http="https"
 fi
-if [[ ${portType} == "NodePort" ]]
+if [[ ${serviceType} == "NodePort" ]]
 then
     port=${nodePort}
 fi
@@ -42,13 +40,12 @@ then
 else
     opsMgrExtUrl1=${http}://${hostname}:${port}
     opsMgrExtUrl2=${http}://${omExternalName}:${port}
-    [[ $opsMgrExtIp == "" ]] && if [[ "${hostname}" != "localhost" && "${hostname}" != "" ]]
+    if [[ $opsMgrExtIp == "" ]]
     then
         eval list=( $(nslookup ${hostname} | grep Address ) )
         opsMgrExtIp=${list[3]}
-    else
-        opsMgrExtIp=127.0.0.1
     fi
+    [[ "${hostname}" == "localhost" ]] && opsMgrExtIp=127.0.0.1
 fi
 
 # Update init.conf with OpsMgr info
@@ -56,15 +53,14 @@ initconf=$( sed -e '/opsMgrUrl/d' -e '/opsMgrExt/d' -e '/queryableBackupIp/d' in
 printf "%s\n" "$initconf" > init.conf
 echo ""
 echo  opsMgrUrl=\""$opsMgrUrl"\"                    | tee -a init.conf
-echo  opsMgrExtUrl1=\""$opsMgrExtUrl1"\"              | tee -a init.conf
+echo  opsMgrExtUrl1=\""$opsMgrExtUrl1"\"            | tee -a init.conf
 echo  opsMgrExtUrl2=\""$opsMgrExtUrl2"\"            | tee -a init.conf
 echo  opsMgrExtIp=\""$opsMgrExtIp"\"                | tee -a init.conf
-# echo  queryableBackupIp=\""$queryableBackupIp"\"    | tee -a init.conf
 
 if [[ ${opsMgrExtIp} != "" ]]
 then
 printf "\n%s\n\n" "*** Note: sudo may ask for your password" 
-# put the internal name opsmanager-svc.${namespace}.svc.cluster.local in /etc/hosts
+# put the name and IP for opsmanager in /etc/hosts 
 grep "^[0-9].*${name}-svc.${namespace}.svc.cluster.local" /etc/hosts > /dev/null 2>&1
 if [[ $? == 0 ]]
 then
@@ -78,10 +74,19 @@ else
     printf "%s\n" "${opsMgrExtIp}${TAB}${name}-svc.${namespace}.svc.cluster.local ${name}-svc ${omExternalName}" | sudo tee -a /etc/hosts
 fi
 fi
+}
 
-if [[ $replicasetName != "" ]]
-then
+getRSname() {
+name=$1
 # get the node info for creating an external cluster via agent automation
+
+svc=( $( kubectl get svc|grep "${name}-." 2>/dev/null ) )
+if [[ $? != 0 ]] 
+then
+    printf "%s\n" "* * * Error - svc ${name}-0 not found" 
+    return
+fi
+
 if [[ $serviceType == "NodePort" ]]
 then
 	nodename=( $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="Hostname")].address}') )
@@ -89,6 +94,7 @@ then
 	iplist=(   $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="ExternalIP")].address}' ) )
 else
 	list=( $( get_hns.bash -n "${name}" ) )
+        [[ $? != 0 ]] && return
         dnslist=( ${list[*]%:*} ) # strip off port
 	n=0
 	for h in ${dnslist[*]}
@@ -107,11 +113,11 @@ then
     dnslist=(docker-desktop)
     iplist=(127.0.0.1)
 fi
-
-if [[ ${nodename} == "minikube" ]]
+ 
+if [[ ${nodename} == "minikube" || ${nodename} == "colima" ]]
 then
-    nodename=(minikube)
-    dnslist=(minikube)
+    nodename=($nodename)
+    dnslist=($nodename)
     iplist=(   $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="InternalIP")].address}' ) )
 fi
 
@@ -123,7 +129,7 @@ if [[ ${num} > 0 ]]
 then
     num=$(( $num-1 ))
 else
-    exit
+    return
 fi
 
 printf "\n" 
@@ -143,16 +149,25 @@ do
     printf "%s\n"                                   "${iplist[$m]}${TAB}${names[$n]} ${dnslist[$m]} ${nodename[$m]}" | sudo tee -a /etc/hosts
   fi
 done
+}
 
-fi
-
-if [[ $shardedName != "" ]]
-then
+getSHname() {
+name=${1}
 # sharded mongos
-name=( $( kubectl get svc|grep -v "${name}" | grep svc-external ) )
-name=${name[0]%%-svc*}
-list=( $( get_hns.bash -n "${name}" ) )
-dnslist=( ${list[*]%:*} ) # strip off port
+slist=( $( kubectl get svc|grep "${name}-mongos-.-svc-external" 2>/dev/null |awk '{print $1}') )
+if [[ $? != 0 || ${#slist} == 0 ]]
+then
+    printf "%s\n" "* * * Error - svc ${name}-mongos-*-svc-external not found" 
+    return
+fi
+n=0
+for s in ${slist[*]}
+do 
+    slist[$n]=$( get_hns.bash -s "${s}" ) 
+    n=$((n+1))
+done
+
+dnslist=( ${slist[*]%:*} ) # strip off port
 
 n=0
 unset iplist
@@ -163,43 +178,64 @@ do
     nodename[$n]=""
     n=$((n+1))
 done
-num=${#iplist[@]}
-if [[ ${num} > 0 ]]
-then
-    num=$(( $num-1 ))
-else
-    exit
-fi
 
-if [[ $? == 0 ]]
+num=${#slist[@]}
+if [[ ${num} < 1 ]]
 then
-    name=${name[0]%%-svc*}
-    snames[0]="${name}-mongos-0.${name}-svc.${namespace}.svc.cluster.local"
-    snames[1]="${name}-mongos-1.${name}-svc.${namespace}.svc.cluster.local"
-    snames[2]="${name}-mongos-2.${name}-svc.${namespace}.svc.cluster.local"
+    return
 fi
 
 printf "\n" 
-for n in 0 1 2
+n=0
+while [ $n -lt $num ]
 do
+  sname="${name}-mongos-${n}.${name}-svc.${namespace}.svc.cluster.local"
   m=$n;  if [[ $m > $num ]]; then m=$num; fi;
-  if [[ "${iplist[$m]}" == "" || "${snames[$n]}" == "" ]] 
+  if [[ "${iplist[$m]}" == "" || "${sname}" == "" ]] 
   then
     printf "skipping mongos %d\n" $n
   else
-  grep "^[0-9].*${snames[$n]%%.*}" /etc/hosts > /dev/null 2>&1
+  grep "^[0-9].*${sname%%.*}" /etc/hosts > /dev/null 2>&1
   if [[ $? == 0 ]]
   then
     printf "%s" "Replacing /etc/hosts entry: "
-    printf "%s\n"                                        "${iplist[$m]}${TAB}${snames[$n]%%.*} ${snames[$n]}"
-    sudo ${sed} -E -e "s|^[0-9].*${snames[$n]%%.*}.*|${iplist[$m]}${TAB}${snames[$n]%%.*} ${snames[$n]}|" /etc/hosts 
+    printf "%s\n"                                        "${iplist[$m]}${TAB}${sname%%.*} ${sname}"
+    sudo ${sed} -E -e "s|^[0-9].*${sname%%.*}.*|${iplist[$m]}${TAB}${sname%%.*} ${sname}|" /etc/hosts 
   else
     # add host entry
-    printf "%s" "Adding /etc/hosts entry: "
-    printf "%s\n"                                      "${iplist[$m]}${TAB}${snames[$n]%%.*} ${snames[$n]}" | sudo tee -a /etc/hosts
+    printf "%s" "Adding    /etc/hosts entry: "
+    printf "%s\n"                                      "${iplist[$m]}${TAB}${sname%%.*} ${sname}" | sudo tee -a /etc/hosts
   fi
   fi
+  n=$((n+1))
 done
-fi
+}
+
+# argument if set to 1 will skip creating new certs for OM and the App DB
+while getopts 'o:r:s:h' opt
+do
+  case "$opt" in
+    o)   om="$OPTARG" ;;
+    r)   rs="$OPTARG" ;;
+    s)   sh="$OPTARG" ;;
+    ?|h)
+      echo "Usage: $(basename $0) [-o name] [-r name] [-s name]"
+      echo "     use -o opsmanger"
+      echo "     use -r a ReplicSet Cluster Name"
+      echo "     use -r a Sharded Cluster Name"
+      exit 1
+      ;;
+  esac
+done
+shift "$(($OPTIND -1))"
+
+omName="${om:-opsmanager}"
+rsName=$( printf "${rs}"| tr '[:upper:]' '[:lower:]' )
+shName=$( printf "${sh}"| tr '[:upper:]' '[:lower:]' )
+
+[[ "${omName}" != "" ]] && getOMname "$omName"
+[[ "${rsName}" != "" ]] && getRSname "$rsName"
+[[ "${shName}" != "" ]] && getSHname "$shName"
+
 printf "\n" 
 

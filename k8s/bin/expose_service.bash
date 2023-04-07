@@ -17,10 +17,10 @@ PATH=.:bin:$PATH
 expose="svc_expose_template.yaml"
 if [[ "${serviceType}" == "LoadBalancer" ]]
 then
-    cat ${expose} | sed -e "s/NAME/$name/" -e "s/PORTTYPE/LoadBalancer/g" > svc_lb_${name}.yaml
+    cat ${expose} | sed -e "s/NAME/$name/" -e "s/SERVICETYPE/LoadBalancer/g" > svc_lb_${name}.yaml
     kubectl apply -f svc_lb_${name}.yaml
 else
-    cat ${expose} | sed -e "s/NAME/$name/" -e "s/PORTTYPE/NodePort/g" > svc_np_${name}.yaml
+    cat ${expose} | sed -e "s/NAME/$name/" -e "s/SERVICETYPE/NodePort/g" > svc_np_${name}.yaml
     kubectl apply -f svc_np_${name}.yaml
 fi
 

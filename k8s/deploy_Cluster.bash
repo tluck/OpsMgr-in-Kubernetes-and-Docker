@@ -98,6 +98,7 @@ then
     -e "s|MSCPU|$mscpu|" \
     -e "s|MSMEM|$msmem|" \
     -e "s|NAMESPACE|$namespace|" \
+    -e "s|SERVICETYPE|$serviceType|" \
     -e "s|#LDAP  ||" \
     -e "s|#LDAPT |$LDAPT|" \
     -e "s|LDAPTLS|$ldaptls|" \
@@ -124,6 +125,7 @@ else
     -e "s|MSCPU|$mscpu|" \
     -e "s|MSMEM|$msmem|" \
     -e "s|NAMESPACE|$namespace|" \
+    -e "s|SERVICETYPE|$serviceType|" \
     -e "s|#X509  ||" \
     -e "s|PROJECT-NAME|$fullName|" > "$mdb"
 fi

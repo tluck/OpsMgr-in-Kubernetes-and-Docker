@@ -95,7 +95,14 @@ spec:
       #   logs:
       #     storage: 1Gi
       #     #storageClass: standard
-  exposedExternally: true # create NodePorts
+  #exposedExternally: true # create NodePorts
+  externalAccess:
+    externalService:
+      annotations:
+      # cloud-specific annotations for the service
+      spec:
+        type: SERVICETYPE
+  #      port: 27017
   security:
     #TLS certsSecretPrefix: mdb # provide custom x509 certificates (keys and certs)
     #TLS tls:

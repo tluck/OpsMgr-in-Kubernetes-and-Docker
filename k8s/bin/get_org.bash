@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# script to find out if there is an existing non-deleted Organization and what is the id
+
 source init.conf
 test -f custom.conf && source custom.conf
 
@@ -23,13 +25,13 @@ oid=$( curl $curlOpts --silent --user "${publicKey}:${privateKey}" --digest \
 
 errorCode=$( printf "%s" "$oid" | jq .errorCode )
 
-out=( $( printf "%s" "$oid" | jq --arg orgName "$orgName" '.results[]| select( .name == $orgName ) | .name,.id' ))
-eval out=( $( printf '%s ' "${out[*]}" ) )
-
 if [[ "${errorCode}" == "null" ]]
 then
-    printf  "${out[*]}"
+    orgName=( $( printf "%s" "$oid" | jq --arg orgName "$orgName" '.results[]| select( (.name == $orgName) and (.isDeleted == false) ) | .name,.id' ))
+    eval out=( ${orgName[0]} ${orgName[1]} )
+    [[ "x${out[0]}" == "x" ]] && out=( none none )
+    printf "%s\n" "${out[*]}"
 else
-    printf "%s\n" "none"
-    exit 0
+    printf "%s\n" "none none"
 fi
+exit 0

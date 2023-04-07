@@ -132,4 +132,9 @@ else
     hn1=${slist[1]}
     hn2=${slist[2]}
 fi
+if [[ $sName != "" ]]
+then
+printf "%s %s %s" "$hn0:$np0"
+else
 printf "%s %s %s" "$hn0:$np0" "$hn1:$np1" "$hn2:$np2" 
+fi

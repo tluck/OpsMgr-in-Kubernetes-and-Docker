@@ -2,7 +2,7 @@
 
 conf=$( sed -e '/myNodeIp/d' custom.conf )
 printf "%s\n" "${conf}" > custom.conf
-myNodeIp="$( kubectl get node/docker-desktop -o json |jq .status.addresses[0].address)"
+myNodeIp="$( kubectl get node -o json |jq .items[].status.addresses[0].address)"
 echo myNodeIp="${myNodeIp}" | tee -a custom.conf
 
 source init.conf

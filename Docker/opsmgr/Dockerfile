@@ -100,12 +100,17 @@ RUN set -x \
 	&& rm -rf /var/lib/mongodb \
 	&& mv /etc/mongod.conf /etc/mongod.conf.orig
 
+RUN apt-get -qq update && apt-get -y -qq install apt-utils ca-certificates curl libsasl2-2 net-tools netcat procps libgssapi-krb5-2 libkrb5-dbg libldap-2.4-2 libpcap0.8 libpci3 libwrap0 libcurl4 liblzma5 libsasl2-modules libsasl2-modules-gssapi-mit openssl snmp && apt-get upgrade -y -qq && apt-get dist-upgrade -y -qq && rm -rf /var/lib/apt/lists/* # buildkit
+
+# install OM
 ARG DOWNLOAD
 ARG PACKAGE
 
 RUN set -x \
-    && curl -OL ${DOWNLOAD}/${PACKAGE} \
+    && curl -kOL ${DOWNLOAD}/${PACKAGE} 
+RUN set -x \
     && dpkg --install ${PACKAGE}
+RUN set -x && rm ${PACKAGE}
 
 RUN mkdir -p /data/db /data/configdb /data/backups \
     && chown -R mongodb:mongodb /data/db /data/configdb /data/backups

@@ -169,6 +169,7 @@ then
   else
     kubectl create configmap "${fullName}" \
         --from-literal="baseUrl=${opsMgrUrl}" \
+        --from-literal="orgId=" \
         --from-literal="projectName=${projectName}" \
         --from-literal="sslMMSCAConfigMap=opsmanager-ca" \
         --from-literal="sslRequireValidMMSServerCertificates='true'"

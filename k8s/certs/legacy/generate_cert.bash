@@ -1,7 +1,7 @@
 #!/bin/bash
 
 d=$( dirname "$0" )
-cd "${d}"
+#cd "${d}"
 
 name="$1"
 if [[ "$name" == "" ]]

@@ -24,6 +24,9 @@ else
 fi
 kubectl apply -f "${myoperator}"
 
-[[ ${tls} == 1 ]] && certs/make_cert_issuer.bash ${namespace} ${issuerName} ${issuerVersion}
-[[ $? != 0 ]] && exit 1
+if [[ ${tls} == 1 ]] 
+then
+    certs/make_cert_issuer.bash ${namespace} ${issuerName} ${issuerVersion}
+    [[ $? != 0 ]] && exit 1
+fi
 exit 0

@@ -8,4 +8,4 @@ docker build \
         --build-arg PACKAGE=$MMSPACKAGE \
         --build-arg MONGO_VERSION=$MONGO_VERSION \
         --build-arg MONGO_REPO=repo.mongodb.com \
-        -t $DOCKER_USERNAME/mongodb:opsmgr-$OPSMGR_VERSION .
+        -t $DOCKER_USERNAME/opsmgr .

@@ -10,4 +10,5 @@ docker run \
         -p 27016:27017 \
         --network mongonet \
         -v ${data}:/shareddata  \
-        -itd $DOCKER_USERNAME/mongodb:opsmgr-$OPSMGR_VERSION 
+        -itd $DOCKER_USERNAME/opsmgr
+#       -itd $DOCKER_USERNAME/opsmgr:$OPSMGR_VERSION 

@@ -2,12 +2,12 @@ version: '2'
 
 services:
   opsmgr:
-    image: "tjluckenbach/mongodb:opsmgr-6.0.11"
+    image: "tjluckenbach/opsmgr:latest"
     environment:
       - DOWNLOAD="https://downloads.mongodb.com/on-prem-mms/deb"
       - OPSMGR="http://opsmgr:8080/download/agent/automation"
-      - MMSPACKAGE="mongodb-mms-6.0.11.100.20230310T0141Z.amd64.deb"
-      - AGENTPACKAGE="mongodb-mms-automation-agent-manager_12.0.17.7665-1_amd64.ubuntu1604.deb"
+      - MMSPACKAGE="mongodb-mms-6.0.13.100.20230502T1610Z.amd64.deb"
+      - AGENTPACKAGE="mongodb-mms-automation-agent-manager_12.0.19.7676-1_amd64.ubuntu1604.deb"
     command:
         echo
     ulimits:

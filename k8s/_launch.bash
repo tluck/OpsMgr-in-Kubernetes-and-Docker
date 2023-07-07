@@ -76,7 +76,7 @@ printf "%s\n" "Deploy OM and wait until Running status..."
 
 if [[ "${demo}"  == "-t" ]]
 then
-[[ "${context}" == "docker"* ]] && docker pull "quay.io/mongodb/mongodb-enterprise-ops-manager:$omVersion" # issue with docker not (re)pulling the image
+# [[ "${context}" == "docker"* ]] && docker pull "quay.io/mongodb/mongodb-enterprise-ops-manager:$omVersion" # issue with docker not (re)pulling the image
 (set -x; 
 deploy_OM.bash $skip $demo # [-n name] [-g] [-c cpu] [-m memory] [-d disk] [-v version] 
 )
@@ -130,11 +130,11 @@ printf "%s\n" "Create a Production ReplicaSet Cluster with a splitHorizon config
 if [[ "${demo}"  == "-t" ]]
 then
 (set -x
-    deploy_Cluster.bash -n "myreplicaset" -e -l "${ldapType}" -c "0.50" -m "400Mi"         -v "6.0.1-ent" -o "${orgId}" -p "myProject1" ${skip}
+    deploy_Cluster.bash -n "myreplicaset" -e -l "${ldapType}" -c "0.50" -m "400Mi"         -v "6.0.5-ent" -o "${orgId}" -p "myProject1" ${skip}
 )
 else
 (set -x
-    deploy_Cluster.bash -n "myreplicaset" -e -l "${ldapType}" -c "1.00" -m "4Gi" -d "20Gi" -v "6.0.1-ent" -o "${orgId}" -p "myProject1" ${skip}
+    deploy_Cluster.bash -n "myreplicaset" -e -l "${ldapType}" -c "1.00" -m "4Gi" -d "20Gi" -v "6.0.5-ent" -o "${orgId}" -p "myProject1" ${skip}
 )
 fi
 cluster1="myProject1-myreplicaset"

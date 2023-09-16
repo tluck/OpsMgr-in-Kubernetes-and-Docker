@@ -71,7 +71,14 @@ then
         slist=( $( kubectl get svc ${name}-0 ${name}-1 ${name}-2 -o jsonpath='{.items[*].status.loadBalancer.ingress[0].hostname}' ) )
         if [[ ${#slist[@]} == 0 ]]
         then
-        slist=( $(kubectl get svc ${name}-0 ${name}-1 ${name}-2 -o jsonpath='{.items[*].status.loadBalancer.ingress[*].ip }' ) )
+        iplist=( $(kubectl get svc ${name}-0 ${name}-1 ${name}-2 -o jsonpath='{.items[*].status.loadBalancer.ingress[*].ip }' ) )
+            n=0 
+            for ip in ${iplist[*]}
+            do 
+                slist[$n]=$( nslookup $ip|grep name|awk '{print $4}')
+                n=$((n+1))
+            done
+        
         fi
     fi
 else
@@ -113,7 +120,13 @@ then
         fi
     	if [[ ${#slist[@]} == 0 ]] 
         then
-            slist=( $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="ExternalIP")].address}' ) )
+            iplist=( $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="ExternalIP")].address}' ) )
+            n=0 
+            for ip in ${iplist[*]}
+            do 
+                slist[$n]=$( nslookup $ip|grep name|awk '{print $4}')
+                n=$((n+1))
+            done
         fi
     fi
     

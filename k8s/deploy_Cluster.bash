@@ -142,7 +142,7 @@ then
 fi
 
 # clean up old stuff
-if [[ ${cleanup} = 1 ]]
+if [[ ${cleanup} == 1 ]]
 then
   for type in mdb configmaps csr
   do

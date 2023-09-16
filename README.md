@@ -24,7 +24,8 @@ This demo will install OM and a few MDB Clusters into a Kubernetes cluster.
 		* 50GB Disk 
 
 ### Step 2. Launch the Services
-the **_launch.bash** script runs several "deploy" scripts for each of the following steps:
+The **_launch.bash** script runs several "deploy" scripts for each of the following steps.
+However, before you run the **_launch.bash** script or any of deploy scripts, copy the `sample_init.conf` file to `init.conf` and customer the parameters, such as update your username (use your email) and a password. Note: For a simple demo, you may need to change serviceType to NodePort vs LoadBalancer. 
 
 - Script 1: **deploy_Operator.bash**
 	- Setup the OM enviroment
@@ -43,7 +44,7 @@ the **_launch.bash** script runs several "deploy" scripts for each of the follow
 	- the _launch script deploys several MDB clusters. 
 	- The Oplog and Blockstore ReplicaSet Clusters complete the Backup setup for OM
 	- The cluster "myreplicaset" is a "Production" ReplicaSet Cluster and has a splitHorizon configuration for external cluster access
-		- connect via ```bin/connect_external.bash``` script
+		- connect via `bin/connect_external.bash` script
 	- The cluster "mysharded" is a "Production" Sharded Cluster using either NodePort or LoadBalancer for external cluster access
 	- The monitors the progress until the pods of the cluster are ready before it finishes.
 	- Note: for convenience, the k8s cluster node names are used for the external access.

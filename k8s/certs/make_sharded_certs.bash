@@ -15,4 +15,4 @@ if [[ "$ctype" == [012356] ]] ; then comp="sh" ; fi
 if [[ "$ctype" == "mongos" ]] ; then comp="svc"; fi
 
 # use wildcard vs individual certs now
-"$PWD/gen_cert.bash" "mdb-${name}-${ctype}${cert}" "${namespace}" "*.${name}-${comp}.${namespace}.svc.cluster.local" 
+"$PWD/gen_cert.bash" "mdb-${name}-${ctype}${cert}" "*.${name}-${comp}.${namespace}.svc.cluster.local" 

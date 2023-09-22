@@ -21,24 +21,24 @@ serviceName=""
 if [[ $name != "" ]] 
 then
     serviceName=${name}-0
-type=$( kubectl get mdb/${name} -o jsonpath='{.spec.type}' 2>/dev/null )
-err1=$?
-if [[ $err1 != 0 ]]
-then
-    serviceType=$( kubectl get om/${name} -o jsonpath='{.spec.externalConnectivity.type}' 2>/dev/null )
-    err2=$?
-    if [[ $err2 == 0 ]] 
+    type=$( kubectl get mdb/${name} -o jsonpath='{.spec.type}' 2>/dev/null )
+    err1=$?
+    if [[ $err1 != 0 ]]
     then
-        om=1
-        serviceName=${name}-svc-ext
+        serviceType=$( kubectl get om/${name} -o jsonpath='{.spec.externalConnectivity.type}' 2>/dev/null )
+        err2=$?
+        if [[ $err2 == 0 ]] 
+        then
+            om=1
+            serviceName=${name}-svc-ext
+        fi
+    else # we assume RepSet but lets check for RepSet vs Sharded
+        om=0
+        if [[ "${type}" == "ShardedCluster" ]]
+        then
+            serviceName=${name}-svc-external
+        fi
     fi
-else # we assume RepSet but lets check for RepSet vs Sharded
-    om=0
-    if [[ "${type}" == "ShardedCluster" ]]
-    then
-        serviceName=${name}-svc-external
-    fi
-fi
 else
     serviceName=$sName
     om=1
@@ -61,7 +61,13 @@ then
         slist=( $( kubectl get svc/${serviceName} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' ) )
         if [[ ${#slist[@]} == 0 ]]
         then
-        slist=( $(kubectl get svc/${serviceName} -o jsonpath='{.status.loadBalancer.ingress[*].ip }' ) )
+        iplist=( $(kubectl get svc/${serviceName} -o jsonpath='{.status.loadBalancer.ingress[*].ip }' ) )
+            n=0 
+            for ip in ${iplist[*]}
+            do 
+                slist[$n]=$( nslookup $ip|grep name|awk '{print $4}')
+                n=$((n+1))
+            done
         fi
     else
         np0=$( kubectl get svc/${name}-0 -o jsonpath='{.spec.ports[0].port}' )
@@ -107,8 +113,19 @@ then
     	if [[ ${#slist[@]} == 0 ]] 
         then
     	    slist=( $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="Hostname")].address}') )
-	fi
-    	if [[ ${#slist[@]} == 0 && $custerType == "openshift" ]]
+	    fi
+        if [[ ${#slist[@]} == 0 ]] 
+        then
+            iplist=( $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="ExternalIP")].address}' ) )
+            n=0 
+            for ip in ${iplist[*]}
+            do 
+                slist[$n]=$( nslookup $ip|grep name|awk '{print $4}')
+                n=$((n+1))
+            done
+        fi
+
+    if [[ ${#slist[@]} == 0 && $custerType == "openshift" ]]
 	then
             # OpenShift read of names
 	    # slist=( $( kubectl get nodes -o json | jq -r '.items[].metadata.labels | select(."node-role.kubernetes.io/worker") | ."kubernetes.io/hostname" '))

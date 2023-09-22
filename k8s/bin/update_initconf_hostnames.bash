@@ -174,6 +174,10 @@ unset iplist
 for h in ${dnslist[*]}
 do
     ip=( $( nslookup $h | grep Address ) )
+    if [[ ${ip[3]} == "" ]]
+    then
+    ip=( Address $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="ExternalIP")].address}' ))
+    fi
     iplist[$n]=${ip[3]}  # strip off Address:
     nodename[$n]=""
     n=$((n+1))
@@ -222,7 +226,7 @@ do
       echo "Usage: $(basename $0) [-o name] [-r name] [-s name]"
       echo "     use -o opsmanger"
       echo "     use -r a ReplicSet Cluster Name"
-      echo "     use -r a Sharded Cluster Name"
+      echo "     use -s a Sharded Cluster Name"
       exit 1
       ;;
   esac

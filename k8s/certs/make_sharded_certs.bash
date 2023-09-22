@@ -15,4 +15,13 @@ if [[ "$ctype" == [012356] ]] ; then comp="sh" ; fi
 if [[ "$ctype" == "mongos" ]] ; then comp="svc"; fi
 
 # use wildcard vs individual certs now
-"$PWD/gen_cert.bash" "mdb-${name}-${ctype}${cert}" "*.${name}-${comp}.${namespace}.svc.cluster.local" 
+#"$PWD/gen_cert.bash" "mdb-${name}-${ctype}${cert}" "*.${name}-${comp}.${namespace}.svc.cluster.local" 
+
+members=3 # hard coded in template
+n=0
+while [ $n -lt $members ]
+do
+    names[$n]="${name}-${ctype}-${n}.${name}-${comp}.${namespace}.svc.cluster.local"
+    n=$((n+1))
+done
+"$PWD/gen_cert.bash" "mdb-${name}-${ctype}${cert}" ${names[*]}

@@ -148,9 +148,10 @@ then
   do
     kubectl delete $type "${fullName}" --now > /dev/null 2>&1
   done
-  for type in pvc pv svc secrets certificaterequests certificates
+  kubectl delete pods $( kubectl get pods | grep "${fullName}" | awk '{print $1}' ) --force --now > /dev/null 2>&1
+  for type in pvc svc secrets certificaterequests certificates
   do
-    kubectl delete $type "${fullName}-" --now > /dev/null 2>&1
+    kubectl delete $type $( kubectl get $type | grep "${fullName}" | awk '{print $1}' ) --now > /dev/null 2>&1
   done
 fi
 

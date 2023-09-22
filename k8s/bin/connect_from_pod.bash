@@ -39,6 +39,6 @@ printf "\n%s %s\n\n" "Connect String: ${fcs} "
 # update old mongosh
 kubectl exec ${name}${mongos}-0 -i -t -- bash -c "curl -s https://downloads.mongodb.com/compass/mongosh-${mongoshVersion}-linux-x64.tgz -o /var/lib/mongodb-mms-automation/mongosh-${mongoshVersion}-linux-x64.tgz; cd /var/lib/mongodb-mms-automation/ ; tar -zxvf mongosh-${mongoshVersion}-linux-x64.tgz; rm mongosh-${mongoshVersion}-linux-x64.tgz"
 
-path="$( kubectl exec ${name}${mongos}-0  -- find /var/lib/ -name ${mongo} |grep "${mongoshVersion}")"
+path="$( kubectl exec ${name}${mongos}-0  -- find /var/lib/mongodb-mms-automation/ -name ${mongo} |grep "${mongoshVersion}")"
 mongosh=$( printf "%s" $path)
 eval "kubectl exec ${name}${mongos}-0 -i -t -- ${mongosh} ${fcs} "

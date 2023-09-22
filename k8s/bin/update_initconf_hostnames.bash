@@ -122,7 +122,7 @@ then
 fi
 
 # add 3 nodes to the /etc/hosts file
-names=( mongodb1 mongodb2 mongodb3 )  
+names=( ${name}-0 ${name}-1 ${name}-2 )  
 
 num=${#iplist[@]}
 if [[ ${num} > 0 ]]

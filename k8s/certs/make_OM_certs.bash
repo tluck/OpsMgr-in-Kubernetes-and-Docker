@@ -47,4 +47,14 @@ cat "${cert}.key" "${cert}.crt" > "${cert}.pem"
 
 # appdb
 # use prefix om
-"$PWD/gen_cert.bash" ${name}-db-cert "*.${name}-db-svc.${namespace}.svc.cluster.local" 
+#"$PWD/gen_cert.bash" ${name}-db-cert "*.${name}-db-svc.${namespace}.svc.cluster.local" 
+
+members=3 # hard coded in template
+n=0
+while [ $n -lt $members ]
+do
+    names[$n]="${name}-db-${n}.${name}-db-svc.${namespace}.svc.cluster.local"
+    n=$((n+1))
+done
+
+"$PWD/gen_cert.bash" "${name}-db-cert" ${names[*]}

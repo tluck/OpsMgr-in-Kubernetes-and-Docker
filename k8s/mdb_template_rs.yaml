@@ -91,3 +91,10 @@ spec:
     operationProfiling:
       mode: "off" # "slowOp"
       slowOpThresholdMs: 100
+  #  security:
+  #    enableEncryption: true
+  #    kmip:
+  #      clientCertificateFile: /kmip/cert/cert.pem
+  #      serverCAFile: /mongodb-automation/tls/ca/ca-pem
+  #      serverName: kmip.server.tld
+  #      port: 5696

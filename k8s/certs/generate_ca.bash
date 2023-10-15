@@ -9,6 +9,7 @@ cat <<EOF |cfssl gencert -initca - | cfssljson -bare ca -
     },
     "names": [
         {
+            "O": "MongoDB",
             "C": "US",
             "ST": "CA",
             "L": "San Francisco"

@@ -68,10 +68,18 @@ then
 fi
 
 tlsc="#TLS "
-tlsr=$tlsc
+tlsr=${tlsc}
 if [[ ${tls} == 1 ]]
 then
-tlsr=""
+    tlsr=""
+fi
+tlsMode=${tlsMode:-"requireTLS"}
+
+kmipc="#KMIP "
+kmipr=${kmipc}
+if [[ ${kmip} == 1 ]]
+then
+    kmipr=""
 fi
 
 if [[ ${ldap} == 'ldaps' ]]
@@ -87,6 +95,8 @@ if [[ ${ldap} == 'ldap' || ${ldap} == 'ldaps' ]]
 then
   cat ${template} | sed \
     -e "s|$tlsc|$tlsr|" \
+    -e "s|TLSMODE|$tlsMode|" \
+    -e "s|$kmipc|$kmipr|" \
     -e "s|VERSION|$ver|" \
     -e "s|RSMEM|$mem|" \
     -e "s|RSCPU|$cpu|" \
@@ -114,6 +124,7 @@ then
 else
   cat ${template} | sed \
     -e "s|$tlsc|$tlsr|" \
+    -e "s|$kmipc|$kmipr|" \
     -e "s|VERSION|$ver|" \
     -e "s|RSMEM|$mem|" \
     -e "s|RSCPU|$cpu|" \

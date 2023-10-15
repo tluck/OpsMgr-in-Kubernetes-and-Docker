@@ -84,7 +84,7 @@ then
     rm "${PWD}/certs/${name}-[svc,db]".* "${PWD}/certs/queryable-backup.pem" > /dev/null 2>&1
     "${PWD}/certs/make_OM_certs.bash" ${name}
     # create appdb cert request
-    kubectl apply -f "${PWD}/certs/certs_${name}-db-cert.yaml" 
+    kubectl apply -f "${PWD}/certs/certs_om-${name}-db-cert.yaml" 
     # For enablement of TLS (https) - provide certs and certificate authority
     # <prefix>-<metadata.name>-cert - need the specific keyname server.pem and queryable-backup.pem
     kubectl delete secret         ${name}-cert > /dev/null 2>&1

@@ -45,12 +45,12 @@ spec:
     version: APPDBVER # 5.0.9-ent # 4.4.4-ent
     # persistent: true
     #TLS security:
-    #TLS   # certsSecretPrefix: "om"
+    #TLS   certsSecretPrefix: "om"
     #TLS   tls:
     #TLS     # enabled: true
     #TLS     ca: "NAME-ca" # needs to be mms-ca.crt
     #TLS     # secretRef:
-    #TLS     #   name: "NAME-db-cert"
+    #TLS     #   name: "om-NAME-db-cert"
     podSpec:
       persistence:
         single:

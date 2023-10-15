@@ -24,6 +24,32 @@ spec:
   #   persistence:
   #     single:
   #       storage: 1Gi # 2Gi
+  mongos:
+    # optional. Allows to pass custom configuration for mongos processes
+    additionalMongodConfig:
+    #TLS   net:
+    #TLS     tls:
+    #TLS       mode: "requireTLS" # "requireTLS" "preferTLS" "allowTLS"
+      # systemLog:
+      #   logAppend: true
+      #   verbosity: 4
+  configSrv:
+    additionalMongodConfig:
+      operationProfiling:
+        mode: "off" # "slowOp"
+        slowOpThresholdMs: 100
+    #TLS   net:
+    #TLS     tls:
+    #TLS       mode: "requireTLS" # "requireTLS" "preferTLS" "allowTLS"
+  shard:
+    additionalMongodConfig:
+    #TLS   net:
+    #TLS     tls:
+    #TLS       mode: "requireTLS" # "requireTLS" "preferTLS" "allowTLS"
+    # optional. Allows to pass custom configuration for Shards mongod processes
+    #  storage:
+    #    journal:
+    #      commitIntervalMs: 50
   mongosPodSpec:
     podTemplate:
       spec:
@@ -149,4 +175,3 @@ spec:
       #LDAPT   caConfigMapRef:
       #LDAPT     name: "LDAPCERTMAPNAME"
       #LDAPT     key: "LDAPKEY"
-

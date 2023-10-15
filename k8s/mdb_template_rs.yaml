@@ -80,21 +80,21 @@ spec:
     #LDAP          role: dbAdminAnyDatabase
     #LDAP        - db: admin
     #LDAP          role: readWriteAnyDatabase
-  # The default TLS mode is 'requireTLS' but it can be customized using the
-  # the `additionalMongodConfig` structure. Please find more information here:
-  # https://docs.mongodb.com/manual/reference/configuration-options/#net.ssl.mode
-  # additionalMongodConfig:
-  #   net:
-  #     ssl:
-  #       mode: "preferSSL" # "requireSSL" "preferSSL" "allowSSL"
   additionalMongodConfig:
     operationProfiling:
       mode: "off" # "slowOp"
       slowOpThresholdMs: 100
-  #  security:
-  #    enableEncryption: true
-  #    kmip:
-  #      clientCertificateFile: /kmip/cert/cert.pem
-  #      serverCAFile: /mongodb-automation/tls/ca/ca-pem
-  #      serverName: kmip.server.tld
-  #      port: 5696
+  #TLS   net:
+  #TLS     tls:
+  #TLS       mode: "TLSMODE" # "requireTLS" "preferTLS" "allowTLS"
+  # The default TLS mode is 'requireTLS' but it can be customized using the
+  # the `additionalMongodConfig` structure. Please find more information here:
+  # https://docs.mongodb.com/manual/reference/configuration-options/#net.tls.mode
+  # encryption at rest
+  #KMIP   security:
+  #KMIP     enableEncryption: true
+  #KMIP     kmip:
+  #KMIP       clientCertificateFile: /kmip/cert/cert.pem
+  #KMIP       serverCAFile: /mongodb-automation/tls/ca/ca-pem
+  #KMIP       serverName: kmip.server.tld
+  #KMIP       port: 5696

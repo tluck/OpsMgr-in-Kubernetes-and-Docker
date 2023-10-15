@@ -57,4 +57,4 @@ do
     n=$((n+1))
 done
 
-"$PWD/gen_cert.bash" "${name}-db-cert" ${names[*]}
+"$PWD/gen_cert.bash" "om-${name}-db-cert" ${names[*]}

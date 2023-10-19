@@ -1,4 +1,4 @@
-#!/bin/bash
+#/bin/bash
 
 d=$( dirname "$0" )
 cd "${d}"
@@ -69,35 +69,44 @@ fi
 
 tlsc="#TLS "
 tlsr=${tlsc}
-if [[ ${tls} == 1 ]]
+[[ ${x509} == true ]] && x509m=', "X509"'
+if [[ ${tls} == true ]]
 then
     tlsr=""
+else
+    x509m=""
 fi
 tlsMode=${tlsMode:-"requireTLS"}
 
 kmipc="#KMIP "
 kmipr=${kmipc}
-if [[ ${kmip} == 1 ]]
+if [[ ${kmip} == true ]]
 then
     kmipr=""
 fi
 
+ldapt="#LDAPT "
+ldaptls="none"
 if [[ ${ldap} == 'ldaps' ]]
 then
-    LDAPT=""
+    ldapt=""
     ldaptls="tls"
-else
-    LDAPT="#LDAPT "
+    ldapm=', "LDAP"'
+elif [[ ${ldap} == 'ldap' ]]
+then
+    ldapt="#LDAPT "
     ldaptls="none"
+    ldapm=', "LDAP"'
 fi
 
-if [[ ${ldap} == 'ldap' || ${ldap} == 'ldaps' ]]
+if [[ ${tls} == 'true' ]]
 then
   cat ${template} | sed \
     -e "s|$tlsc|$tlsr|" \
     -e "s|TLSMODE|$tlsMode|" \
     -e "s|$kmipc|$kmipr|" \
     -e "s|VERSION|$ver|" \
+    -e "s|DOMAINNAME|$domainName|" \
     -e "s|RSMEM|$mem|" \
     -e "s|RSCPU|$cpu|" \
     -e "s|RSDISK|$dsk|" \
@@ -109,8 +118,10 @@ then
     -e "s|MSMEM|$msmem|" \
     -e "s|NAMESPACE|$namespace|" \
     -e "s|SERVICETYPE|$serviceType|" \
+    -e "s|X509M|$x509m|" \
+    -e "s|LDAPM|$ldapm|" \
     -e "s|#LDAP  ||" \
-    -e "s|#LDAPT |$LDAPT|" \
+    -e "s|#LDAPT |$lpapt|" \
     -e "s|LDAPTLS|$ldaptls|" \
     -e "s|LDAPBINDQUERYUSER|$ldapBindQueryUser|" \
     -e "s|LDAPAUTHZQUERYTEMPLATE|$ldapAuthzQueryTemplate|" \
@@ -126,6 +137,7 @@ else
     -e "s|$tlsc|$tlsr|" \
     -e "s|$kmipc|$kmipr|" \
     -e "s|VERSION|$ver|" \
+    -e "s|DOMAINNAME|$domainName|" \
     -e "s|RSMEM|$mem|" \
     -e "s|RSCPU|$cpu|" \
     -e "s|RSDISK|$dsk|" \
@@ -137,7 +149,19 @@ else
     -e "s|MSMEM|$msmem|" \
     -e "s|NAMESPACE|$namespace|" \
     -e "s|SERVICETYPE|$serviceType|" \
-    -e "s|#X509  ||" \
+    -e "s|X509M|$x509m|" \
+    -e "s|LDAPM|$ldapm|" \
+    -e "s|#LDAP  ||" \
+    -e "s|#LDAPT |$lpapt|" \
+    -e "s|LDAPTLS|$ldaptls|" \
+    -e "s|LDAPBINDQUERYUSER|$ldapBindQueryUser|" \
+    -e "s|LDAPAUTHZQUERYTEMPLATE|$ldapAuthzQueryTemplate|" \
+    -e "s|LDAPUSERTODNMAPPING|$ldapUserToDNMapping|" \
+    -e "s|LDAPTIMEOUTMS|$ldapTimeoutMS|" \
+    -e "s|LDAPUSERCACHEINVALIDATIONINTERVAL|$ldapUserCacheInvalidationInterval|" \
+    -e "s|LDAPSERVER|$ldapServer|" \
+    -e "s|LDAPCERTMAPNAME|$ldapCertMapName|" \
+    -e "s|LDAPKEY|$ldapKey|" \
     -e "s|PROJECT-NAME|$fullName|" > "$mdb"
 fi
 
@@ -167,7 +191,7 @@ then
 fi
 
 # Create map for OM Org/Project
-if [[ ${tls} == 1 ]]
+if [[ ${tls} == true ]]
 then
   kubectl delete configmap "${fullName}" > /dev/null 2>&1
   if [[ $orgId != "" ]]

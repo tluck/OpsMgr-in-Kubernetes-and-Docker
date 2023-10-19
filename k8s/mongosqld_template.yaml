@@ -26,7 +26,7 @@ mongodb:
   # versionCompatibility: <string>
   net:
     #uri: "mongodb://minikube:27017" # https://docs.mongodb.com/manual/reference/connection-string/#mongodb-uri
-    uri: "mongodb://NAME-0.NAME-svc.NAMESPACE.svc.cluster.local:27017,NAME-1.NAME-svc.NAMESPACE.svc.cluster.local:27017,NAME-2.NAME-svc.NAMESPACE.svc.cluster.local:27017/?replicaSet=NAME&connectTimeoutMS=20000&serverSelectionTimeoutMS=20000"
+    uri: "mongodb://NAME-0.NAME-svc.NAMESPACE.svc.DOMAINNAME:27017,NAME-1.NAME-svc.NAMESPACE.svc.DOMAINNAME:27017,NAME-2.NAME-svc.NAMESPACE.svc.DOMAINNAME:27017/?replicaSet=NAME&connectTimeoutMS=20000&serverSelectionTimeoutMS=20000"
     ssl:
       enabled: true
     ## https://docs.mongodb.com/bi-connector/master/reference/mongosqld/#mongodb-tls-ssl-options

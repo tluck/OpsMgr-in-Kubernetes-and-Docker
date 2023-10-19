@@ -7,6 +7,7 @@ metadata:
 spec:
   members: 3
   version: VERSION
+  clusterDomain: DOMAINNAME
   type: ReplicaSet
   opsManager:
     configMapRef:
@@ -43,8 +44,7 @@ spec:
       enabled : true # false
       agents: 
         mode: "SCRAM"
-      #X509  modes: ["SCRAM","X509"]
-      #LDAP  modes: ["SCRAM","LDAP"]
+      modes: [ "SCRAM" X509M LDAPM ]
       #LDAP  ldap:  # Enabled LDAP Authentication Mode # LDAP related configuration
       #LDAP    # Specify the hostname:port combination of one or more LDAP servers
       #LDAP    servers:
@@ -86,7 +86,7 @@ spec:
       slowOpThresholdMs: 100
   #TLS   net:
   #TLS     tls:
-  #TLS       mode: "TLSMODE" # "requireTLS" "preferTLS" "allowTLS"
+  #TLS       mode: "TLSMODE" # "requireTLS" "preferTLS" "allowTLS" 
   # The default TLS mode is 'requireTLS' but it can be customized using the
   # the `additionalMongodConfig` structure. Please find more information here:
   # https://docs.mongodb.com/manual/reference/configuration-options/#net.tls.mode

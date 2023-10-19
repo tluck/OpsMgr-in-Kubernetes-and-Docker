@@ -18,7 +18,12 @@ This demo will install OM and a few MDB Clusters into a Kubernetes cluster.
 ### Step 1. Configure a K8s Cluster
 - Setup the K8s cluster and install the needed command tools: kubectl, jq, cfssl.
 	* Kubernetes - the demo compatible with RH Openshift, Docker-Desktop, Minikube, AWS EKS, GCP K8S.
-	* Minimum resources required: 
+	* For a Production/Full Deployment:
+		* 48-64 Cores
+		* 192-256 GB Memory
+		* 2000-5000 GB Disk 
+
+	* Minimum resources required for a demo: 
 		* 8 Cores
 		* 11GB Memory (2GB of swap)
 		* 50GB Disk 

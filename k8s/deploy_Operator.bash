@@ -24,7 +24,7 @@ else
 fi
 kubectl apply -f "${myoperator}"
 
-if [[ ${tls} == 1 ]] 
+if [[ ${tls} == 'true' ]] 
 then
     certs/make_cert_issuer.bash ${namespace} ${issuerName} ${issuerVersion}
     [[ $? != 0 ]] && exit 1

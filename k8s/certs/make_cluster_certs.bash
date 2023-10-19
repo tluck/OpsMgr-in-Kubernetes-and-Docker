@@ -8,14 +8,14 @@ shift
 dnsHorizon=( $@ )
 
 # use wildcard vs individual certs now
-#"$PWD/gen_cert.bash" "mdb-${name}-cert" "*.${name}-svc.${namespace}.svc.cluster.local" ${dnsHorizon[*]}
+#"$PWD/gen_cert.bash" "mdb-${name}-cert" "*.${name}-svc.${namespace}.svc.${domainName}" ${dnsHorizon[*]}
 
 # members=$( kubectl get mdb ${name} -o json|jq .spec.members )
 members=3 # hard coded in template
 n=0
 while [ $n -lt $members ]
 do
-    names[$n]="${name}-${n}.${name}-svc.${namespace}.svc.cluster.local"
+    names[$n]="${name}-${n}.${name}-svc.${namespace}.svc.${domainName}"
     n=$((n+1))
 done
 

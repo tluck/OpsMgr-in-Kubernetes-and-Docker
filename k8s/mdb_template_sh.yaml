@@ -6,6 +6,7 @@ metadata:
   namespace: NAMESPACE
 spec:
   version: VERSION
+  clusterDomain: DOMAINNAME
   type: ShardedCluster
   shardCount: SHARDS
   mongodsPerShardCount: 3
@@ -147,8 +148,7 @@ spec:
       #internalCluster: "X509"
       agents: 
         mode: "SCRAM"
-      #X509  modes: ["SCRAM","X509"]
-      #LDAP  modes: ["SCRAM","LDAP"]
+      modes: [ "SCRAM" X509M LDAPM ]
       #LDAP  ldap:  # Enabled LDAP Authentication Mode # LDAP related configuration
       #LDAP    # Specify the hostname:port combination of one or more LDAP servers
       #LDAP    servers:

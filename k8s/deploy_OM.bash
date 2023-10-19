@@ -75,7 +75,7 @@ kubectl create secret generic admin-user-credentials \
     --from-literal=LastName="${lastName}"
 
 tlsc="#TLS "
-if [[ ${tls} == 1 ]]
+if [[ ${tls} == 'true' ]]
 then
     if [[ ${skipMakeCerts} == 0 ]]
     then
@@ -121,6 +121,7 @@ fi
 # make manifest from template
 cat mdbom_template.yaml | sed \
     -e "s/VERSION/$omVer/" \
+    -e "s/DOMAINNAME/$domainName/" \
     -e "s/APPDBVER/$appdbVer/" \
     -e "s/MMSADMINEMAILADDR/$user/" \
     -e "s/MMSEMAIL/$mmsemail/" \

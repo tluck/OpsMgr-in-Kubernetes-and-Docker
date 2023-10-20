@@ -50,11 +50,11 @@ else
     ecs=$( printf "%s" "$ics" | sed -e "s?@.*/?@${hn[0]},${hn[1]},${hn[2]}/?" )
 fi
 fi
-
-tls=$( kubectl get mdb/${name} -o jsonpath='{.spec.security}' )
+# check to see is TLS on
+spec=$( kubectl get mdb/${name} -o jsonpath='{.spec.security}' )
 if [[ ${serviceType} != "" && ${internal} = 0 ]]
 then
-if [[ "${tls}" == "map[enabled:true]" || "${tls}" == *"refix"* || "${tls}" == *"ecret"* || "${tls}" == *\"ca\":* ]]
+if [[ "${spec}" == "map[enabled:true]" || "${spec}" == *"refix":* || "${spec}" == *"ecret":* || "${spec}" == *\"ca\":* ]]
 then
     test -e "${PWD}/certs/ca.pem"               || kubectl get configmap ca-pem -o jsonpath="{.data['ca-pem']}" > "${PWD}/certs/ca.pem"
     test -e "${PWD}/certs/${name}${mongos}.pem" || kubectl get secret mdb-${name}${mongos}-cert-pem -o jsonpath="{.data.*}" | base64 --decode > "${PWD}/certs/${name}${mongos}.pem"
@@ -72,7 +72,7 @@ fi
     printf "%s\n" "The connection string (external): ${fcs} ${ssltls_options}"
 
 else # internal
-if [[ "${tls}" == "map[enabled:true]" || "${tls}" == *"refix"* || "${tls}" == *"ecret"* || "${tls}" == *\"ca\":* ]]
+if [[ "${spec}" == "map[enabled:true]" || "${spec}" == *"refix":* || "${spec}" == *"ecret":* || "${spec}" == *\"ca\":* ]]
 then
     #eval serverpem=$( kubectl get secret mdb-${name}${mongos}-cert-pem -o json |jq ".data"| jq "keys[]" )
     kv=$( kubectl get secret mdb-${name}${mongos}-cert-pem -o jsonpath="{.data}" | grep -o '".*":*' )

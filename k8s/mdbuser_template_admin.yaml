@@ -22,4 +22,5 @@ spec:
       name: "readWriteAnyDatabase"
     - db: "admin"
       name: "dbAdminAnyDatabase"
-
+    - db: "admin"
+      name: "clusterMonitor"

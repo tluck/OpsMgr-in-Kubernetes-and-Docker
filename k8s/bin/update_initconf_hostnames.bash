@@ -87,7 +87,7 @@ then
     return
 fi
 
-if [[ $serviceType == "NodePort" ]]
+if [[ $serviceType == "NodePort" || ${tls} == false ]]
 then
 	nodename=( $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="Hostname")].address}') )
 	dnslist=(  $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="ExternalDNS")].address}' ) )
@@ -154,7 +154,7 @@ done
 getSHname() {
 name=${1}
 # sharded mongos
-slist=( $( kubectl get svc|grep "${name}-mongos-.-svc-external" 2>/dev/null |awk '{print $1}') )
+slist=( $( kubectl get svc -o name | grep "${name}-mongos-.-svc-external" 2>/dev/null ) )
 if [[ $? != 0 || ${#slist} == 0 ]]
 then
     printf "%s\n" "* * * Error - svc ${name}-mongos-*-svc-external not found" 
@@ -163,7 +163,7 @@ fi
 n=0
 for s in ${slist[*]}
 do 
-    slist[$n]=$( get_hns.bash -s "${s}" ) 
+    slist[$n]=$( get_hns.bash -s "${s##*/}" ) 
     n=$((n+1))
 done
 

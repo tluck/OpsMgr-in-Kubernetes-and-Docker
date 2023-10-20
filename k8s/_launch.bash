@@ -155,6 +155,7 @@ fi
 
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Update init.conf with IPs and put k8s internal hostnames in /etc/hosts ..."
-update_initconf_hostnames.bash -o "${omName}" -r "${cluster1}" -s "${cluster2}"
-
+(set -x
+    update_initconf_hostnames.bash -o "${omName}" -r "${cluster1}" -s "${cluster2}"
+)
 date

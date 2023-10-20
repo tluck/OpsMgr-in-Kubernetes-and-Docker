@@ -162,7 +162,7 @@ cat mdbom_template.yaml | sed \
 kubectl apply -f "${mdbom}"
 
 # remove any certificate requests
-kubectl delete certificaterequest $( kubectl get certificaterequest -o name | grep "${name}" ) > /dev/null 2>&1
+[[ ${tls} == true ]] && kubectl delete $( kubectl get certificaterequest -o name | grep "${name}" ) > /dev/null 2>&1
 
 # Monitor the progress until the OpsMgr app is ready
 printf "\n%s\n" "Monitoring the progress of resource om/${name} ..."
@@ -191,7 +191,7 @@ printf "\n%s\n" "Monitoring the progress of svc ${name} ..."
 n=0
 while [ $n -lt 12 ]
 do
-    kubectl get svc | grep ${name} | grep pending
+    kubectl get svc | grep ${name} | grep -i "pending"
     if [[ $? = 1 ]]
     then
         kubectl get svc/${name}-svc-ext # svc/${name}-backup svc/${name}-backup-daemon-0

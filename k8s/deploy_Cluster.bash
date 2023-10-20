@@ -179,15 +179,19 @@ fi
 # clean up old stuff
 if [[ ${cleanup} == 1 ]]
 then
-  for type in mdb configmaps csr
+  kubectl delete mdb "${fullName}" --now > /dev/null 2>&1
+  kubectl delete $( kubectl get pods -o name | grep "${fullName}" ) --force --now > /dev/null 2>&1
+  for type in pvc svc secrets configmaps
   do
-    kubectl delete $type "${fullName}" --now > /dev/null 2>&1
+    kubectl delete $( kubectl get $type -o name | grep "${fullName}" ) --now > /dev/null 2>&1
   done
-  kubectl delete pods $( kubectl get pods | grep "${fullName}" | awk '{print $1}' ) --force --now > /dev/null 2>&1
-  for type in pvc svc secrets certificaterequests certificates
+  if [[ ${tls} == true ]]
+  then
+  for type in csr certificaterequests certificates
   do
-    kubectl delete $type $( kubectl get $type | grep "${fullName}" | awk '{print $1}' ) --now > /dev/null 2>&1
+    kubectl delete $( kubectl get $type -o name | grep "${fullName}" ) --now > /dev/null 2>&1
   done
+  fi
 fi
 
 # Create map for OM Org/Project
@@ -305,8 +309,11 @@ fi
 kubectl apply -f "${mdb}"
 
 # remove any certificate requests
-kubectl delete csr $( kubectl get csr -o name | grep "${fullName}" ) > /dev/null 2>&1
-kubectl delete certificaterequest $( kubectl get certificaterequest -o name | grep "${fullName}" ) > /dev/null 2>&1
+if [[ ${tls} == true ]]
+then
+  kubectl delete csr $( kubectl get csr -o name | grep "${fullName}" ) > /dev/null 2>&1
+  kubectl delete certificaterequest $( kubectl get certificaterequest -o name | grep "${fullName}" ) > /dev/null 2>&1
+fi
 
 # Monitor the progress
 resource="mongodb/${fullName}"

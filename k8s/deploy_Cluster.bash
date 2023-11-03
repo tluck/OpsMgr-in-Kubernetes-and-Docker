@@ -76,7 +76,13 @@ then
 else
     x509m=""
 fi
+
+sslRequireValidMMSServerCertificates=false
 tlsMode=${tlsMode:-"requireTLS"}
+if [[ ${tlsMode} == "requireTLS" ]]
+then
+    sslRequireValidMMSServerCertificates=true
+fi
 
 kmipc="#KMIP "
 kmipr=${kmipc}
@@ -205,14 +211,14 @@ then
         --from-literal="orgId=${orgId}" \
         --from-literal="projectName=${projectName}" \
         --from-literal="sslMMSCAConfigMap=opsmanager-ca" \
-        --from-literal="sslRequireValidMMSServerCertificates='true'"
+        --from-literal="sslRequireValidMMSServerCertificates=${sslRequireValidMMSServerCertificates}"
   else
     kubectl create configmap "${fullName}" \
         --from-literal="baseUrl=${opsMgrUrl}" \
         --from-literal="orgId=" \
         --from-literal="projectName=${projectName}" \
         --from-literal="sslMMSCAConfigMap=opsmanager-ca" \
-        --from-literal="sslRequireValidMMSServerCertificates='true'"
+        --from-literal="sslRequireValidMMSServerCertificates=${sslRequireValidMMSServerCertificates}"
   fi
 
   if [[ ${sharded} == true ]]

@@ -108,6 +108,7 @@ tlsr="$tlsc"
         --from-file="${PWD}/certs/queryable-backup.pem"
     fi
 fi
+tlsMode=${tlsMode:-"requireTLS"}
 
 mdbom="mdbom_${name}.yaml"
 
@@ -155,6 +156,7 @@ cat mdbom_template.yaml | sed \
     -e "s/#NP  /$NP/" \
     -e "s/#LB  /$LB/" \
     -e "s/$tlsc/$tlsr/" \
+    -e "s|TLSMODE|$tlsMode|" \
     -e "s/$replace//" \
     -e "s/NAME/$name/g" > "${mdbom}"
 

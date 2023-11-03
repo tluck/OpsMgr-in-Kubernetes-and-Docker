@@ -53,6 +53,10 @@ spec:
     #TLS     ca: "NAME-ca" # needs to be mms-ca.crt
     #TLS     # secretRef:
     #TLS     #   name: "om-NAME-db-cert"
+    additionalMongodConfig:
+    #TLS   net:
+    #TLS     tls:
+    #TLS       mode: "TLSMODE" # "requireTLS" "preferTLS" "allowTLS" 
     podSpec:
       persistence:
         single:

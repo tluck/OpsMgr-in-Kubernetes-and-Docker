@@ -26,7 +26,12 @@ kubectl create configmap ca-pem \
     --from-file="ca-pem=ca.pem"
 
 # get the cert-manager
-kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/${issuerVersion}/cert-manager.yaml
+if [[ -e cert-manager.yaml ]]
+then
+    kubectl apply -f cert-manager.yaml
+else
+    kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/${issuerVersion}/cert-manager.yaml
+fi
 
 kubectl delete secret ca-key-pair > /dev/null 2>&1
 kubectl create secret tls ca-key-pair \

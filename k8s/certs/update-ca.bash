@@ -40,3 +40,4 @@ kubectl create secret generic ${omName}-cert \
         --from-file="ca-pem=${PWD}/certs/ca.pem" \
         --from-file="mms-ca.crt=${PWD}/certs/ca.pem"
 
+certs/make_cert_issuer.bash ${namespace} ${issuerName} ${issuerVersion}

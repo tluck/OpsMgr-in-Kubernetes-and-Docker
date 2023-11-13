@@ -517,3 +517,7 @@ spec:
               value: "quay.io/mongodb/mongodb-enterprise-appdb-database-ubi:5.0.14-ent"
             - name: RELATED_IMAGE_MONGODB_IMAGE_5_0_18_ent
               value: "quay.io/mongodb/mongodb-enterprise-appdb-database-ubi:5.0.18-ent"
+            - name: MDB_AUTOMATIC_RECOVERY_ENABLE
+              value: 'true'
+            - name: MDB_AUTOMATIC_RECOVERY_BACKOFF_TIME_S
+              value: '480'

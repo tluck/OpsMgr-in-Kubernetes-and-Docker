@@ -203,7 +203,7 @@ fi
 # Create map for OM Org/Project
 if [[ ${tls} == true ]]
 then
-  kubectl delete configmap "${fullName}" > /dev/null 2>&1
+  [[ ${cleanup} == 1 ]] && kubectl delete configmap "${fullName}" > /dev/null 2>&1
   if [[ $orgId != "" ]]
   then
     kubectl create configmap "${fullName}" \
@@ -211,14 +211,14 @@ then
         --from-literal="orgId=${orgId}" \
         --from-literal="projectName=${projectName}" \
         --from-literal="sslMMSCAConfigMap=opsmanager-ca" \
-        --from-literal="sslRequireValidMMSServerCertificates=${sslRequireValidMMSServerCertificates}"
+        --from-literal="sslRequireValidMMSServerCertificates=${sslRequireValidMMSServerCertificates}" 2> /dev/null
   else
     kubectl create configmap "${fullName}" \
         --from-literal="baseUrl=${opsMgrUrl}" \
         --from-literal="orgId=" \
         --from-literal="projectName=${projectName}" \
         --from-literal="sslMMSCAConfigMap=opsmanager-ca" \
-        --from-literal="sslRequireValidMMSServerCertificates=${sslRequireValidMMSServerCertificates}"
+        --from-literal="sslRequireValidMMSServerCertificates=${sslRequireValidMMSServerCertificates}" 2> /dev/null
   fi
 
   if [[ ${sharded} == true ]]
@@ -276,39 +276,37 @@ then
 
 else
 # no tls here
-  kubectl delete configmap "${fullName}" > /dev/null 2>&1
+  [[ ${cleanup} == 1 ]] && kubectl delete configmap "${fullName}" > /dev/null 2>&1
   if [[ $orgId != "" ]]
   then
-    kubectl delete configmap "${fullName}" > /dev/null 2>&1
     kubectl create configmap "${fullName}" \
     --from-literal="orgId=${orgId}" \
     --from-literal="projectName=${projectName}" \
-    --from-literal="baseUrl=${opsMgrUrl}"
+    --from-literal="baseUrl=${opsMgrUrl}" 2> /dev/null
   else
-    kubectl delete configmap "${fullName}" > /dev/null 2>&1
     kubectl create configmap "${fullName}" \
     --from-literal="projectName=${projectName}" \
-    --from-literal="baseUrl=${opsMgrUrl}"
+    --from-literal="baseUrl=${opsMgrUrl}" 2> /dev/null
   fi
 fi # tls
 
 # Create a a secret for a db user credentials
-kubectl delete secret         ${fullName}-admin > /dev/null 2>&1
+[[ ${cleanup} == 1 ]] && kubectl delete secret         ${fullName}-admin > /dev/null 2>&1
 kubectl create secret generic ${fullName}-admin \
     --from-literal=name="${dbuser}" \
-    --from-literal=password="${dbpassword}"
+    --from-literal=password="${dbpassword}" 2> /dev/null
 
 # Create the User Resources
-kubectl delete mdbu ${fullName}-admin > /dev/null 2>&1
-kubectl apply -f "${mdbuser1}"
+[[ ${cleanup} == 1 ]] && kubectl delete mdbu ${fullName}-admin > /dev/null 2>&1
+kubectl apply -f "${mdbuser1}" 2> /dev/null
 
 if [[ ${ldap} == 'ldap' || ${ldap} == 'ldaps' ]]
 then
-  kubectl delete mdbu ${fullName}-ldap > /dev/null 2>&1
+  [[ ${cleanup} == 1 ]] && kubectl delete mdbu ${fullName}-ldap > /dev/null 2>&1
   kubectl apply -f "${mdbuser2}"
-  kubectl delete secret         "${fullName}-ldapsecret" > /dev/null 2>&1
+  [[ ${cleanup} == 1 ]] && kubectl delete secret "${fullName}-ldapsecret" > /dev/null 2>&1
   kubectl create secret generic "${fullName}-ldapsecret" \
-    --from-literal=password="${ldapBindQueryPassword}" 
+    --from-literal=password="${ldapBindQueryPassword}" 2> /dev/null 
 fi
 
 # Create the DB Resource

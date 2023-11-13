@@ -6,27 +6,28 @@ source custom.conf
 while getopts 'i:o:p:u:h' opt
 do
   case "$opt" in
-    i|o) orgId="$OPTARG";;
+    i|o) orgName="$OPTARG";;
     p) projectName="$OPTARG";;
     u) user="$OPTARG";;
     ?|h)
-      echo "Usage: $(basename $0) -o orgName [-h]"
+      echo "Usage: $(basename $0) -o orgName -p projectName [-h]"
       exit 1
       ;;
   esac
 done
 shift "$(($OPTIND -1))"
 
-#orgId=${}
+orgName=${orgName:-myOrg}
+orgInfo=( $( get_org.bash -o ${orgName} ) )
+orgId=${orgInfo[1]}
 projectName=${projectName:-myProject}
+curlData=$( printf '{ "name" : "PROJECT", "orgId" : "ORGID" }' | sed -e"s/PROJECT/${projectName}/" -e"s/ORGID/${orgId}/" )
 
-echo '{ "name" : "PROJECT", "orgId" : "ORGID" }' | sed -e"s/PROJECT/${projectName}/" -e"s/ORGID/${orgId}/" > data.json
 pid=$( curl $curlOpts --silent --user "${publicKey}:${privateKey}" --digest \
      --header "Content-Type: application/json" \
      --request POST "${opsMgrExtUrl2}/api/public/v1.0/groups?pretty=true" \
-     --data @data.json )
+     --data "${curlData}" )
 errorCode=$( printf "%s" "$pid" | jq .errorCode )
-rm data.json
 
 if [[ "${errorCode}" == "null" ]]
 then
@@ -34,7 +35,7 @@ then
     printf "%s\n" "${conf}" > custom.conf
     printf "%s\n" "Successfully created Project: $projectName in OrgId: ${orgId}"
 #    echo  projectName=\"${projectName}\"                                        >> custom.conf
-    echo  ${projectName}_Id="$(          printf "%s" "$pid" | jq .id )"          >> custom.conf
+    echo  ${projectName}_projectId="$(   printf "%s" "$pid" | jq .id )"          >> custom.conf
     echo  ${projectName}_agentApiKey="$( printf "%s" "$pid" | jq .agentApiKey )" >> custom.conf
 else
     detail=$( printf "%s" "$pid" | jq .detail )

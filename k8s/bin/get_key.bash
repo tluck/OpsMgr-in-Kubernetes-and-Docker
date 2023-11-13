@@ -13,20 +13,18 @@ then
     exit 1
 fi
 
-if [[ -e custom.conf ]]
+if [[ $publicApiKey != $publicKey ]]
 then
-    if [[ $publicApiKey != $publicKey ]]
+    if [[ -e custom.conf ]]
     then
-        rm custom.conf
-        echo  publicKey="${publicApiKey}"   > custom.conf
-        echo  privateKey="${privateApiKey}" >> custom.conf
-    #else
-    #    conf=$( sed -e '/privateKey/d' -e '/publicKey/d' custom.conf )
-    #    printf "%s\n" "$conf" > custom.conf
+        conf=$( sed -e '/adminUser/d' -e '/privateKey/d' -e '/publicKey/d'  custom.conf )
+        printf "%s\n" "$conf" > custom.conf
     fi
+    printf "publicKey=\"${publicApiKey}\"\n"    | tee -a custom.conf
+    printf "privateKey=\"${privateApiKey}\"\n"  | tee -a custom.conf
 else
-    echo  publicKey="${publicApiKey}"   > custom.conf
-    echo  privateKey="${privateApiKey}" >> custom.conf
+    printf "publicKey=\"${publicApiKey}\"\n" 
+    printf "privateKey=\"${privateApiKey}\"\n" 
 fi
 
 exit 0

@@ -2,22 +2,18 @@
 
 conf=$( sed -e '/myNodeIp/d' custom.conf )
 printf "%s\n" "${conf}" > custom.conf
-myNodeIp="$( kubectl get node -o json |jq .items[].status.addresses[0].address)"
-echo myNodeIp="${myNodeIp}" | tee -a custom.conf
+eval nodes=( $( kubectl get node -o json |jq ".items[].status.addresses[0].address" ) )
+myNodeIp=${nodes[0]}
+printf "myNodeIp=${myNodeIp}" | tee -a custom.conf
 
 source init.conf
 source custom.conf
 
-file="whitelist.json"
-
-printf "%s\n" '{ "cidrBlock": "MYIP", "description": "my IP"}' | sed -e"s?MYIP?${myNodeIp}/1?g" > data.json
-curl $curlOpts --user "${publicApiKey}:${privateApiKey}" --digest \
+curlData=$( printf '{ "cidrBlock": "MYIP", "description": "my IP"}' | sed -e"s?MYIP?${myNodeIp}/1?g" )
+output=$( curl $curlOpts --silent --user "${publicApiKey}:${privateApiKey}" --digest \
 --header 'Accept: application/json' \
 --header 'Content-Type: application/json' \
 --request POST "${opsMgrExtUrl2}/api/public/v1.0/admin/whitelist?pretty=true" \
---data @data.json \
--o "${file}" > /dev/null 2>&1
-rm data.json
+--data "${curlData}" )
 
-cat "${file}"
-rm "${file}"
+printf "${output}"

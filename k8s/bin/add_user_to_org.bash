@@ -16,30 +16,29 @@ do
 done
 shift "$(($OPTIND -1))"
 
-file=/tmp/$$user.json
-curl $curlOpts --user "${publicKey}:${privateKey}" --digest \
+output=$( curl $curlOpts --silent --user "${publicKey}:${privateKey}" --digest \
   --header "Accept: application/json" \
   --header "Content-Type: application/json" \
-  --request GET "${opsMgrExtUrl2}/api/public/v1.0/users/byName/${user}?pretty=true" \
-  -o ${file} > /dev/null 2>&1
+  --request GET "${opsMgrExtUrl2}/api/public/v1.0/users/byName/${user}?pretty=true" )
 
 errorCode=$?
 
-eval userId="$( cat ${file} | jq .id )" 
+#printf "${output}" 
+eval userId=$( printf "${output}" | jq .id ) 
 
-echo '{
+curlData=$( printf '{
         "roles": [
         {
           "orgId" : "ORGID",
           "roleName" : "ORG_OWNER"
         }]
-      }' | sed -e"s/ORGID/${orgId}/" > tmpdata.json
+      }' | sed -e"s/ORGID/${orgId}/" )
 
-curl $curlOpts --user "${publicKey}:${privateKey}" --digest \
+output=$( curl $curlOpts --silent --user "${publicKey}:${privateKey}" --digest \
   --header "Accept: application/json" \
   --header "Content-Type: application/json" \
      --request PATCH "${opsMgrExtUrl2}/api/public/v1.0/users/${userId}" \
-     --data @tmpdata.json > /dev/null 2>&1
+     --data "${curlData}" )
 
 errorCode=$?
 
@@ -48,6 +47,4 @@ then
     printf "%s\n" "Successfully added User: $user with userId: $userId to orgId: $orgId"
 fi
 
-rm tmpdata.json
 exit $errorCode
-

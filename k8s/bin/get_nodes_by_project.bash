@@ -12,10 +12,10 @@ then
 fi
 
 
-oid=$( curl $curlOpts --silent --user "${publicKey}:${privateKey}" --digest \
- --header 'Accept: application/json' \
- --header 'Content-Type: application/json' \
- --request GET "${opsMgrExtUrl2}/api/public/v1.0/groups/${projectId}/hosts?pretty=true" )
+output=$( curl $curlOpts --silent --user "${publicKey}:${privateKey}" --digest \
+  --header 'Accept: application/json' \
+  --header 'Content-Type: application/json' \
+  --request GET "${opsMgrExtUrl2}/api/public/v1.0/groups/${projectId}/hosts?pretty=true" )
 
-printf "%s" "$oid" | jq '.results[]| .hostname,.systemInfo'
+printf "%s" "$output" | jq '.results[]| .hostname,.systemInfo'
 exit 0

@@ -282,3 +282,7 @@ spec:
               value: ubi8
             - name: PERFORM_FAILOVER
               value: 'true'
+            - name: MDB_AUTOMATIC_RECOVERY_ENABLE
+              value: 'true'
+            - name: MDB_AUTOMATIC_RECOVERY_BACKOFF_TIME_S
+              value: '480'

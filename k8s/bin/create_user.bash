@@ -1,24 +1,27 @@
 #!/bin/bash
 
-source custom.conf
 source init.conf
+source custom.conf
 
-echo '{ "username":     "sharath.rao@mongodb.com",
-        "emailAddress": "sharath.rao@mongodb.com",
-        "firstName":    "Sharath",
-        "lastName":     "Rao",
+orgName=${orgName:-myOrg}
+orgInfo=( $( get_org.bash -o ${orgName} ) )
+orgId=${orgInfo[1]}
+
+curlData=$( printf '{ 
+        "username":     "new.user@mongodb.com",
+        "emailAddress": "new.user@mongodb.com",
+        "firstName":    "New",
+        "lastName":     "User",
         "password":     "Mongodb1$",
         "roles": [ { "orgId": "ORGID", "roleName": "ORG_OWNER" } ]
-      }' | sed -e"s/ORGID/${orgId}/" > data.json
+      }' | sed -e"s/ORGID/${orgId}/" )
 
-curl $curlOpts -s --user "${publicKey}:${privateKey}" --digest \
+output=$( curl $curlOpts -s --user "${publicKey}:${privateKey}" --digest \
   --header "Accept: application/json" \
   --header "Content-Type: application/json" \
   --request POST "${opsMgrExtUrl2}/api/public/v1.0/users" \
-  --data @data.json \
-  -o newuser.json > /dev/null 2>&1
+  --data "${curlData}" )
 
-cat newuser.json
-rm newuser.json data.json
-
+printf "New User\n" 
+printf "$output" | jq
 exit

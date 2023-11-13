@@ -27,17 +27,15 @@ then
     errorCode="null"
 else
 
-ifile=tmpdata.json
-echo '{ "name" : "NAME" }' | sed -e"s/NAME/${orgName}/" > ${ifile}
+curlData=$( printf '{ "name" : "NAME" }' | sed -e"s/NAME/${orgName}/" )
 
-#rm ${ofile} > /dev/null 2>&1
 oid=$( curl $curlOpts --silent --user "${publicKey}:${privateKey}" --digest \
  --header 'Accept: application/json' \
  --header 'Content-Type: application/json' \
  --request POST "${opsMgrExtUrl2}/api/public/v1.0/orgs?pretty=true" \
- --data @tmpdata.json ) 
+ --data "${curlData}" ) 
+
 errorCode=$( printf "%s" "$oid" | jq .errorCode )
-rm ${ifile}
 orgId="$( printf "%s" "$oid" | jq .id )" 
 fi
 
@@ -51,10 +49,8 @@ then
     else
     printf "\n%s\n" "Created a new Organization: ${orgName} with orgId: ${orgId}"
     fi
-    #echo  orgName=\"${orgName}\" >> custom.conf
-    echo  ${orgName}_orgId=${orgId}     >> custom.conf
+    printf  "${orgName}_orgId=\"${orgId}\"\n"     >> custom.conf
 else
     printf "%s\n" "* * * Error - Organiztion creation failed"
     exit 1
 fi
-

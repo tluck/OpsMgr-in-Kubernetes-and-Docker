@@ -185,6 +185,8 @@ fi
 # clean up old stuff
 if [[ ${cleanup} == 1 ]]
 then
+  printf "%s" "Cleaning up ...\n"
+  delete_project.bash -p ${projectName} 
   kubectl delete mdb "${fullName}" --now > /dev/null 2>&1
   kubectl delete $( kubectl get pods -o name | grep "${fullName}" ) --force --now > /dev/null 2>&1
   for type in pvc svc secrets configmaps
@@ -198,6 +200,8 @@ then
     kubectl delete $( kubectl get $type -o name | grep "${fullName}" ) --now > /dev/null 2>&1
   done
   fi
+  printf "%s\n" "Done."
+  exit
 fi
 
 # Create map for OM Org/Project

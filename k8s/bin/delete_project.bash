@@ -21,24 +21,21 @@ orgName=${orgName:-myOrg}
 orgInfo=( $( get_org.bash -o ${orgName} ) )
 orgId=${orgInfo[1]}
 projectName=${projectName:-myProject}
-curlData=$( printf '{ "name" : "PROJECT", "orgId" : "ORGID" }' | sed -e"s/PROJECT/${projectName}/" -e"s/ORGID/${orgId}/" )
+#curlData=$( printf '{ "name" : "PROJECT", "orgId" : "ORGID" }' | sed -e"s/PROJECT/${projectName}/" -e"s/ORGID/${orgId}/" )
+projectId=$( get_projectId.bash -p ${projectName} )
 
 output=$( curl $curlOpts --silent --user "${publicKey}:${privateKey}" --digest \
      --header "Content-Type: application/json" \
-     --request POST "${opsMgrExtUrl2}/api/public/v1.0/groups?pretty=true" \
-     --data "${curlData}" )
+     --request DELETE "${opsMgrExtUrl2}/api/public/v1.0/groups/{$projectId}" )
 errorCode=$( printf "%s" "$output" | jq .errorCode )
 
 if [[ "${errorCode}" == "null" ]]
 then
     conf=$( sed -e "/${projectName}_Id/d" -e "/${projectName}_agentApiKey/d" custom.conf )
     printf "%s\n" "${conf}" > custom.conf
-    printf "%s\n" "Successfully created Project: $projectName in OrgId: ${orgId}"
-#    echo  projectName=\"${projectName}\"                                        >> custom.conf
-    echo  ${projectName}_projectId="$(   printf "%s" "$output" | jq .id )"          >> custom.conf
-    echo  ${projectName}_agentApiKey="$( printf "%s" "$output" | jq .agentApiKey )" >> custom.conf
+    exit 0
 else
     detail=$( printf "%s" "$output" | jq .detail )
-    printf "%s\n" " * * * Error did not create projectName.\n $detail \n"
+    printf "%s\n" " * * * Error did not delete projectName.\n $detail \n"
     exit 1
 fi

@@ -36,9 +36,12 @@ ics=$( get_connection_string.bash -n "${name}" -i $ldap )
 fcs=${ics#*:}
 printf "\n%s %s\n\n" "Connect String: ${fcs} "
 
+path="$( kubectl exec ${name}${mongos}-0 -c "mongodb-enterprise-database" -- find /var/lib/mongodb-mms-automation/ -name ${mongo} |grep "${mongoshVersion}")"
+if [[ x${path}x == xx ]]
+then
 # update old mongosh
-kubectl exec ${name}${mongos}-0 -i -t -- bash -c "curl -s https://downloads.mongodb.com/compass/mongosh-${mongoshVersion}-linux-x64.tgz -o /var/lib/mongodb-mms-automation/mongosh-${mongoshVersion}-linux-x64.tgz; cd /var/lib/mongodb-mms-automation/ ; tar -zxvf mongosh-${mongoshVersion}-linux-x64.tgz; rm mongosh-${mongoshVersion}-linux-x64.tgz"
-
-path="$( kubectl exec ${name}${mongos}-0  -- find /var/lib/mongodb-mms-automation/ -name ${mongo} |grep "${mongoshVersion}")"
+    kubectl exec ${name}${mongos}-0 -i -t -c "mongodb-enterprise-database" -- bash -c "curl -s https://downloads.mongodb.com/compass/mongosh-${mongoshVersion}-linux-x64.tgz -o /var/lib/mongodb-mms-automation/mongosh-${mongoshVersion}-linux-x64.tgz; cd /var/lib/mongodb-mms-automation/ ; tar -zxvf mongosh-${mongoshVersion}-linux-x64.tgz; rm mongosh-${mongoshVersion}-linux-x64.tgz"
+    path="$( kubectl exec ${name}${mongos}-0 -c "mongodb-enterprise-database" -- find /var/lib/mongodb-mms-automation/ -name ${mongo} |grep "${mongoshVersion}")"
+fi
 mongosh=$( printf "%s" $path)
-eval "kubectl exec ${name}${mongos}-0 -i -t -- ${mongosh} ${fcs} "
+eval "kubectl exec ${name}${mongos}-0 -i -t -c "mongodb-enterprise-database" -- ${mongosh} ${fcs} "

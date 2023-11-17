@@ -90,6 +90,7 @@ spec:
                   memory: 75Mi
 
   configuration:
+    #mms.userSvcClass: "MMSUSERSVCCLASS"
     mms.ignoreInitialUiSetup: "true"
     mms.adminEmailAddr:   MMSADMINEMAILADDR
     mms.fromEmailAddr:    MMSEMAIL

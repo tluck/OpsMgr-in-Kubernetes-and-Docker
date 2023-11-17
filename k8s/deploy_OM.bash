@@ -142,6 +142,7 @@ cat mdbom_template.yaml | sed \
     -e "s/MMSLDAPUSERLASTNAME/$mmsldapuserlastname/" \
     -e "s/MMSLDAPUSERGROUP/$mmsldapusergroup/" \
     -e "s/MMSLDAPUSERSEARCHATTRIBUTE/$mmsldapusersearchattribute/" \
+    -e "s/MMSUSERSVCCLASS/$mmsusersvcclass/" \
     -e "s/RSCPU/$rscpu/" \
     -e "s/RSMEM/$rsmem/" \
     -e "s/RSDISK/$rsdsk/" \

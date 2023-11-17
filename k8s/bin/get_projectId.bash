@@ -10,7 +10,7 @@ do
   case "$opt" in
     p) projectName="$OPTARG";;
     ?|h)
-      echo "Usage: $(basename $0) -o orgName [-h]"
+      echo "Usage: $(basename $0) -p projectName [-h]"
       exit 1
       ;;
   esac

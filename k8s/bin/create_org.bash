@@ -37,6 +37,7 @@ oid=$( curl $curlOpts --silent --user "${publicKey}:${privateKey}" --digest \
 
 errorCode=$( printf "%s" "$oid" | jq .errorCode )
 orgId="$( printf "%s" "$oid" | jq .id )" 
+eval orgId=$orgId
 fi
 
 if [[ "${errorCode}" == "null" ]]

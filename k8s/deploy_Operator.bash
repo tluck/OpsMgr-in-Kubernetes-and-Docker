@@ -22,6 +22,14 @@ else
     cat mongodb-enterprise.yaml | sed \
     -e "s/namespace: mongodb/namespace: $namespace/"  > "${myoperator}"
 fi
+
+cat <<EOF >> "${myoperator}" 
+            - name: MDB_AUTOMATIC_RECOVERY_ENABLE
+              value: 'true'
+            - name: MDB_AUTOMATIC_RECOVERY_BACKOFF_TIME_S
+              value: '480'
+EOF
+
 kubectl apply -f "${myoperator}"
 
 if [[ ${tls} == 'true' ]] 

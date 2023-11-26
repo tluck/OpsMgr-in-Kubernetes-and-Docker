@@ -27,9 +27,9 @@ shift "$(($OPTIND -1))"
 
 # for OM App-DB
 name=${name:-opsmanager}
-if [[ $demo == 1 ]]
+if [[ ${demo} ]]
 then
-    replace="#Demo   "
+    demoMode=""
     omcpu=${omcpu:-"0.75"}
     ommemlim=${ommemlim:-"3Gi"}
     ommemreq=${ommemreq:-"3Gi"}
@@ -40,8 +40,8 @@ then
     rscpu=${rscpu:-"0.25"}
     rsmem=${rsmem:-"400Mi"}
     rsdsk=${rsdsk:-"2Gi"}
-else
-    replace="NOTHING "
+else   
+    demoMode="#DEMO "
     omcpu=${omcpu:-"4.00"}
     ommemlim=${ommemlim:-"16Gi"}
     ommemreq=${ommemreq:-"8Gi"}
@@ -62,8 +62,7 @@ skipMakeCerts=${skipMakeCerts:-0}
 printf "\n"
 printf "%s\n" "Deploying OM Application   with $ommemlim Maximum Memory, $ommemreq Requested Memory, and $omcpu Cores"
 printf "%s\n" "Deploying OM ApplicationDB with $rsmem Maximum Memory, $rsmem Requested Memory, $rscpu Cores, and $rsdsk Disk"
-[[ $omBackup == "true" ]] && 
-printf "%s\n" "Deploying OM Backup Daemon with $bdmemlim Maximum Memory, $bdmemreq Requested Memory, $bdcpu Cores, and $bddsk Disk"
+[[ ${omBackup} == true ]] && printf "%s\n" "Deploying OM Backup Daemon with $bdmemlim Maximum Memory, $bdmemreq Requested Memory, $bdcpu Cores, and $bddsk Disk"
 printf "\n"
 
 # Create the credentials for main admin user
@@ -74,8 +73,7 @@ kubectl create secret generic admin-user-credentials \
     --from-literal=FirstName="${firstName}" \
     --from-literal=LastName="${lastName}"
 
-tlsc="#TLS "
-if [[ ${tls} == 'true' ]]
+if [[ ${tls} == true ]]
 then
     if [[ ${skipMakeCerts} == 0 ]]
     then
@@ -99,7 +97,7 @@ then
     fi
 tlsr=""
 else
-tlsr="$tlsc"
+tlsr="#TLS "
     if [[ ${skipMakeCerts} == 0 ]]
     then
     # <prefix>-<metadata.name>-cert
@@ -110,15 +108,24 @@ tlsr="$tlsc"
 fi
 tlsMode=${tlsMode:-"requireTLS"}
 
+perf="#PERF "
+replicas=1
+if [[ ${highPerformance} == true && ! ${demo} ]]
+then
+    perf=""
+    replicas="${omReplicas}"
+fi
+
 mdbom="mdbom_${name}.yaml"
 
-if [[ $serviceType == "NodePort" ]]
+if [[ ${serviceType} == "NodePort" || ${demo} ]]
 then 
     LB="#LB  "
+    serviceType="NodePort"
 else
     NP="#NP   "
 fi
-# serviceType="LoadBalancer"
+
 # make manifest from template
 cat mdbom_template.yaml | sed \
     -e "s/VERSION/$omVer/" \
@@ -156,9 +163,11 @@ cat mdbom_template.yaml | sed \
     -e "s/BDDISK/$bddsk/" \
     -e "s/#NP  /$NP/" \
     -e "s/#LB  /$LB/" \
-    -e "s/$tlsc/$tlsr/" \
+    -e "s/#TLS /$tlsr/" \
+    -e "s|#PERF |$perf|" \
+    -e "s|REPLICAS|$replicas|" \
     -e "s|TLSMODE|$tlsMode|" \
-    -e "s/$replace//" \
+    -e "s|#DEMO |$demoMode|"\
     -e "s/NAME/$name/g" > "${mdbom}"
 
 #  Deploy OpsManager resources

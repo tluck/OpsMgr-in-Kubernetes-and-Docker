@@ -12,7 +12,8 @@ s=( $( grep " name" "${fn}") )
 name="${s[1]}"
 
 source init.conf
-PATH=.:bin:$PATH
+[[ ${demo} ]] && serviceType="NodePort"
+#PATH=.:bin:$PATH
 
 expose="svc_expose_template.yaml"
 if [[ "${serviceType}" == "LoadBalancer" ]]

@@ -1,6 +1,7 @@
 #!/bin/bash
 
 source init.conf
+[[ ${demo} ]] && serviceType="NodePort"
 
 while getopts 'n:u:p:t:h' opt
 do

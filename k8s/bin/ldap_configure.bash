@@ -8,6 +8,8 @@
 #   -p "389:1389" bitnami/openldap:latest
 
 source init.conf
+[[ ${demo} ]] && serviceType="NodePort"
+
 kubectl config set-context $(kubectl config current-context) --namespace=${namespace}
 serviceName="openldap-svc-ext"
 if [[ $serviceType == "NodePort" ]]

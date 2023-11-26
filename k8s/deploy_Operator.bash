@@ -4,9 +4,6 @@ d=$( dirname "$0" )
 cd "${d}"
 source init.conf
 
-# Optinal - Create the metrics server
-#kubectl apply -f /opt/Source/metrics-server/components.yaml 
-
 # Create the namespace and context
 kubectl create namespace ${namespace}
 kubectl config set-context $(kubectl config current-context) --namespace=${namespace}
@@ -32,7 +29,7 @@ EOF
 
 kubectl apply -f "${myoperator}"
 
-if [[ ${tls} == 'true' ]] 
+if [[ ${tls} == true ]] 
 then
     certs/make_cert_issuer.bash ${namespace} ${issuerName} ${issuerVersion}
     [[ $? != 0 ]] && exit 1

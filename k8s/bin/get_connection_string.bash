@@ -41,7 +41,7 @@ ecs="${ics}"
 if [[ ${serviceType} != "" ]]
 then
 
-if [[ "${sharded}" == "1" ]] 
+if [[ ${sharded} == 1 ]] 
 then
     hn=( $( get_hns.bash -s "${name}${mongos}-0-svc-external" ) )
     ecs=$( printf "%s" "$ics" | sed -e "s?:2701.?:${hn#*:}?g" )
@@ -57,15 +57,16 @@ then
 if [[ "${spec}" == "map[enabled:true]" || "${spec}" == *"refix":* || "${spec}" == *"ecret":* || "${spec}" == *\"ca\":* ]]
 then
     test -e "${PWD}/certs/ca.pem"               || kubectl get configmap ca-pem -o jsonpath="{.data['ca-pem']}" > "${PWD}/certs/ca.pem"
-    test -e "${PWD}/certs/${name}${mongos}.pem" || kubectl get secret mdb-${name}${mongos}-cert-pem -o jsonpath="{.data.*}" | base64 --decode > "${PWD}/certs/${name}${mongos}.pem"
+    #test -e "${PWD}/certs/${name}${mongos}.pem" || kubectl get secret mdb-${name}${mongos}-cert-pem -o jsonpath="{.data.*}" | base64 --decode > "${PWD}/certs/${name}${mongos}.pem"
+    kubectl get secret mdb-${name}${mongos}-cert-pem -o jsonpath="{.data.*}" | base64 --decode > "${PWD}/certs/${name}${mongos}.pem"
     eval version=$( kubectl get mdb ${name} -o jsonpath={.spec.version} )
     if [[ ${version%%.*} = 3 ]]
     then
-        ssltls_options=" --sslCAFile \"${PWD}/certs/ca.pem\" --sslPEMKeyFile \"${PWD}/certs/${name}${mongos}.pem\" "
-        ssltls_enabled="&ssl=true"
+        ssltls_enabled="&ssl=true&sslCAFile=${PWD}/certs/ca.pem&sslPEMKeyFile=${PWD}/certs/${name}${mongos}.pem "
+        #ssltls_options=" --ssl true --sslCAFile \"${PWD}/certs/ca.pem\" --sslPEMKeyFile \"${PWD}/certs/${name}${mongos}.pem\" "
     else
-        ssltls_options=" --tlsCAFile \"${PWD}/certs/ca.pem\" --tlsCertificateKeyFile \"${PWD}/certs/${name}${mongos}.pem\" "
-        ssltls_enabled="&tls=true"
+        ssltls_enabled="&tls=true&tlsCAFile=${PWD}/certs/ca.pem&tlsCertificateKeyFile=${PWD}/certs/${name}${mongos}.pem "
+        #ssltls_options=" --tls true --tlsCAFile \"${PWD}/certs/ca.pem\" --tlsCertificateKeyFile \"${PWD}/certs/${name}${mongos}.pem\" "
     fi
 fi
     fcs=\'${ecs}${ssltls_enabled}\'
@@ -79,13 +80,14 @@ then
     serverpem=$( eval printf ${kv%:*} )
     if [[ ${version%%.*} = 3 ]]
     then
-        ssltls_options=" --sslCAFile /mongodb-automation/tls/ca/ca-pem --sslPEMKeyFile /mongodb-automation/tls/${serverpem}"
-        ssltls_enabled="&ssl=true"
+        ssltls_enabled="&ssl=true&sslCAFile=/mongodb-automation/tls/ca/ca-pem&sslPEMKeyFile=/mongodb-automation/tls/${serverpem}"
+        #ssltls_options=" --ssl true --sslCAFile /mongodb-automation/tls/ca/ca-pem --sslPEMKeyFile /mongodb-automation/tls/${serverpem}"
     else
-        ssltls_options=" --tlsCAFile /mongodb-automation/tls/ca/ca-pem --tlsCertificateKeyFile /mongodb-automation/tls/${serverpem}"
-        ssltls_enabled="&tls=true"
+        ssltls_enabled="&tls=true&tlsCAFile=/mongodb-automation/tls/ca/ca-pem&tlsCertificateKeyFile=/mongodb-automation/tls/${serverpem}"
+        #ssltls_options=" --tls true --tlsCAFile /mongodb-automation/tls/ca/ca-pem --tlsCertificateKeyFile /mongodb-automation/tls/${serverpem}"
     fi
 fi
     fcs=\'${ics}${ssltls_enabled}\'
-    printf "%s\n" "The connection string (internal): ${fcs} ${ssltls_options}"
+    #printf "%s\n" "The connection string (internal): ${fcs} ${ssltls_options}"
+    printf "%s\n" "The connection string (internal): ${fcs}"
 fi

@@ -40,6 +40,7 @@ path="$( kubectl exec ${name}${mongos}-0 -c "mongodb-enterprise-database" -- fin
 if [[ x${path}x == xx ]]
 then
 # update old mongosh
+    printf "Updating mongosh\n"
     kubectl exec ${name}${mongos}-0 -i -t -c "mongodb-enterprise-database" -- bash -c "curl -s https://downloads.mongodb.com/compass/mongosh-${mongoshVersion}-linux-x64.tgz -o /var/lib/mongodb-mms-automation/mongosh-${mongoshVersion}-linux-x64.tgz; cd /var/lib/mongodb-mms-automation/ ; tar -zxvf mongosh-${mongoshVersion}-linux-x64.tgz; rm mongosh-${mongoshVersion}-linux-x64.tgz"
     path="$( kubectl exec ${name}${mongos}-0 -c "mongodb-enterprise-database" -- find /var/lib/mongodb-mms-automation/ -name ${mongo} |grep "${mongoshVersion}")"
 fi

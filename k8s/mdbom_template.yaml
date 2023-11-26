@@ -5,10 +5,10 @@ metadata:
   name: NAME
 
 spec:
-  replicas: 1
+  replicas: REPLICAS
   version: VERSION # 6.0.6 # 5.0.14 # 4.4.15
   clusterDomain: DOMAINNAME
-  #Demo   jvmParameters: ["-Xms2560m", "-Xmx2560m"] # 2.5M is a good size for a demo -- comment out for larger clusters in production
+  #DEMO jvmParameters: ["-Xms2560m", "-Xmx2560m"] # 2.5M is a good size for a demo -- comment out for larger clusters in production
   adminCredentials: admin-user-credentials # Should match metadata.name in the Kubernetes secret for the admin user
   statefulSet:
     spec:
@@ -121,13 +121,42 @@ spec:
     mongodb.release.modulePreference: enterpriseRequired
     #TLS brs.queryable.pem: /opt/mongodb/mms/secrets/queryable-backup.pem # stored in a secret
     brs.queryable.expiration: "3600000"
+    # Improved monitoring ingestion
+    #PERF ingestion.thread.count: "64"
+    #PERF ping.thread.count: "32"
+    #PERF mms.monitoring.agentlog.writers: "16"
+    #PERF mms.monitoring.ingestion.databasenames.poolsize: "16"
+    #PERF mms.monitoring.ingestion.diskpartition.poolsize: "16"
+    #PERF mms.monitoring.ingestion.groupupdate.poolsize:  "8"
+    #PERF mms.monitoring.ingestion.hostping.poolsize:  "32"
+    #PERF mms.monitoring.ingestion.hostversionchange.poolsize:  "8"
+    #PERF mms.monitoring.ingestion.ipaddresschange.poolsize:  "8"
+    #PERF mms.monitoring.ingestion.hostlogs.poolsize: "16"
+    #PERF mms.monitoring.ingestion.newrelic.poolsize: "16"
+    #PERF mms.monitoring.ingestion.profiler.poolsize: "16"
+    #PERF mms.monitoring.ingestion.shardchunkcount.poolsize: "16"
+    #PERF mms.monitoring.ingestion.totalstoragecache.poolsize: "16"
+    #PERF mms.monitoring.rrd.rawdbperf.thread.count: "16"
+    #PERF mms.monitoring.rrd.rawdbperf.batch.size: "1000"
+    #PERF mms.monitoring.rrd.rawdbstorage.thread.count: "16"
+    #PERF mms.monitoring.rrd.rawdbstorage.batch.size: "1000"
+    #PERF mms.monitoring.rrd.rawdisk.thread.count:  "32"
+    #PERF mms.monitoring.rrd.rawdisk.batch.size: "1000"
+    #PERF mms.monitoring.rrd.rawhost.thread.count:  "32"
+    #PERF mms.monitoring.rrd.rawhost.batch.size: "1000"
+    #PERF mms.monitoring.rrd.rawnamespace.thread.count: "16"
+    #PERF mms.monitoring.rrd.rawnamespace.batch.size: "1000"
+    #PERF mms.monitoring.rrd.rawprocess.thread.count:  "32"
+    #PERF mms.monitoring.rrd.rawprocess.batch.size: "1000"
+    #PERF mms.monitoring.rrd.rawsystem.thread.count:  "32"
+    #PERF mms.monitoring.rrd.rawsystem.batch.size: "1000"
 
   backup:
     enabled: OMBACKUP
     headDB:
       storage: BDDISK # optional. Default storage is 30G
     members: 1 # Configures the number of backup daemons to create (default 1)
-    #Demo   jvmParameters: ["-Xms1024m", "-Xmx1536m"] # 1M is a good size for a demo -- comment out for larger clusters in production
+    #DEMO jvmParameters: ["-Xms1024m", "-Xmx1536m"] # 1M is a good size for a demo -- comment out for larger clusters in production
     opLogStores:
       - name: oplog
         mongodbResourceRef:

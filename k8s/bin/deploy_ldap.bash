@@ -1,6 +1,8 @@
 #!/bin/bash
 
 source init.conf
+[[ ${demo} ]] && serviceType="NodePort"
+
 kubectl config set-context $(kubectl config current-context) --namespace=${namespace}
 
 kubectl -n $namespace delete secret openldap  > /dev/null 2>&1 

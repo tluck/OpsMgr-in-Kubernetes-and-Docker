@@ -123,6 +123,9 @@ fi
 
 # add 3 nodes to the /etc/hosts file
 names=( ${name}-0 ${name}-1 ${name}-2 )  
+fullNames=( ${name}-0.${name}-svc.${namespace}.svc.${domainName} \
+            ${name}-1.${name}-svc.${namespace}.svc.${domainName} \
+            ${name}-2.${name}-svc.${namespace}.svc.${domainName} )
 
 num=${#iplist[@]}
 if [[ ${num} > 0 ]]
@@ -141,12 +144,12 @@ do
   then
     # replace host entry
     printf "%s" "Replacing /etc/hosts entry: "
-    printf "%s\n"                                   "${iplist[$m]}${TAB}${names[$n]} ${dnslist[$m]} ${nodename[$m]}" 
-    sudo ${sed} -E -e "s|^[0-9].*${names[$n]}.*|${iplist[$m]}${TAB}${names[$n]} ${dnslist[$m]} ${nodename[$m]}|" /etc/hosts 
+    printf "%s\n"                                   "${iplist[$m]}${TAB}${names[$n]} ${fullNames[$n]} ${dnslist[$m]} ${nodename[$m]}" 
+    sudo ${sed} -E -e "s|^[0-9].*${names[$n]}.*|${iplist[$m]}${TAB}${names[$n]} ${fullNames[$n]} ${dnslist[$m]} ${nodename[$m]}|" /etc/hosts 
   else
     # add host entry
     printf "%s" "Adding /etc/hosts entry: "
-    printf "%s\n"                                   "${iplist[$m]}${TAB}${names[$n]} ${dnslist[$m]} ${nodename[$m]}" | sudo tee -a /etc/hosts
+    printf "%s\n"                                   "${iplist[$m]}${TAB}${names[$n]} ${fullNames[$n]} ${dnslist[$m]} ${nodename[$m]}" | sudo tee -a /etc/hosts
   fi
 done
 }

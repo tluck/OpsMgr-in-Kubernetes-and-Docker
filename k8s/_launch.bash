@@ -137,11 +137,11 @@ projectName="myProject1"
 name="myreplicaset"
 if [[ ${demo} ]]
 then
-    options=" -n ${name} -v 6.0.5-ent -c 0.50 -m 400Mi         -e -l ${ldapType} -o ${orgId} -p ${projectName} ${skipCertGen}"
+    options=" -n ${name} -v 6.0.5-ent -c 0.50 -m 400Mi         -l ${ldapType} -o ${orgId} -p ${projectName} ${skipCertGen} -e horizon"
 else
-    options=" -n ${name} -v 6.0.5-ent -c 1.00 -m 4.0Gi -d 20Gi -e -l ${ldapType} -o ${orgId} -p ${projectName} ${skipCertGen}"
+    options=" -n ${name} -v 6.0.5-ent -c 1.00 -m 4.0Gi -d 20Gi -l ${ldapType} -o ${orgId} -p ${projectName} ${skipCertGen} -e horizon"
 fi
-# source custom.conf; deploy_Cluster.bash -n "myreplicaset" -v "6.0.5" -c "0.50" -m "400Mi" -d "1Gi" -e -l "ldap" -o "$myOrg_orgId" -p "myProject1" -g
+# source custom.conf; deploy_Cluster.bash -n "myreplicaset" -v "6.0.5-ent" -c "0.50" -m "400Mi" -d "1Gi" -l "ldap" -o "$myOrg_orgId" -p "myProject1" -g -e horizon
 (set -x; deploy_Cluster.bash ${options})
 cluster1="${projectName}-${name}"
 
@@ -150,11 +150,11 @@ printf "%s\n" "Create a Production Sharded Cluster  ..."
 date
 if [[ ${demo} ]]
 then
-    printf "\n%s\n" " **** skipCertGenping sharded deployment - not enough resources ***"
+    printf "\n%s\n" " *** skipping sharded deployment - not enough resources ***"
 else
     name="mysharded"
     projectName="myProject2"
-    options=" -n ${name} -v ${mdbVersion} -c 0.50 -m 2Gi -d 4Gi -s 2 -r 2 -l ${ldapType} -o ${orgId} -p ${projectName} ${skipCertGen}"
+    options=" -n ${name} -v ${mdbVersion} -c 0.50 -m 2Gi -d 4Gi -s 2 -r 2 -l ${ldapType} -o ${orgId} -p ${projectName} ${skipCertGen} -e mongos"
 # source custom.conf; deploy_Cluster.bash -n "mysharded" -c "0.33" -m "400Mi" -d "1Gi" -s "1" -r "1" -l "ldap" -o "${myOrg_orgId}" -p "myProject2" -g
 (set -x; deploy_Cluster.bash ${options})
 cluster2="${projectName}-${name}"

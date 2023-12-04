@@ -60,7 +60,7 @@ code=$?
 n=$((n+1))
 if [[ "$n" > 20 ]] 
 then
-    printf "%s\n" "* * * - Error Launching Cert Issuer"
+    printf "%s\n" "* * * Error - Launching Cert Issuer"
     exit 1
 fi
 done

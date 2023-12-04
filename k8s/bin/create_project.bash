@@ -39,6 +39,6 @@ then
     echo  ${projectName}_agentApiKey="$( printf "%s" "$output" | jq .agentApiKey )" >> custom.conf
 else
     detail=$( printf "%s" "$output" | jq .detail )
-    printf "%s\n" " * * * Error did not create projectName.\n $detail \n"
+    printf "%s\n" "* * * Error - did not create projectName.\n $detail \n"
     exit 1
 fi

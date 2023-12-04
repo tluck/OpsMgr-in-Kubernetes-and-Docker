@@ -57,47 +57,18 @@ if [[ "$serviceType" != "NodePort" ]]
 then
     if [[ "${type}" == "ShardedCluster" || ${om} == 1 ]]
     then
-        np0=$( kubectl get svc/${serviceName} -o jsonpath='{.spec.ports[0].port}' )
         slist=( $( kubectl get svc/${serviceName} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' ) )
         if [[ ${#slist[@]} == 0 ]]
         then
         iplist=( $(kubectl get svc/${serviceName} -o jsonpath='{.status.loadBalancer.ingress[*].ip }' ) )
-            n=0 
-            for ip in ${iplist[*]}
-            do 
-                slist[$n]=$( nslookup $ip|grep name|awk '{print $4}')
-                n=$((n+1))
-            done
         fi
     else
-        np0=$( kubectl get svc/${name}-0-svc-external -o jsonpath='{.spec.ports[0].port}' )
-        np1=$( kubectl get svc/${name}-1-svc-external -o jsonpath='{.spec.ports[0].port}' )
-        np2=$( kubectl get svc/${name}-2-svc-external -o jsonpath='{.spec.ports[0].port}' )
-
         slist=( $( kubectl get $( kubectl get svc -o name |grep "${name}.*external" )  -o jsonpath='{.items[*].status.loadBalancer.ingress[0].hostname}' ) )
         if [[ ${#slist[@]} == 0 ]]
         then
         iplist=( $(kubectl get $( kubectl get svc -o name |grep "${name}.*external" )  -o jsonpath='{.items[*].status.loadBalancer.ingress[*].ip }' ) )
-            n=0 
-            for ip in ${iplist[*]}
-            do 
-                slist[$n]=$( nslookup $ip|grep name|awk '{print $4}')
-                n=$((n+1))
-            done
-        
         fi
     fi
-else
-    if [[ "${type}" == "ShardedCluster" || ${om} == 1 ]]
-    then
-    np0=$( kubectl get svc/${serviceName} -o jsonpath='{.spec.ports[0].nodePort}' )
-    np1=$np0
-    np2=$np0
-    else
-    np0=$( kubectl get svc/${name}-0-svc-external -o jsonpath='{.spec.ports[0].nodePort}' )
-    np1=$( kubectl get svc/${name}-1-svc-external -o jsonpath='{.spec.ports[0].nodePort}' )
-    np2=$( kubectl get svc/${name}-2-svc-external -o jsonpath='{.spec.ports[0].nodePort}' )
-    fi # not sharded
 fi
 
 if [[ "$serviceType" != "LoadBalancer" ]]
@@ -117,12 +88,6 @@ then
         if [[ ${#slist[@]} == 0 ]] 
         then
             iplist=( $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="ExternalIP")].address}' ) )
-            n=0 
-            for ip in ${iplist[*]}
-            do 
-                slist[$n]=$( nslookup $ip|grep name|awk '{print $4}')
-                n=$((n+1))
-            done
         fi
 
     if [[ ${#slist[@]} == 0 && $custerType == "openshift" ]]
@@ -138,15 +103,21 @@ then
     	if [[ ${#slist[@]} == 0 ]] 
         then
             iplist=( $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="ExternalIP")].address}' ) )
-            n=0 
-            for ip in ${iplist[*]}
-            do 
-                slist[$n]=$( nslookup $ip|grep name|awk '{print $4}')
-                n=$((n+1))
-            done
         fi
     fi
     
+fi
+
+num=${#iplist[@]}
+if [[ $num == 0 ]]
+then
+n=0
+for h in ${slist[*]}
+do 
+    out=( $( nslookup $h|grep -i Address ))
+    iplist[$n]=${out[3]}
+    n=$((n+1))
+done
 fi
 
 num=${#slist[@]}
@@ -154,17 +125,17 @@ num=${#slist[@]}
 if [[ $num = 1 ]]
 then
 # single node cluster
-    hn0=${slist[0]}
-    hn1=${slist[0]#}
-    hn2=${slist[0]#}
+    hn0=${iplist[0]}
+    hn1=${iplist[0]#}
+    hn2=${iplist[0]#}
 else
-    hn0=${slist[0]}
-    hn1=${slist[1]}
-    hn2=${slist[2]}
+    hn0=${iplist[0]}
+    hn1=${iplist[1]}
+    hn2=${iplist[2]}
 fi
 if [[ $sName != "" ]]
 then
-printf "%s %s %s" "$hn0:$np0"
+printf "%s %s %s" "$hn0"
 else
-printf "%s %s %s" "$hn0:$np0" "$hn1:$np1" "$hn2:$np2" 
+printf "%s %s %s" "$hn0" "$hn1" "$hn2" 
 fi

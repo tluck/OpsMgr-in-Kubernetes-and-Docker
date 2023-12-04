@@ -61,17 +61,17 @@ if [[ ${opsMgrExtIp} != "" ]]
 then
 printf "\n%s\n\n" "*** Note: sudo may ask for your password" 
 # put the name and IP for opsmanager in /etc/hosts 
-grep "^[0-9].*${name}-svc.${namespace}.svc.${domainName}" /etc/hosts > /dev/null 2>&1
+grep "^[0-9].*${name}-svc.${namespace}.svc.${clusterDomain}" /etc/hosts > /dev/null 2>&1
 if [[ $? == 0 ]]
 then
     # replace host entry
     printf "%s" "Replacing /etc/hosts entry: "
-    printf "%s\n" "${opsMgrExtIp}${TAB}${name}-svc.${namespace}.svc.${domainName} ${name}-svc ${omExternalName}" 
-    sudo ${sed} -E -e "s|^[0-9].*(${name}-svc.*.svc.${domainName}.*)|${opsMgrExtIp}${TAB}${name}-svc.${namespace}.svc.${domainName} ${name}-svc ${omExternalName}|" /etc/hosts 1>/dev/null
+    printf "%s\n" "${opsMgrExtIp}${TAB}${name}-svc.${namespace}.svc.${clusterDomain} ${name}-svc ${omExternalName}" 
+    sudo ${sed} -E -e "s|^[0-9].*(${name}-svc.*.svc.${clusterDomain}.*)|${opsMgrExtIp}${TAB}${name}-svc.${namespace}.svc.${clusterDomain} ${name}-svc ${omExternalName}|" /etc/hosts 1>/dev/null
 else
     # add host entry
     printf "%s" "Adding /etc/hosts entry: "
-    printf "%s\n" "${opsMgrExtIp}${TAB}${name}-svc.${namespace}.svc.${domainName} ${name}-svc ${omExternalName}" | sudo tee -a /etc/hosts
+    printf "%s\n" "${opsMgrExtIp}${TAB}${name}-svc.${namespace}.svc.${clusterDomain} ${name}-svc ${omExternalName}" | sudo tee -a /etc/hosts
 fi
 fi
 }
@@ -122,10 +122,18 @@ then
 fi
 
 # add 3 nodes to the /etc/hosts file
+eval externalDomain=$( kubectl get mdb ${name} -o json | jq .spec.externalAccess.externalDomain ); 
 names=( ${name}-0 ${name}-1 ${name}-2 )  
-fullNames=( ${name}-0.${name}-svc.${namespace}.svc.${domainName} \
-            ${name}-1.${name}-svc.${namespace}.svc.${domainName} \
-            ${name}-2.${name}-svc.${namespace}.svc.${domainName} )
+if [[ ${externalDomain} != "null" ]]
+then
+    fullNames=( "${name}-0.${externalDomain}" \
+                "${name}-1.${externalDomain}" \
+                "${name}-2.${externalDomain}" )
+else
+    fullNames=( "${name}-0.${name}-svc.${namespace}.svc.${clusterDomain}" \
+                "${name}-1.${name}-svc.${namespace}.svc.${clusterDomain}" \
+                "${name}-2.${name}-svc.${namespace}.svc.${clusterDomain}" )
+fi
 
 num=${#iplist[@]}
 if [[ ${num} > 0 ]]
@@ -196,7 +204,7 @@ printf "\n"
 n=0
 while [ $n -lt $num ]
 do
-  sname="${name}-mongos-${n}.${name}-svc.${namespace}.svc.${domainName}"
+  sname="${name}-mongos-${n}.${name}-svc.${namespace}.svc.${clusterDomain}"
   m=$n;  if [[ $m > $num ]]; then m=$num; fi;
   if [[ "${iplist[$m]}" == "" || "${sname}" == "" ]] 
   then

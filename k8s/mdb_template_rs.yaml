@@ -32,6 +32,14 @@ spec:
     persistence:
       single:
         storage: RSDISK # 2Gi
+  #EXPOSE externalAccess:
+  #EXPOSE   #EXTDOMAIN externalDomain: EXTDOMAINNAME
+  #EXPOSE   externalService:
+  #EXPOSE     annotations:
+  #EXPOSE     # cloud-specific annotations for the service
+  #EXPOSE     spec:
+  #EXPOSE       type: SERVICETYPE
+  #EXPOSE       # port: 27017
   security:
     #TLS certsSecretPrefix: mdb # provide custom x509 certificates (keys and certs)
     #TLS tls:

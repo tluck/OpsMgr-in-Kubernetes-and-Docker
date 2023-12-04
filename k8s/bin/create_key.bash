@@ -25,7 +25,7 @@ output=$( curl $curlOpts --silent --user "${kpublicApiKey}:${kprivateApiKey}" --
         printf  "publicApiKey=$(  printf "${output}" |jq .publicKey  )\n" | tee -a custom.conf
         printf  "privateApiKey=$( printf "${output}" |jq .privateKey )\n" | tee -a custom.conf
     else
-        printf "%s\n" " * * * Error did not create any keys"
+        printf "%s\n" "* * * Error - did not create any keys"
         exit 1
     fi
 

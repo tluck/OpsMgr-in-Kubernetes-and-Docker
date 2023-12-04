@@ -4,7 +4,7 @@ d=$( dirname "$0" )
 cd "${d}"
 source init.conf
 
-while getopts 'n:c:m:d:v:l:s:r:i:o:p:egxh' opt
+while getopts 'n:c:m:d:v:l:s:r:i:o:p:e:gxh' opt
 do
   case "$opt" in
     n) name="$OPTARG" ;;
@@ -12,19 +12,21 @@ do
     m) mem="$OPTARG" ;;
     d) dsk="$OPTARG" ;;
     v) ver="$OPTARG" ;;
-    e) expose=true ;;
+    e) expose="$OPTARG" ;;
     l) ldap="$OPTARG" ;;
     i|o) orgId="$OPTARG";;
     p) projectName="$OPTARG";;
-    g) skipMakeCerts=1 ;; 
+    g) makeCerts=false ;; 
     x) x=1 ;; # cleanup
     s) shards="$OPTARG" ;;
     r) mongos="$OPTARG" ;;
     ?|h)
-      echo "Usage: $(basename $0) [-n name] [-c cpu] [-m memory] [-d disk] [-v ver] [ -e ] [-s shards] [-r mongos] [-l ldap[s]] [-o orgId] [-p projectName] [-g] [-x]"
-      echo "Usage:       -e to generate the splitHorizon configuration for the Replica Set"
-      echo "Usage:       -x for total clean up before (re)deployment"
-      echo "Usage:       -g to not recreate the certs."
+      echo "Usage: $(basename $0) [-n name] [-c cpu] [-m memory] [-d disk] [-v ver] [ -e horizon ] [-s shards] [-r mongos] [-l ldap[s]] [-o orgId] [-p projectName] [-g] [-x]"
+      echo "Usage:       -e to generate the external service definitions when using externalDomain or splitHorizon names"
+      echo "Usage:           - for replicaSets: use -e horizon or -e external.domain"
+      echo "Usaag:           - for sharded clusters: use -e mongos"
+      echo "Usage:       -g to NOT (re)create the certs."
+      echo "Usage:       -x for a total clean up "
       exit 1
       ;;
   esac
@@ -57,7 +59,7 @@ dsk="${dsk:-1Gi}"
 cleanup=${x:-0}
 projectName="${projectName:-$name}"
 fullName=$( printf "${projectName}-${name}"| tr '[:upper:]' '[:lower:]' )
-skipMakeCerts=${skipMakeCerts:-0}
+makeCerts=${makeCerts:-true}
 [[ ${demo} ]] && serviceType="NodePort"
 
 # make manifest from template
@@ -86,10 +88,10 @@ then
 fi
 
 kmipc="#KMIP "
-kmipr=${kmipc}
+kmipString=${kmipc}
 if [[ ${kmip} == true ]]
 then
-    kmipr=""
+    kmipString=""
 fi
 
 ldapt="#LDAPT "
@@ -106,14 +108,31 @@ then
     ldapm=', "LDAP"'
 fi
 
+exposeString="#EXPOSE "
+# externalDomain is a per MDB Cluster parameter
+unset ${externalDomain}
+if [[ ${expose} ]] 
+then 
+  exposeString=""
+  extdomainString="#EXTDOMAIN "
+  if [[ ${expose} != "horizon" ]] 
+  then 
+    export externalDomain="${expose}"
+    extdomainString=""
+  fi
+fi
+
 if [[ ${tls} == true ]]
 then
   cat ${template} | sed \
+    -e "s|#EXPOSE |$exposeString|" \
+    -e "s|EXTDOMAINNAME|$externalDomain|" \
+    -e "s|#EXTDOMAIN |$extdomainString|" \
+    -e "s|DOMAINNAME|$clusterDomain|" \
     -e "s|$tlsc|$tlsr|" \
     -e "s|TLSMODE|$tlsMode|" \
-    -e "s|$kmipc|$kmipr|" \
+    -e "s|$kmipc|$kmipString|" \
     -e "s|VERSION|$ver|" \
-    -e "s|DOMAINNAME|$domainName|" \
     -e "s|RSMEM|$mem|" \
     -e "s|RSCPU|$cpu|" \
     -e "s|RSDISK|$dsk|" \
@@ -141,10 +160,13 @@ then
     -e "s|PROJECT-NAME|$fullName|" > "$mdb"
 else
   cat ${template} | sed \
+    -e "s|#EXPOSE |$exposeString|" \
+    -e "s|EXTDOMAINNAME|$externalDomain|" \
+    -e "s|#EXTDOMAIN |$extdomainString|" \
     -e "s|$tlsc|$tlsr|" \
-    -e "s|$kmipc|$kmipr|" \
+    -e "s|$kmipc|$kmipString|" \
     -e "s|VERSION|$ver|" \
-    -e "s|DOMAINNAME|$domainName|" \
+    -e "s|DOMAINNAME|$clusterDomain|" \
     -e "s|RSMEM|$mem|" \
     -e "s|RSCPU|$cpu|" \
     -e "s|RSDISK|$dsk|" \
@@ -187,7 +209,6 @@ fi
 if [[ ${cleanup} == 1 ]]
 then
   printf "Cleaning up ... \n"
-  delete_project.bash -p ${projectName} 
   kubectl delete mdb "${fullName}" --now > /dev/null 2>&1
   kubectl delete $( kubectl get pods -o name | grep "${fullName}" ) --force --now > /dev/null 2>&1
   for type in pvc svc secrets configmaps
@@ -201,6 +222,7 @@ then
     kubectl delete $( kubectl get $type -o name | grep "${fullName}" ) --now > /dev/null 2>&1
   done
   fi
+  delete_project.bash -p ${projectName} 
   printf "Done.\n"
   exit
 fi
@@ -228,7 +250,7 @@ then
 
   if [[ ${sharded} == true ]]
   then
-    if [[ ${skipMakeCerts} == 0 ]]
+    if [[ ${makeCerts} == true ]]
     then 
       # mdb-{metadata.name}-mongos-cert
       # mdb-{metadata.name}-config-cert
@@ -245,37 +267,10 @@ then
   else 
     # ReplicaSet
     # create new certs if the service does not exist
-    # check to see if the external svc needs to be created
-    if [[ $expose == true && ${sharded} == false ]] 
+    if [[ ${makeCerts} == true ]]
     then
-        printf "%s\n" "Generating ${serviceType} Service ports..."
-        serviceOut=$( expose_service.bash "${mdb}" ) 
-        dnsHorizon=( $( printf "${serviceOut}" | tail -n 1 ) )
-        if [[ $? != 0 ]]
-        then
-            printf "* * * Error - failed to configure splitHorizon for ${fullName}:\n" 
-            exit 1
-        fi
-        printf "${serviceOut}"| head -n 7
-        printf "...added these hostnames to the manifest ${mdb}:\n" 
-        printf "\t%s\n" "${dnsHorizon[0]}"
-        printf "\t%s\n" "${dnsHorizon[1]}"
-        printf "\t%s\n" "${dnsHorizon[2]}"
-        printf "\n"
-        eval tail -n 5 "${mdb}"
-        printf "\n"
-    fi
-    
-    # now make the certs
-    if [[ ${skipMakeCerts} == 0 ]]
-    then
-    if [[ ${#dnsHorizon[@]} != 0  ]] 
-    then
-      "${PWD}/certs/make_cluster_certs.bash" "${fullName}" ${dnsHorizon[@]}
-      else
       "${PWD}/certs/make_cluster_certs.bash" "${fullName}"
-    fi
-    kubectl apply -f "${PWD}/certs/certs_mdb-${fullName}-cert.yaml"
+      kubectl apply -f "${PWD}/certs/certs_mdb-${fullName}-cert.yaml"
     fi
   fi # end if sharded or replicaset
 
@@ -316,6 +311,30 @@ fi
 
 # Create the DB Resource
 kubectl apply -f "${mdb}"
+# for SplitHorizons - append horizons and reissue certs with horizons
+sleep 3
+if [[ ${expose} && ${sharded} == false ]] 
+then
+  printf "%s\n" "Generating ${serviceType} Service ports ..."
+  serviceOut=$( expose_service.bash -n "${fullName}" -g ${makeCerts} ) 
+  if [[ $? != 0 ]]
+  then 
+    printf "* * * Error - Failed to get services.\n"
+    exit 1
+  fi
+  printf "${serviceOut}\n"| head -n 5
+  if [[ ${externalDomain} ]]
+  then
+    printf "\nMake sure external DNS is configured for your replicaSet\n"
+    printf "  - Match repSet names to the service External-IP\n"
+    printf "  - The repSet names are: ${fullName}-[012].${externalDomain}\n"
+  else
+    kubectl apply -f "${mdb}" # re-apply for splitHorizon addition
+    printf "\nAdded this configuration to the manifest ${mdb}:\n" 
+    eval tail -n 5 "${mdb}"
+  fi
+  printf "... Done.\n"
+fi
 
 # remove any certificate requests
 if [[ ${tls} == true ]]

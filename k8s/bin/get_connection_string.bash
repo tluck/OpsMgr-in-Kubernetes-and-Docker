@@ -27,11 +27,19 @@ then
     mongos="-mongos"
     serviceType=$( kubectl get svc/${name}${mongos}-0-svc-external -o jsonpath='{.spec.type}' 2>/dev/null )
 else
-    serviceType=$( kubectl get svc/${name}-0 -o jsonpath='{.spec.type}' 2>/dev/null )
+    serviceType=$( kubectl get svc/${name}-0-svc-external -o jsonpath='{.spec.type}' 2>/dev/null )
 fi
 
 #cs="mongodb://${dbuser}:${dbpassword}@${hn0}:${np0},${hn1}:${np1},${hn2}:${np2}/?replicaSet=${name}&authSource=admin"
 ics=$( kubectl get secret ${name}-${name}-admin-admin -o jsonpath="{.data['connectionString\.standard']}" | base64 --decode ) 
+eval externalDomain=$( kubectl get mdb ${name} -o json | jq .spec.externalAccess.externalDomain ); 
+# bug with connection string
+if [[ ${externalDomain} != "null" ]]
+then
+    hn=( "${name}-0.${externalDomain}" "${name}-1.${externalDomain}" "${name}-2.${externalDomain}" ) 
+    ics=$( printf "%s" "$ics" | sed -e "s?@.*/?@${hn[0]},${hn[1]},${hn[2]}/?" )
+fi
+
 if [[ $ldap == 1 ]]
 then
     ics=${ics/SCRAM-SHA-256/PLAIN}
@@ -45,7 +53,8 @@ if [[ ${sharded} == 1 ]]
 then
     hn=( $( get_hns.bash -s "${name}${mongos}-0-svc-external" ) )
     ecs=$( printf "%s" "$ics" | sed -e "s?:2701.?:${hn#*:}?g" )
-else
+elif [[ ${externalDomain} == "null" ]]
+then
     hn=( $( get_hns.bash -n "${name}" ) )
     ecs=$( printf "%s" "$ics" | sed -e "s?@.*/?@${hn[0]},${hn[1]},${hn[2]}/?" )
 fi

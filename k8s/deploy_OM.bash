@@ -14,7 +14,7 @@ do
     m) rsmem="$OPTARG" ;;
     d) rsdsk="$OPTARG" ;;
     b) omBackup="true" ;;
-    g) skipMakeCerts=1 ;;
+    g) makeCerts=false ;;
     t) demo=1 ;;
     ?|h)
       echo "Usage: $(basename $0) [-n name] [-v omVersion] [-a appdbVersion] [-c cpu] [-m memory] [-d disk] [-g] [-t]"
@@ -57,7 +57,7 @@ fi
 omVer="${omVer:-$omVersion}"
 omBackup="${omBackup:-false}"
 appdbVer="${appdbVer:-$appdbVersion}"
-skipMakeCerts=${skipMakeCerts:-0}
+makeCerts=${makeCerts:-true}
 
 printf "\n"
 printf "%s\n" "Deploying OM Application   with $ommemlim Maximum Memory, $ommemreq Requested Memory, and $omcpu Cores"
@@ -75,7 +75,7 @@ kubectl create secret generic admin-user-credentials \
 
 if [[ ${tls} == true ]]
 then
-    if [[ ${skipMakeCerts} == 0 ]]
+    if [[ ${makeCerts} == true ]]
     then
     printf "%s\n" "Making various certs for OM and the OM AppDB ..."
     # Create certs for OM and App-db
@@ -98,12 +98,12 @@ then
 tlsr=""
 else
 tlsr="#TLS "
-    if [[ ${skipMakeCerts} == 0 ]]
+    if [[ ${makeCerts} == true ]]
     then
-    # <prefix>-<metadata.name>-cert
-    kubectl delete secret         ${name}-cert > /dev/null 2>&1
-    kubectl create secret generic ${name}-cert \
-        --from-file="${PWD}/certs/queryable-backup.pem"
+        # <prefix>-<metadata.name>-cert
+        kubectl delete secret         ${name}-cert > /dev/null 2>&1
+        kubectl create secret generic ${name}-cert \
+            --from-file="${PWD}/certs/queryable-backup.pem"
     fi
 fi
 tlsMode=${tlsMode:-"requireTLS"}
@@ -129,7 +129,7 @@ fi
 # make manifest from template
 cat mdbom_template.yaml | sed \
     -e "s/VERSION/$omVer/" \
-    -e "s/DOMAINNAME/$domainName/" \
+    -e "s/DOMAINNAME/$clusterDomain/" \
     -e "s/APPDBVER/$appdbVer/" \
     -e "s/MMSADMINEMAILADDR/$user/" \
     -e "s/MMSEMAIL/$mmsemail/" \

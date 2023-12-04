@@ -26,7 +26,7 @@ get_connection_string.bash -n "${name}"
 
 cat mongosqld_template.yaml | sed \
     -e "s/NAMESPACE/$namespace/g" \
-    -e "s/DOMAINNAME/$domainName/g" \
+    -e "s/DOMAINNAME/$clusterDomain/g" \
     -e "s/DBUSER/$dbuser/g" \
     -e "s/DBPASSWORD/$dbpassword/g" \
     -e "s/NAME/$name/g" > "${pod}.yaml"

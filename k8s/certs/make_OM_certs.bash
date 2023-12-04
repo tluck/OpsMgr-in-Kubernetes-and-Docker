@@ -15,7 +15,7 @@ cert="${name}-svc"
 # certs for the proxy server for queryable backup
 if [[ ! -e queryable-backup.pem ]]
 then
-    "$PWD/gen_cert.bash" ${cert} ${name}-svc ${name}-svc.${namespace}.svc.${domainName} ${name}-backup-daemon-0 ${name}-backup-daemon-0.${name}-backup-daemon-svc.${namespace}.svc.${domainName} 
+    "$PWD/gen_cert.bash" ${cert} ${name}-svc ${name}-svc.${namespace}.svc.${clusterDomain} ${name}-backup-daemon-0 ${name}-backup-daemon-0.${name}-backup-daemon-svc.${namespace}.svc.${clusterDomain} 
     kubectl apply -f "$PWD/certs_${cert}.yaml"
     while true
     do
@@ -32,7 +32,7 @@ fi
 
 # OM
 # makes opmanager-svc.pem
-"$PWD/gen_cert.bash" "${cert}" "${name}-svc" "${name}-svc.${namespace}.svc.${domainName}" "${omExternalName}"
+"$PWD/gen_cert.bash" "${cert}" "${name}-svc" "${name}-svc.${namespace}.svc.${clusterDomain}" "${omExternalName}"
 kubectl apply -f "$PWD/certs_${cert}.yaml"
     while true
     do
@@ -47,13 +47,13 @@ cat "${cert}.key" "${cert}.crt" > "${cert}.pem"
 
 # appdb
 # use prefix om
-#"$PWD/gen_cert.bash" ${name}-db-cert "*.${name}-db-svc.${namespace}.svc.${domainName}" 
+#"$PWD/gen_cert.bash" ${name}-db-cert "*.${name}-db-svc.${namespace}.svc.${clusterDomain}" 
 
 members=3 # hard coded in template
 n=0
 while [ $n -lt $members ]
 do
-    names[$n]="${name}-db-${n}.${name}-db-svc.${namespace}.svc.${domainName}"
+    names[$n]="${name}-db-${n}.${name}-db-svc.${namespace}.svc.${clusterDomain}"
     n=$((n+1))
 done
 

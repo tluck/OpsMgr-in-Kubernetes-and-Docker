@@ -1,10 +1,11 @@
 #!/bin/bash
 
-while getopts 'n:gh' opt
+while getopts 'n:g:mh' opt
 do
   case "$opt" in
     n) name="$OPTARG" ;;
     g) makeCerts="$OPTARG" ;;
+    m) multiCluster=true ;;
     ?|h)
       echo "Usage: $(basename $0) [-n clusterName] "
       exit 1
@@ -21,6 +22,15 @@ source init.conf
 [[ ${demo} ]] && serviceType="NodePort"
 #PATH=.:bin:$PATH
 
+mdbKind="MongoDB"
+if [[ ${multiCluster} == true ]]
+then
+    clusterDomain="${multiClusterDomain}"
+    mdbKind="MongoDBMultiCluster"
+    context="--context=$MDB_CLUSTER_0_CONTEXT"
+    ns="-n $namespace"
+fi
+
 # use externalService managed by the operator now
 # expose="svc_expose_template.yaml"
 # if [[ "${serviceType}" == "LoadBalancer" ]]
@@ -36,7 +46,7 @@ n=0
 max=10
 while [ $n -lt $max ]
 do
-    out=$( kubectl get svc | grep "${name}.*external" ) 
+    out=$( kubectl $context $ns get svc | grep "${name}.*external" ) 
     if [[ $out != "" && $? == 0 ]]
     then
         #printf "${out}\n"
@@ -53,10 +63,17 @@ n=0
 max=30
 while [ $n -lt $max ]
 do
-    out=$( kubectl get svc | grep "${name}.*external.*pending" ) 
+    out=$( kubectl $context $ns get svc | grep "${name}.*external.*pending" ) 
     if [[ $? == 1 ]]
     then
+        if [[ ${multiCluster} == true ]]
+        then
+        kubectl --context=$MDB_CLUSTER_0_CONTEXT $ns get $( kubectl --context=$MDB_CLUSTER_0_CONTEXT $ns get svc -o name | grep "${name}.*external" ) 
+        kubectl --context=$MDB_CLUSTER_1_CONTEXT $ns get $( kubectl --context=$MDB_CLUSTER_1_CONTEXT $ns get svc -o name | grep "${name}.*external" ) 
+        kubectl --context=$MDB_CLUSTER_2_CONTEXT $ns get $( kubectl --context=$MDB_CLUSTER_2_CONTEXT $ns get svc -o name | grep "${name}.*external" ) 
+        else
         kubectl get $( kubectl get svc -o name | grep "${name}.*external" ) 
+        fi
         [[ $? == 1 ]] && exit 1
         break
     fi

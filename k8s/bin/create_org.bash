@@ -16,7 +16,7 @@ done
 shift "$(($OPTIND -1))"
 
 # check to see if the org (still) exists
-orgName="${orgName:-myOrg}"
+orgName="${orgName:-myDeployment}"
 # test to see if the org already exits if so get the orgId
 name=( $( get_org.bash -o ${orgName} ) )
 
@@ -42,7 +42,7 @@ fi
 
 if [[ "${errorCode}" == "null" ]]
 then
-    conf=$( sed -e "/${orgName}_orgId=/d" custom.conf )
+    conf=$( sed -e "/${orgName//-/_}_orgId=/d" custom.conf )
     printf "%s\n" "${conf}" > custom.conf
     if [[ ${orgExists} == 1 ]]
     then
@@ -50,7 +50,7 @@ then
     else
     printf "\n%s\n" "Created a new Organization: ${orgName} with orgId: ${orgId}"
     fi
-    printf  "${orgName}_orgId=\"${orgId}\"\n"     >> custom.conf
+    printf  "${orgName//-/_}_orgId=\"${orgId}\"\n"     >> custom.conf
 else
     printf "%s\n" "* * * Error - Organiztion creation failed"
     exit 1

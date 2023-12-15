@@ -16,7 +16,7 @@ do
   esac
 done
 
-orgName=${orgName:-myOrg}
+orgName=${orgName:-myDeployment}
 
 oid=$( curl $curlOpts --silent --user "${publicKey}:${privateKey}" --digest \
  --header 'Accept: application/json' \

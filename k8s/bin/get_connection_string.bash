@@ -2,12 +2,13 @@
 
 source init.conf
 
-while getopts 'n:lih' opt
+while getopts 'n:mlih' opt
 do
   case "$opt" in
     n) name="$OPTARG" ;;
     i) internal=1     ;;
     l) ldap=1         ;;
+    m) multiCluster="-m" ;;
     ?|h)
       echo "Usage: $(basename $0) [-n clusterName] "
       exit 1
@@ -16,28 +17,51 @@ do
 done
 shift "$(($OPTIND -1))"
 
-name=${name:-myproject1-myreplicaset}
-internal=${internal-0}
+mdbKind="MongoDB"
+if [[ ${multiCluster} == "-m" ]]
+then
+    clusterDomain="${multiClusterDomain}"
+    mdbKind="MongoDBMultiCluster"
+    context="--context=$MDB_CLUSTER_0_CONTEXT"
+    ns="-n $namespace"
+    member="-0"
+fi
 
-type=$( kubectl get mdb/${name} -o jsonpath='{.spec.type}' )
+name=${name:-myproject1-myreplicaset}
+internal=${internal:-0}
+
+type=$( kubectl get ${mdbKind}/${name} -o jsonpath='{.spec.type}' )
 #if [[ "${sharded}" == "1" ]]
 if [[ "${type}" == "ShardedCluster" ]]
 then
     sharded=1
     mongos="-mongos"
-    serviceType=$( kubectl get svc/${name}${mongos}-0-svc-external -o jsonpath='{.spec.type}' 2>/dev/null )
+    serviceType=$( kubectl $context $ns get svc/${name}${mongos}-0-svc-external -o jsonpath='{.spec.type}' 2>/dev/null )
 else
-    serviceType=$( kubectl get svc/${name}-0-svc-external -o jsonpath='{.spec.type}' 2>/dev/null )
+    serviceType=$( kubectl $context $ns get svc/${name}${member}-0-svc-external -o jsonpath='{.spec.type}' 2>/dev/null )
 fi
 
 #cs="mongodb://${dbuser}:${dbpassword}@${hn0}:${np0},${hn1}:${np1},${hn2}:${np2}/?replicaSet=${name}&authSource=admin"
-ics=$( kubectl get secret ${name}-${name}-admin-admin -o jsonpath="{.data['connectionString\.standard']}" | base64 --decode ) 
-eval externalDomain=$( kubectl get mdb ${name} -o json | jq .spec.externalAccess.externalDomain ); 
+ics=$( kubectl $context $ns get secret ${name}-${name}-admin-admin -o jsonpath="{.data['connectionString\.standard']}" | base64 --decode ) 
+eval externalDomain=$( kubectl get ${mdbKind} ${name} -o json | jq .spec.externalAccess.externalDomain ); 
 # bug with connection string
 if [[ ${externalDomain} != "null" ]]
 then
-    hn=( "${name}-0.${externalDomain}" "${name}-1.${externalDomain}" "${name}-2.${externalDomain}" ) 
+    if [[ ${mdbKind} == "MongoDBMultiCluster" ]]
+    then
+    eval domainList=( $(kubectl get ${mdbKind} ${name} -o json|jq .spec.clusterSpecList[].externalAccess.externalDomain ) )
+    hn=( "${name}-0-0.${domainList[0]}" \
+         "${name}-0-1.${domainList[0]}" \
+         "${name}-1-0.${domainList[1]}" \
+         "${name}-1-1.${domainList[1]}" \
+         "${name}-2-0.${domainList[2]}" )
+    ics=$( printf "%s" "$ics" | sed -e "s?@.*/?@${hn[0]},${hn[1]},${hn[2]},${hn[3]},${hn[4]}/?" )
+    else
+    hn=( "${name}-0.${externalDomain}" \
+         "${name}-1.${externalDomain}" \
+         "${name}-2.${externalDomain}" ) 
     ics=$( printf "%s" "$ics" | sed -e "s?@.*/?@${hn[0]},${hn[1]},${hn[2]}/?" )
+    fi
 fi
 
 if [[ $ldap == 1 ]]
@@ -60,15 +84,15 @@ then
 fi
 fi
 # check to see is TLS on
-spec=$( kubectl get mdb/${name} -o jsonpath='{.spec.security}' )
+spec=$( kubectl get ${mdbKind}/${name} -o jsonpath='{.spec.security}' )
 if [[ ${serviceType} != "" && ${internal} = 0 ]]
 then
 if [[ "${spec}" == "map[enabled:true]" || "${spec}" == *"refix":* || "${spec}" == *"ecret":* || "${spec}" == *\"ca\":* ]]
 then
-    test -e "${PWD}/certs/ca.pem"               || kubectl get configmap ca-pem -o jsonpath="{.data['ca-pem']}" > "${PWD}/certs/ca.pem"
+    test -e "${PWD}/certs/ca.pem"               || kubectl $context $ns get configmap ca-pem -o jsonpath="{.data['ca-pem']}" > "${PWD}/certs/ca.pem"
     #test -e "${PWD}/certs/${name}${mongos}.pem" || kubectl get secret mdb-${name}${mongos}-cert-pem -o jsonpath="{.data.*}" | base64 --decode > "${PWD}/certs/${name}${mongos}.pem"
-    kubectl get secret mdb-${name}${mongos}-cert-pem -o jsonpath="{.data.*}" | base64 --decode > "${PWD}/certs/${name}${mongos}.pem"
-    eval version=$( kubectl get mdb ${name} -o jsonpath={.spec.version} )
+    kubectl $context $ns get secret mdb-${name}${mongos}-cert-pem -o jsonpath="{.data.*}" | base64 --decode > "${PWD}/certs/${name}${mongos}.pem"
+    eval version=$( kubectl get ${mdbKind} ${name} -o jsonpath={.spec.version} )
     if [[ ${version%%.*} = 3 ]]
     then
         ssltls_enabled="&ssl=true&sslCAFile=${PWD}/certs/ca.pem&sslPEMKeyFile=${PWD}/certs/${name}${mongos}.pem "
@@ -84,8 +108,8 @@ fi
 else # internal
 if [[ "${spec}" == "map[enabled:true]" || "${spec}" == *"refix":* || "${spec}" == *"ecret":* || "${spec}" == *\"ca\":* ]]
 then
-    #eval serverpem=$( kubectl get secret mdb-${name}${mongos}-cert-pem -o json |jq ".data"| jq "keys[]" )
-    kv=$( kubectl get secret mdb-${name}${mongos}-cert-pem -o jsonpath="{.data}" | grep -o '".*":*' )
+    #eval serverpem=$( kubectl $context $ns get secret mdb-${name}${mongos}-cert-pem -o json |jq ".data"| jq "keys[]" )
+    kv=$( kubectl $context $ns get secret mdb-${name}${mongos}-cert-pem -o jsonpath="{.data}" | grep -o '".*":*' )
     serverpem=$( eval printf ${kv%:*} )
     if [[ ${version%%.*} = 3 ]]
     then

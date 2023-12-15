@@ -1,6 +1,6 @@
 ---
 apiVersion: mongodb.com/v1
-kind: MongoDB
+kind: MDBKIND
 metadata:
   name: PROJECT-NAME
   namespace: NAMESPACE
@@ -14,6 +14,29 @@ spec:
       name: PROJECT-NAME # Must match metadata.name in ConfigMap file
   credentials: NAMESPACE-opsmanager-admin-key
   persistent: true
+  duplicateServiceObjects: DUPSERVICE
+  #MULTI clusterSpecList:
+  #MULTI   - clusterName: MDB_CLUSTER_0_CONTEXT
+  #MULTI     members: 2
+  #MULTI     #MCEXPOSE externalAccess:
+  #MULTI     #MCEXPOSE   #EXTDOMAIN externalDomain: CLUSTER0.EXTDOMAINNAME
+  #MULTI     #MCEXPOSE   externalService:
+  #MULTI     #MCEXPOSE   #  annotations:
+  #MULTI     #MCEXPOSE   #    "cloud.google.com/l4-rbs": "enabled"
+  #MULTI   - clusterName: MDB_CLUSTER_1_CONTEXT
+  #MULTI     members: 2
+  #MULTI     #MCEXPOSE externalAccess:
+  #MULTI     #MCEXPOSE   #EXTDOMAIN externalDomain: CLUSTER1.EXTDOMAINNAME
+  #MULTI     #MCEXPOSE   externalService:
+  #MULTI     #MCEXPOSE   #  annotations:
+  #MULTI     #MCEXPOSE   #    "cloud.google.com/l4-rbs": "enabled"
+  #MULTI   - clusterName: MDB_CLUSTER_2_CONTEXT
+  #MULTI     members: 1
+  #MULTI     #MCEXPOSE externalAccess:
+  #MULTI     #MCEXPOSE   #EXTDOMAIN externalDomain: CLUSTER2.EXTDOMAINNAME
+  #MULTI     #MCEXPOSE   externalService:
+  #MULTI     #MCEXPOSE   #  annotations:
+  #MULTI     #MCEXPOSE   #    "cloud.google.com/l4-rbs": "enabled"
   podSpec:
     # `podTemplate` allows to set custom fields in PodTemplateSpec for the
     # Database Pods.

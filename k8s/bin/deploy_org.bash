@@ -16,7 +16,7 @@ do
 done
 shift "$(($OPTIND -1))"
 
-orgName="${orgName:-myOrg}"
+orgName="${orgName:-myDeployment}"
 
 #create_key.bash
 get_key.bash
@@ -28,7 +28,7 @@ fi
 create_org.bash -o "${orgName}"
 if [[ $? != 0 ]]
 then
-    rm custom.conf
+    #rm custom.conf
     exit 1
 fi
 source custom.conf

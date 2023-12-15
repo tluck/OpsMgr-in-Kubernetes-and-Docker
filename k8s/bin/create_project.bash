@@ -17,7 +17,7 @@ do
 done
 shift "$(($OPTIND -1))"
 
-orgName=${orgName:-myOrg}
+orgName=${orgName:-myDeployment}
 orgInfo=( $( get_org.bash -o ${orgName} ) )
 orgId=${orgInfo[1]}
 projectName=${projectName:-myProject}

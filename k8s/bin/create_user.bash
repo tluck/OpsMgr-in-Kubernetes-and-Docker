@@ -3,7 +3,7 @@
 source init.conf
 source custom.conf
 
-orgName=${orgName:-myOrg}
+orgName=${orgName:-myDeployment}
 orgInfo=( $( get_org.bash -o ${orgName} ) )
 orgId=${orgInfo[1]}
 

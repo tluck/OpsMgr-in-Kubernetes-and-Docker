@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: dnsutils
-  namespace: mynamespace
+  namespace: mongodb
 spec:
   containers:
   - name: dnsutils

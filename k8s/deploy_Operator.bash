@@ -5,8 +5,8 @@ cd "${d}"
 source init.conf
 
 # Create the namespace and context
-kubectl create namespace ${namespace}
 kubectl config set-context $(kubectl config current-context) --namespace=${namespace}
+kubectl create namespace ${namespace}
 
 # Deploy the MongoDB Enterprise Operator
 myoperator="${namespace}-myoperator.yaml"

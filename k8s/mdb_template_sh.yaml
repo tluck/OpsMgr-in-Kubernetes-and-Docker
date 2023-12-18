@@ -15,7 +15,7 @@ spec:
   opsManager:
     configMapRef:
       name: PROJECT-NAME # Must match metadata.name in ConfigMap file
-  credentials: NAMESPACE-opsmanager-admin-key
+  credentials: NAMESPACE-OPSMANAGER-admin-key
   persistent: true
   # podSpec:
   #   cpu: "0.5"

@@ -166,6 +166,7 @@ cat ${template} | sed \
   -e "s|MSCPU|$mscpu|" \
   -e "s|MSMEM|$msmem|" \
   -e "s|NAMESPACE|$namespace|" \
+  -e "s|OPSMANAGER|$omName|" \
   -e "s|SERVICETYPE|$serviceType|" \
   -e "s|X509M|$x509m|" \
   -e "s|LDAPM|$ldapm|" \
@@ -233,7 +234,7 @@ then
         --from-literal="baseUrl=${opsMgrUrl}" \
         --from-literal="orgId=${orgId}" \
         --from-literal="projectName=${projectName}" \
-        --from-literal="sslMMSCAConfigMap=opsmanager-ca" \
+        --from-literal="sslMMSCAConfigMap=${omName}-ca" \
         --from-literal="sslRequireValidMMSServerCertificates=${sslRequireValidMMSServerCertificates}" 2> /dev/null
 
   if [[ ${sharded} == true ]]

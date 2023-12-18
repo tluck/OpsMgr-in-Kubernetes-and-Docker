@@ -12,7 +12,7 @@ spec:
   opsManager:
     configMapRef:
       name: PROJECT-NAME # Must match metadata.name in ConfigMap file
-  credentials: NAMESPACE-opsmanager-admin-key
+  credentials: NAMESPACE-OPSMANAGER-admin-key
   persistent: true
   duplicateServiceObjects: DUPSERVICE
   #MULTI clusterSpecList:

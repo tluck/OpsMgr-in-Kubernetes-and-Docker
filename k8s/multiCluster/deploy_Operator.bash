@@ -10,27 +10,15 @@ kubectl config set-context $(kubectl config current-context) --namespace=${names
 kubectl create namespace ${namespace}
 
 # Deploy the MongoDB Enterprise Operator
-myoperator="${namespace}-myoperator.yaml"
+myOperator="${namespace}-myoperator.yaml"
 kubectl apply -f crds.yaml
-#if [[ "${clusterType}" == "openshift" ]]
-#then
-#    cat mongodb-enterprise-openshift.yaml | sed \
-#    -e "s/namespace: mongodb/namespace: $namespace/"  > "${myoperator}"
-#else
-# this is modified operator
-    cat mc-operator.yaml | sed \
-    -e "s/namespace: mongodb/namespace: $namespace/"  > "${myoperator}"
-#fi
 
-#cat <<EOF >> "${myoperator}" 
-#            - name: MDB_AUTOMATIC_RECOVERY_ENABLE
-#              value: 'true'
-#            - name: MDB_AUTOMATIC_RECOVERY_BACKOFF_TIME_S
-#              value: '480'
-#EOF
+# Note: this is a custom operator for now.
+cat mc-operator.yaml | sed \
+    -e "s/namespace: mongodb/namespace: $namespace/"  > "${myOperator}"
 
 kubectl delete deployment mongodb-enterprise-operator
-kubectl apply -f "${myoperator}"
+kubectl apply -f "${myOperator}"
 
 # set up roles for multi-cluster environment
 sleep 3

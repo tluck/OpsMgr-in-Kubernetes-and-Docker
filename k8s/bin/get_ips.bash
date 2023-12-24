@@ -21,11 +21,11 @@ serviceName=""
 if [[ $name != "" ]] 
 then
     serviceName=${name}-0-svc-external
-    type=$( kubectl get mdb/${name} -o jsonpath='{.spec.type}' 2>/dev/null )
+    type=$( kubectl -n ${namespace} get mdb/${name} -o jsonpath='{.spec.type}' 2>/dev/null )
     err1=$?
     if [[ $err1 != 0 ]]
     then
-        serviceType=$( kubectl get om/${name} -o jsonpath='{.spec.externalConnectivity.type}' 2>/dev/null )
+        serviceType=$( kubectl -n ${namespace} get om/${name} -o jsonpath='{.spec.externalConnectivity.type}' 2>/dev/null )
         err2=$?
         if [[ $err2 == 0 ]] 
         then
@@ -44,7 +44,7 @@ else
     om=1
 fi
 
-serviceType=$( kubectl get svc/${serviceName} -o jsonpath='{.spec.type}' 2>/dev/null )
+serviceType=$( kubectl -n ${namespace} get svc/${serviceName} -o jsonpath='{.spec.type}' 2>/dev/null )
 err3=$?
 
 if [[ $err1 != 0 && $err2 != 0 && $err3 != 0 ]]
@@ -57,16 +57,16 @@ if [[ "$serviceType" != "NodePort" ]]
 then
     if [[ "${type}" == "ShardedCluster" || ${om} == 1 ]]
     then
-        slist=( $( kubectl get svc/${serviceName} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' ) )
+        slist=( $( kubectl -n ${namespace} get svc/${serviceName} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' ) )
         if [[ ${#slist[@]} == 0 ]]
         then
-        iplist=( $(kubectl get svc/${serviceName} -o jsonpath='{.status.loadBalancer.ingress[*].ip }' ) )
+        iplist=( $(kubectl -n ${namespace} get svc/${serviceName} -o jsonpath='{.status.loadBalancer.ingress[*].ip }' ) )
         fi
     else
-        slist=( $( kubectl get $( kubectl get svc -o name |grep "${name}.*external" )  -o jsonpath='{.items[*].status.loadBalancer.ingress[0].hostname}' ) )
+        slist=( $( kubectl -n ${namespace} get $( kubectl -n ${namespace} get svc -o name |grep "${name}.*external" )  -o jsonpath='{.items[*].status.loadBalancer.ingress[0].hostname}' ) )
         if [[ ${#slist[@]} == 0 ]]
         then
-        iplist=( $(kubectl get $( kubectl get svc -o name |grep "${name}.*external" )  -o jsonpath='{.items[*].status.loadBalancer.ingress[*].ip }' ) )
+        iplist=( $(kubectl -n ${namespace} get $( kubectl -n ${namespace} get svc -o name |grep "${name}.*external" )  -o jsonpath='{.items[*].status.loadBalancer.ingress[*].ip }' ) )
         fi
     fi
 fi
@@ -74,35 +74,35 @@ fi
 if [[ "$serviceType" != "LoadBalancer" ]]
 then
 # get IP/DNS names
-    #slist=( $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="ExternalDNS")].address}' ) )
-    slist=( $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="Hostname")].address}') )
+    #slist=( $(kubectl -n ${namespace} get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="ExternalDNS")].address}' ) )
+    slist=( $(kubectl -n ${namespace} get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="Hostname")].address}') )
     if [[ ${slist[0]} == "docker-desktop" ]]
     then
 	slist=( "localhost" ) 
     else
-        slist=( $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="ExternalDNS")].address}' ) )
+        slist=( $(kubectl -n ${namespace} get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="ExternalDNS")].address}' ) )
     	if [[ ${#slist[@]} == 0 ]] 
         then
-    	    slist=( $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="Hostname")].address}') )
+    	    slist=( $(kubectl -n ${namespace} get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="Hostname")].address}') )
 	    fi
         if [[ ${#slist[@]} == 0 ]] 
         then
-            iplist=( $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="ExternalIP")].address}' ) )
+            iplist=( $(kubectl -n ${namespace} get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="ExternalIP")].address}' ) )
         fi
 
     if [[ ${#slist[@]} == 0 && $custerType == "openshift" ]]
 	then
             # OpenShift read of names
-	    # slist=( $( kubectl get nodes -o json | jq -r '.items[].metadata.labels | select(."node-role.kubernetes.io/worker") | ."kubernetes.io/hostname" '))
-            slist=( $(kubectl get nodes -o json | jq -r '.items[].metadata.labels | select((."node-role.kubernetes.io/infra" == null) and .storage == "pmem") | ."kubernetes.io/hostname" ' ) ) 
+	    # slist=( $( kubectl -n ${namespace} get nodes -o json | jq -r '.items[].metadata.labels | select(."node-role.kubernetes.io/worker") | ."kubernetes.io/hostname" '))
+            slist=( $(kubectl -n ${namespace} get nodes -o json | jq -r '.items[].metadata.labels | select((."node-role.kubernetes.io/infra" == null) and .storage == "pmem") | ."kubernetes.io/hostname" ' ) ) 
         fi
     	if [[ ${#slist[@]} == 0 ]] 
         then
-            slist=( $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="InternalDNS")].address}' ) )
+            slist=( $(kubectl -n ${namespace} get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="InternalDNS")].address}' ) )
         fi
     	if [[ ${#slist[@]} == 0 ]] 
         then
-            iplist=( $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="ExternalIP")].address}' ) )
+            iplist=( $(kubectl -n ${namespace} get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="ExternalIP")].address}' ) )
         fi
     fi
     

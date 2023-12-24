@@ -26,11 +26,11 @@ mdbKind=mdbmc
 eval domainList=( $(kubectl get ${mdbKind} ${name} -o json|jq .spec.clusterSpecList[].externalAccess.externalDomain ) )
 eval dnszone=$( gcloud dns managed-zones list --format json | jq .[].name )
 
-eval iplist[0]=$( kubectl --context=$MDB_CLUSTER_0_CONTEXT -n mongodb get svc ${name}-0-0-svc-external  -o json |jq .status.loadBalancer.ingress[].ip )
-eval iplist[1]=$( kubectl --context=$MDB_CLUSTER_0_CONTEXT -n mongodb get svc ${name}-0-1-svc-external  -o json |jq .status.loadBalancer.ingress[].ip )
-eval iplist[2]=$( kubectl --context=$MDB_CLUSTER_1_CONTEXT -n mongodb get svc ${name}-1-0-svc-external  -o json |jq .status.loadBalancer.ingress[].ip )
-eval iplist[3]=$( kubectl --context=$MDB_CLUSTER_1_CONTEXT -n mongodb get svc ${name}-1-1-svc-external  -o json |jq .status.loadBalancer.ingress[].ip )
-eval iplist[4]=$( kubectl --context=$MDB_CLUSTER_2_CONTEXT -n mongodb get svc ${name}-2-0-svc-external  -o json |jq .status.loadBalancer.ingress[].ip )
+eval iplist[0]=$( kubectl --context=$MDB_CLUSTER_0_CONTEXT -n ${mcNamespace} get svc ${name}-0-0-svc-external  -o json |jq .status.loadBalancer.ingress[].ip )
+eval iplist[1]=$( kubectl --context=$MDB_CLUSTER_0_CONTEXT -n ${mcNamespace} get svc ${name}-0-1-svc-external  -o json |jq .status.loadBalancer.ingress[].ip )
+eval iplist[2]=$( kubectl --context=$MDB_CLUSTER_1_CONTEXT -n ${mcNamespace} get svc ${name}-1-0-svc-external  -o json |jq .status.loadBalancer.ingress[].ip )
+eval iplist[3]=$( kubectl --context=$MDB_CLUSTER_1_CONTEXT -n ${mcNamespace} get svc ${name}-1-1-svc-external  -o json |jq .status.loadBalancer.ingress[].ip )
+eval iplist[4]=$( kubectl --context=$MDB_CLUSTER_2_CONTEXT -n ${mcNamespace} get svc ${name}-2-0-svc-external  -o json |jq .status.loadBalancer.ingress[].ip )
 
 gcloud dns --project=${MDB_GKE_PROJECT} record-sets delete ${name}-0-0.${domainList[0]} --type="A" --zone="${dnszone}" > /dev/null 2>&1
 gcloud dns --project=${MDB_GKE_PROJECT} record-sets delete ${name}-0-1.${domainList[0]} --type="A" --zone="${dnszone}" > /dev/null 2>&1

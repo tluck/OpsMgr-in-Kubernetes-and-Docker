@@ -72,7 +72,7 @@ then
     fi
 fi
 
-if [[ ${OM} == true || ${Clusters} == true ]]
+if [[ "${OM}" == true || "${Clusters}" == true ]]
 then
     printf "\n%s\n" "__________________________________________________________________________________________"
     printf "%s\n" "Deploy the Operator ..."
@@ -83,19 +83,27 @@ fi
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Deploy OM and wait until Running status..."
 date
-if [[ ${OM} == true ]]
+if [[ "${OM}" == true ]]
 then
     test=" -t ${skipCertGen}" # [-n name] [-g] [-c cpu] [-m memory] [-d disk] [-v version] 
     prod=" -n ${omName} -c 1.00 -m 4Gi -d 40Gi -v ${omVersion} ${skipCertGen}"
 # [[ "${context}" == "docker"* ]] && docker pull "quay.io/mongodb/mongodb-enterprise-ops-manager:$omVersion" # issue with docker not (re)pulling the image
 (set -x; deploy_OM.bash ${!options})
 
-if [[ ${omBackup} == true ]]
+if [[ "${omBackup}" == true ]]
 then
-    # put these resources in the same org as the AppDB
+    printf "\n%s\n" "__________________________________________________________________________________________"
+    # get the API key stored in a secret to find the AppDB orgId
+    get_key.bash
     orgInfo=( $( get_org.bash -o ${omName}-db ) )
     orgId=${orgInfo[1]}
-
+    if [[ "${orgId}" == none ]]
+    then
+        printf "\n%s\n" "* * * Error - orgId is missing"
+        exit 1
+    fi
+    # put these resources in the same org as the AppDB
+    printf "Using Organization: ${omName}-db with orgId: ${orgId} for the OM resources\n"
     printf "\n%s\n" "__________________________________________________________________________________________"
     printf "%s\n" "Create the Backup Oplog DB for OM ..."
     date
@@ -111,7 +119,7 @@ then
 (set -x; deploy_Cluster.bash ${!options})
 fi # backup true
 fi # OM
-[[ ${OM} == true && ${Clusters} == false ]] && exit
+[[ "${OM}" == true && "${Clusters}" == false ]] && exit
 
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Create a specific Organization to put your Deployment projects in ..."
@@ -129,9 +137,9 @@ printf "%s\n" "Create a Production ReplicaSet Cluster with a splitHorizon config
 date
 projectName="myProject1"
 name="myreplicaset"
-test=" -n ${name} -v 6.0.5-ent -c 0.50 -m 400Mi         -l ${ldapType} -o ${orgId} -p ${projectName} ${skipCertGen} -e horizon"
-prod=" -n ${name} -v 6.0.5-ent -c 1.00 -m 4.0Gi -d 20Gi -l ${ldapType} -o ${orgId} -p ${projectName} ${skipCertGen} -e horizon"
-# source custom.conf; deploy_Cluster.bash -n "myreplicaset" -v "6.0.5-ent" -c "0.50" -m "400Mi" -d "1Gi" -l "ldap" -o "$myDeployment_orgId" -p "myProject1" -g -e horizon
+test=" -n ${name} -v 6.0.11-ent -c 0.50 -m 400Mi         -l ${ldapType} -o ${orgId} -p ${projectName} ${skipCertGen} -e horizon"
+prod=" -n ${name} -v 6.0.11-ent -c 1.00 -m 4.0Gi -d 20Gi -l ${ldapType} -o ${orgId} -p ${projectName} ${skipCertGen} -e horizon"
+# source custom.conf; deploy_Cluster.bash -n "myreplicaset" -v "6.0.11-ent" -c "0.50" -m "400Mi" -d "1Gi" -l "ldap" -o "$myDeployment_orgId" -p "myProject1" -g -e horizon
 (set -x; deploy_Cluster.bash ${!options})
 cluster1="${projectName}-${name}"
 

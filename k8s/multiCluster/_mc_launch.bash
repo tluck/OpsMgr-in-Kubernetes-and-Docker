@@ -20,7 +20,7 @@ do
 done
 shift "$(($OPTIND -1))"
 
-OM=${OM:-true}
+OM=${OM:-false}
 Clusters=${Clusters:-true}
 
 d=$( dirname "$0" )
@@ -125,16 +125,29 @@ orgId="${deploymentOrgName//-/_}_orgId"
 orgId="${!orgId}"
 
 printf "\n%s\n" "__________________________________________________________________________________________"
-printf "%s\n" "Create a Production ReplicaSet Cluster with a splitHorizon configuration for External access ..."
+printf "%s\n" "Create a Production ReplicaSet Cluster with an external domain configuration for External access ..."
 date
-projectName="myMultiClusterProject"
+projectName="myMultiClusterProject1"
 name="myreplicaset"
-test=" -n ${name} -v 6.0.5-ent -c 0.50 -m 400Mi         -l ${ldapType} -o ${orgId} -p ${projectName} ${skipCertGen} -e mdb.com"
-prod=" -n ${name} -v 6.0.5-ent -c 1.00 -m 4.0Gi -d 20Gi -l ${ldapType} -o ${orgId} -p ${projectName} ${skipCertGen} -e mdb.com"
+test=" -n ${name} -v 6.0.11-ent -c 0.50 -m 400Mi         -l ${ldapType} -o ${orgId} -p ${projectName} ${skipCertGen} -e mdb.com"
+prod=" -n ${name} -v 6.0.11-ent -c 1.00 -m 4.0Gi -d 20Gi -l ${ldapType} -o ${orgId} -p ${projectName} ${skipCertGen} -e mdb.com"
 # -e horizon is broken at this time
-# source custom.conf; deploy_Cluster.bash -n "myreplicaset" -v "6.0.5-ent" -c "0.50" -m "400Mi" -d "1Gi" -l "ldap" -o "$myDeployment_orgId" -p "myProject1" -g -e horizon
+# source custom.conf; deploy_Cluster.bash -n "myreplicaset" -v "6.0.11-ent" -c "0.50" -m "400Mi" -d "1Gi" -l "ldap" -o "$myDeployment_orgId" -p "myProject1" -g -e horizon
 (set -x; deploy_multiCluster.bash ${!options})
 cluster1="${projectName}-${name}"
+
+printf "\n%s\n" "__________________________________________________________________________________________"
+printf "%s\n" "Create a Production ReplicaSet Cluster withOUT configuration for External access ..."
+date
+projectName="myMultiClusterProject2"
+name="myreplicaset"
+test=" -n ${name} -v 6.0.11-ent -c 0.50 -m 400Mi         -l ${ldapType} -o ${orgId} -p ${projectName} ${skipCertGen} "
+prod=" -n ${name} -v 6.0.11-ent -c 1.00 -m 4.0Gi -d 20Gi -l ${ldapType} -o ${orgId} -p ${projectName} ${skipCertGen} "
+# -e horizon is broken at this time
+# source custom.conf; deploy_Cluster.bash -n "myreplicaset" -v "6.0.11-ent" -c "0.50" -m "400Mi" -d "1Gi" -l "ldap" -o "$myDeployment_orgId" -p "myProject1" -g -e horizon
+(set -x; deploy_multiCluster.bash ${!options})
+cluster1="${projectName}-${name}"
+
 
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Create a Production Sharded Cluster  ..."

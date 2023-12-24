@@ -110,12 +110,34 @@ multiClusterString="#MULTI "
 mdbKind="MongoDB"
 if [[ ${multiCluster} == true ]]
 then
-    multiClusterString=""
-    clusterDomain="${multiClusterDomain}"
-    mdbKind="MongoDBMultiCluster"
-    multiClusterOption="-m"
-    duplicateServiceObjects=true
-fi
+  multiClusterString=""
+  clusterDomain="${multiClusterDomain}"
+  mdbKind="MongoDBMultiCluster"
+  multiClusterOption="-m"
+  duplicateServiceObjects=true
+  # recreate configmap and secret for OM in mcNamespace
+  if [[ ${namespace} != ${mcNamespace} ]]
+  then
+  kubectl -n ${namespace} get configmap ${omName}-ca --namespace=${mcNamespace} >/dev/null 2>&1
+  if [[ $? != 0 ]] 
+  then
+    kubectl -n ${namespace} get configmap ${omName}-ca --namespace=${namespace} -o yaml \
+    | sed "s|namespace: ${namespace}|namespace: ${mcNamespace}|" \
+    | kubectl -n ${namespace} --namespace=${mcNamespace} apply -f -
+  fi
+
+  kubectl -n ${namespace} get secret ${mcNamespace}-${omName}-admin-key --namespace=${mcNamespace} >/dev/null 2>&1
+  if [[ $? != 0 ]]
+  then
+    eval publicKey=$(  kubectl -n ${namespace} get secret ${namespace}-${omName}-admin-key --namespace=${namespace} -o jsonpath='{.data.publicKey}' | base64 -d )
+    eval privateKey=$( kubectl -n ${namespace} get secret ${namespace}-${omName}-admin-key --namespace=${namespace} -o jsonpath='{.data.privateKey}' | base64 -d )
+    kubectl -n ${namespace} create secret generic ${mcNamespace}-${omName}-admin-key --namespace=${mcNamespace} \
+      --from-literal="publicKey=${publicKey}" \
+      --from-literal="privateKey=${privateKey}"
+  fi
+  fi # diff namespace
+  namespace=${mcNamespace}
+fi # multicluster
 
 # expose services
 mcexposeString="#MCEXPOSE "
@@ -202,23 +224,23 @@ fi
 if [[ ${cleanup} == 1 ]]
 then
   printf "Cleaning up ... \n"
-  kubectl delete ${mdbKind} "${fullName}" --now > /dev/null 2>&1
-  kubectl delete $( kubectl get pods -o name | grep "${fullName}" ) --force --now > /dev/null 2>&1
+  kubectl -n ${namespace} delete ${mdbKind} "${fullName}" --now > /dev/null 2>&1
+  kubectl -n ${namespace} delete $( kubectl -n ${namespace} get pods -o name | grep "${fullName}" ) --force --now > /dev/null 2>&1
   for type in pvc svc secrets configmaps
   do
-    kubectl delete $( kubectl get $type -o name | grep "${fullName}" ) --now > /dev/null 2>&1
+    kubectl -n ${namespace} delete $( kubectl -n ${namespace} get $type -o name | grep "${fullName}" ) --now > /dev/null 2>&1
     if [[ ${multiCluster} == true ]]
     then
-      kubectl --context=$MDB_CLUSTER_0_CONTEXT -n $namespace delete $( kubectl --context=$MDB_CLUSTER_0_CONTEXT -n $namespace get $type -o name | grep "${fullName}" ) --now > /dev/null 2>&1 
-      kubectl --context=$MDB_CLUSTER_1_CONTEXT -n $namespace delete $( kubectl --context=$MDB_CLUSTER_1_CONTEXT -n $namespace get $type -o name | grep "${fullName}" ) --now > /dev/null 2>&1 
-      kubectl --context=$MDB_CLUSTER_2_CONTEXT -n $namespace delete $( kubectl --context=$MDB_CLUSTER_2_CONTEXT -n $namespace get $type -o name | grep "${fullName}" ) --now > /dev/null 2>&1 
+      kubectl -n ${namespace} --context=$MDB_CLUSTER_0_CONTEXT -n $namespace delete $( kubectl -n ${namespace} --context=$MDB_CLUSTER_0_CONTEXT -n $namespace get $type -o name | grep "${fullName}" ) --now > /dev/null 2>&1 
+      kubectl -n ${namespace} --context=$MDB_CLUSTER_1_CONTEXT -n $namespace delete $( kubectl -n ${namespace} --context=$MDB_CLUSTER_1_CONTEXT -n $namespace get $type -o name | grep "${fullName}" ) --now > /dev/null 2>&1 
+      kubectl -n ${namespace} --context=$MDB_CLUSTER_2_CONTEXT -n $namespace delete $( kubectl -n ${namespace} --context=$MDB_CLUSTER_2_CONTEXT -n $namespace get $type -o name | grep "${fullName}" ) --now > /dev/null 2>&1 
     fi
   done
   if [[ ${tls} == true ]]
   then
   for type in csr certificaterequests certificates
   do
-    kubectl delete $( kubectl get $type -o name | grep "${fullName}" ) --now > /dev/null 2>&1
+    kubectl -n ${namespace} delete $( kubectl -n ${namespace} get $type -o name | grep "${fullName}" ) --now > /dev/null 2>&1
   done
   fi
   delete_project.bash -p ${projectName} 
@@ -229,8 +251,8 @@ fi
 # Create map for OM Org/Project
 if [[ ${tls} == true ]]
 then
-  kubectl delete configmap "${fullName}" > /dev/null 2>&1
-  kubectl create configmap "${fullName}" \
+  kubectl -n ${namespace} delete configmap "${fullName}" > /dev/null 2>&1
+  kubectl -n ${namespace} create configmap "${fullName}" \
         --from-literal="baseUrl=${opsMgrUrl}" \
         --from-literal="orgId=${orgId}" \
         --from-literal="projectName=${projectName}" \
@@ -250,7 +272,7 @@ then
       cert="-cert"
       [[ "${ctype}" == "agent" ]] && cert="-certs"
       "${PWD}/certs/make_sharded_certs.bash" "${fullName}" ${ctype} ${cert}
-      kubectl apply -f "${PWD}/certs/certs_mdb-${fullName}-${ctype}${cert}.yaml"
+      kubectl -n ${namespace} apply -f "${PWD}/certs/certs_mdb-${fullName}-${ctype}${cert}.yaml"
       done
     fi
   else 
@@ -258,42 +280,42 @@ then
     # create new certs if the service does not exist
     if [[ ${makeCerts} == true ]]
     then
-      kubectl delete secret mdb-${fullName}-cert > /dev/null 2>&1
+      kubectl -n ${namespace} delete secret mdb-${fullName}-cert > /dev/null 2>&1
       "${PWD}/certs/make_cluster_certs.bash" "${fullName}"
-      kubectl apply -f "${PWD}/certs/certs_mdb-${fullName}-cert.yaml"
+      kubectl -n ${namespace} apply -f "${PWD}/certs/certs_mdb-${fullName}-cert.yaml"
     fi
   fi # end if sharded or replicaset
 
 else
 # no tls here
-  [[ ${cleanup} == 1 ]] && kubectl delete configmap "${fullName}" > /dev/null 2>&1
-    kubectl create configmap "${fullName}" \
+  [[ ${cleanup} == 1 ]] && kubectl -n ${namespace} delete configmap "${fullName}" > /dev/null 2>&1
+    kubectl -n ${namespace} create configmap "${fullName}" \
     --from-literal="orgId=${orgId}" \
     --from-literal="projectName=${projectName}" \
     --from-literal="baseUrl=${opsMgrUrl}" 2> /dev/null
 fi # tls
 
 # Create a a secret for a db user credentials
-[[ ${cleanup} == 1 ]] && kubectl delete secret         ${fullName}-admin > /dev/null 2>&1
-kubectl create secret generic ${fullName}-admin \
+[[ ${cleanup} == 1 ]] && kubectl -n ${namespace} delete secret         ${fullName}-admin > /dev/null 2>&1
+kubectl -n ${namespace} create secret generic ${fullName}-admin \
     --from-literal=name="${dbuser}" \
     --from-literal=password="${dbpassword}" 2> /dev/null
 
 # Create the User Resources
-[[ ${cleanup} == 1 ]] && kubectl delete mdbu ${fullName}-admin > /dev/null 2>&1
-kubectl apply -f "${mdbuser1}" 2> /dev/null
+[[ ${cleanup} == 1 ]] && kubectl -n ${namespace} delete mdbu ${fullName}-admin > /dev/null 2>&1
+kubectl -n ${namespace} apply -f "${mdbuser1}" 2> /dev/null
 
 if [[ ${ldap} == 'ldap' || ${ldap} == 'ldaps' ]]
 then
-  [[ ${cleanup} == 1 ]] && kubectl delete mdbu ${fullName}-ldap > /dev/null 2>&1
-  kubectl apply -f "${mdbuser2}"
-  [[ ${cleanup} == 1 ]] && kubectl delete secret "${fullName}-ldapsecret" > /dev/null 2>&1
-  kubectl create secret generic "${fullName}-ldapsecret" \
+  [[ ${cleanup} == 1 ]] && kubectl -n ${namespace} delete mdbu ${fullName}-ldap > /dev/null 2>&1
+  kubectl -n ${namespace} apply -f "${mdbuser2}"
+  [[ ${cleanup} == 1 ]] && kubectl -n ${namespace} delete secret "${fullName}-ldapsecret" > /dev/null 2>&1
+  kubectl -n ${namespace} create secret generic "${fullName}-ldapsecret" \
     --from-literal=password="${ldapBindQueryPassword}" 2> /dev/null 
 fi
 
 # Create the DB Resource
-kubectl apply -f "${mdb}"
+kubectl -n ${namespace} apply -f "${mdb}"
 # for SplitHorizons - append horizons and reissue certs with horizons
 sleep 3
 if [[ ${expose} && ${sharded} == false ]] 
@@ -325,7 +347,7 @@ then
       update_mc_dns.bash -n "${fullName}"
     fi
   else
-    kubectl apply -f "${mdb}" # re-apply for splitHorizon addition
+    kubectl -n ${namespace} apply -f "${mdb}" # re-apply for splitHorizon addition
     printf "\nAdded this configuration to the manifest ${mdb}:\n" 
     eval tail -n 5 "${mdb}"
   fi
@@ -335,8 +357,8 @@ fi
 # remove any certificate requests
 if [[ ${tls} == true ]]
 then
-  kubectl delete csr $( kubectl get csr -o name | grep "${fullName}" ) > /dev/null 2>&1
-  kubectl delete certificaterequest $( kubectl get certificaterequest -o name | grep "${fullName}" ) > /dev/null 2>&1
+  kubectl -n ${namespace} delete csr $( kubectl -n ${namespace} get csr -o name | grep "${fullName}" ) > /dev/null 2>&1
+  kubectl -n ${namespace} delete certificaterequest $( kubectl -n ${namespace} get certificaterequest -o name | grep "${fullName}" ) > /dev/null 2>&1
 fi
 
 # Monitor the progress
@@ -346,14 +368,14 @@ notapproved="Not all certificates have been approved"
 certificate="Certificate"
 while true
 do
-    kubectl get "${resource}"
-    pstatus=$( kubectl get "${resource}" -o jsonpath={'.status.phase'} )
-    message=$( kubectl get "${resource}" -o jsonpath={'.status.message'} )
+    kubectl -n ${namespace} get "${resource}"
+    pstatus=$( kubectl -n ${namespace} get "${resource}" -o jsonpath={'.status.phase'} )
+    message=$( kubectl -n ${namespace} get "${resource}" -o jsonpath={'.status.message'} )
     printf "%s\n" "status.message: $message"
     # if [[ "${message:0:39}" == "${notapproved}" ||  "${message:0:11}" == "${certificate}" ]]
     # then
     #     # TLS Cert approval (if using autogenerated certs -- deprecated)
-    #     kubectl certificate approve $( kubectl get csr | grep "Pending" | awk '{print $1}' )
+    #     kubectl -n ${namespace} certificate approve $( kubectl -n ${namespace} get csr | grep "Pending" | awk '{print $1}' )
     # fi
     #if [[ "$pstatus" == "Pending" || "$pstatus" == "Running" ]];
     if [[ "$pstatus" == "Running" ]];

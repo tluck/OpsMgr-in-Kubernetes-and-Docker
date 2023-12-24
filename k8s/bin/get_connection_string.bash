@@ -17,13 +17,14 @@ do
 done
 shift "$(($OPTIND -1))"
 
+ns="-n ${namespace}"
 mdbKind="MongoDB"
 if [[ ${multiCluster} == "-m" ]]
 then
     clusterDomain="${multiClusterDomain}"
     mdbKind="MongoDBMultiCluster"
     context="--context=$MDB_CLUSTER_0_CONTEXT"
-    ns="-n $namespace"
+    ns="-n $mcNamespace"
     member="-0"
 fi
 

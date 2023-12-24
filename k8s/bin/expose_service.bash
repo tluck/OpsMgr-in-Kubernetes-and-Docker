@@ -22,13 +22,14 @@ source init.conf
 [[ ${demo} ]] && serviceType="NodePort"
 #PATH=.:bin:$PATH
 
+ns="-n ${namespace}"
 mdbKind="MongoDB"
 if [[ ${multiCluster} == true ]]
 then
     clusterDomain="${multiClusterDomain}"
     mdbKind="MongoDBMultiCluster"
     context="--context=$MDB_CLUSTER_0_CONTEXT"
-    ns="-n $namespace"
+    ns="-n ${mcNamespace}"
 fi
 
 # use externalService managed by the operator now
@@ -46,7 +47,7 @@ n=0
 max=10
 while [ $n -lt $max ]
 do
-    out=$( kubectl $context $ns get svc | grep "${name}.*external" ) 
+    out=$( kubectl ${context} ${ns} get svc | grep "${name}.*external" ) 
     if [[ $out != "" && $? == 0 ]]
     then
         #printf "${out}\n"
@@ -63,7 +64,15 @@ n=0
 max=30
 while [ $n -lt $max ]
 do
-    out=$( kubectl $context $ns get svc | grep "${name}.*external.*pending" ) 
+    if [[ ${multiCluster} == true ]]
+    then
+        out1=$( kubectl --context=$MDB_CLUSTER_0_CONTEXT $ns get svc )
+        out2=$( kubectl --context=$MDB_CLUSTER_1_CONTEXT $ns get svc )
+        out3=$( kubectl --context=$MDB_CLUSTER_2_CONTEXT $ns get svc )
+        out=$( printf "$out1" "$out2" "$out3"| grep "${name}.*external.*pending" )
+    else
+        out=$( kubectl ${context} ${ns} get svc | grep "${name}.*external.*pending" ) 
+    fi
     if [[ $? == 1 ]]
     then
         if [[ ${multiCluster} == true ]]
@@ -72,7 +81,7 @@ do
         kubectl --context=$MDB_CLUSTER_1_CONTEXT $ns get $( kubectl --context=$MDB_CLUSTER_1_CONTEXT $ns get svc -o name | grep "${name}.*external" ) 
         kubectl --context=$MDB_CLUSTER_2_CONTEXT $ns get $( kubectl --context=$MDB_CLUSTER_2_CONTEXT $ns get svc -o name | grep "${name}.*external" ) 
         else
-        kubectl get $( kubectl get svc -o name | grep "${name}.*external" ) 
+        kubectl ${context} ${ns} get $( kubectl ${context} ${ns} get svc -o name | grep "${name}.*external" ) 
         fi
         [[ $? == 1 ]] && exit 1
         break
@@ -102,6 +111,6 @@ hn=( $( printf "${hnwp[*]%:*}" ) )
 if [[ ${makeCerts} == true && ${#hn[@]} != 0 ]] 
 then
     "${PWD}/certs/make_cluster_certs.bash" "${name}" ${hn[@]}
-    kubectl apply -f "${PWD}/certs/certs_mdb-${name}-cert.yaml"
+    kubectl ${context} ${ns} apply -f "${PWD}/certs/certs_mdb-${name}-cert.yaml"
 fi
 exit

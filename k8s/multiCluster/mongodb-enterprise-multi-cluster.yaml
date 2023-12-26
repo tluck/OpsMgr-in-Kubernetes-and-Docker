@@ -49,7 +49,7 @@ rules:
       - update
       - delete
   - apiGroups:
-      - ""
+      - '' 
     resources:
       - services
     verbs:
@@ -82,13 +82,13 @@ metadata:
   namespace: mongodb
 rules:
   - apiGroups:
-      - ""
+      - ''
     resources:
       - secrets
     verbs:
       - get
   - apiGroups:
-      - ""
+      - ''
     resources:
       - pods
     verbs:
@@ -139,7 +139,9 @@ spec:
         - name: mongodb-enterprise-operator-multi-cluster
           image: "quay.io/mongodb/mongodb-enterprise-operator-ubi:1.24.0"
           imagePullPolicy: Always
-          args: #- -watch-resource=mongodb #- -watch-resource=opsmanagers
+          args:
+            - -watch-resource=mongodb
+            - -watch-resource=opsmanagers
             - -watch-resource=mongodbusers
             - -watch-resource=mongodbmulticluster
           command:
@@ -195,11 +197,13 @@ spec:
             - name: AGENT_IMAGE
               value: "quay.io/mongodb/mongodb-agent-ubi:12.0.29.7785-1"
             - name: MONGODB_IMAGE
-              value: mongodb-enterprise-appdb-database-ubi
+              value: mongodb-enterprise-server
             - name: MONGODB_REPO_URL
               value: quay.io/mongodb
+            - name: MDB_IMAGE_TYPE
+              value: ubi8
             - name: PERFORM_FAILOVER
-              value: "true"
+              value: 'true'
       volumes:
         - name: kube-config-volume
           secret:

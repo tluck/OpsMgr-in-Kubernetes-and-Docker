@@ -10,6 +10,10 @@ spec:
     name: "NAME" # The name of the MongoDB resource this user will be added to
   roles:
     - db: "admin"
+      name: "cn=dbadmins,ou=users,dc=example,dc=org"
+    - db: "admin"
+      name: "root"
+    - db: "admin"
       name: "clusterAdmin"
     - db: "admin"
       name: "userAdminAnyDatabase"
@@ -17,4 +21,6 @@ spec:
       name: "readWriteAnyDatabase"
     - db: "admin"
       name: "dbAdminAnyDatabase"
+    - db: "admin"
+      name: "clusterMonitor"
 

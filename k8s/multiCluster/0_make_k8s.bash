@@ -14,6 +14,7 @@ memberType="e2-standard-4"
 # e2-standard-4 4 core x 16 GB
 # e2-standard-8 8 core x 32 GB
 
+# Note: these next two variables are variable names
 cluster="MDB_CENTRAL_C"
 gkeRegion=MDB_CENTRAL_REGION
 set -x
@@ -42,7 +43,7 @@ do
     --labels="expire-on=${expire},owner=thomas_luckenbach,purpose=opportunity,noreap=true" \
     --node-labels="expire-on=${expire},owner=thomas_luckenbach,purpose=opportunity,noreap=true"
   set +x
-  gcloud container clusters get-credentials ${!cluster} --zone=${!zone}
+  gcloud container clusters get-credentials ${!cluster} --zone=${!gkeZone}
 done
 
 # make the ISTIO Mesh

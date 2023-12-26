@@ -64,5 +64,5 @@ then
     exit 1
 fi
 done
-printf "%s\n" "... Done"
+printf "... Done.\n"
 exit 0

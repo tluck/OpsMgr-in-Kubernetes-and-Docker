@@ -31,7 +31,7 @@ fi
 name=${name:-myproject1-myreplicaset}
 internal=${internal:-0}
 
-type=$( kubectl get ${mdbKind}/${name} -o jsonpath='{.spec.type}' )
+type=$( kubectl $ns get ${mdbKind}/${name} -o jsonpath='{.spec.type}' )
 #if [[ "${sharded}" == "1" ]]
 if [[ "${type}" == "ShardedCluster" ]]
 then
@@ -44,13 +44,13 @@ fi
 
 #cs="mongodb://${dbuser}:${dbpassword}@${hn0}:${np0},${hn1}:${np1},${hn2}:${np2}/?replicaSet=${name}&authSource=admin"
 ics=$( kubectl $context $ns get secret ${name}-${name}-admin-admin -o jsonpath="{.data['connectionString\.standard']}" | base64 --decode ) 
-eval externalDomain=$( kubectl get ${mdbKind} ${name} -o json | jq .spec.externalAccess.externalDomain ); 
+eval externalDomain=$( kubectl $ns get ${mdbKind} ${name} -o json | jq .spec.externalAccess.externalDomain ); 
 # bug with connection string
 if [[ ${externalDomain} != "null" ]]
 then
     if [[ ${mdbKind} == "MongoDBMultiCluster" ]]
     then
-    eval domainList=( $(kubectl get ${mdbKind} ${name} -o json|jq .spec.clusterSpecList[].externalAccess.externalDomain ) )
+    eval domainList=( $(kubectl $ns get ${mdbKind} ${name} -o json|jq .spec.clusterSpecList[].externalAccess.externalDomain ) )
     hn=( "${name}-0-0.${domainList[0]}" \
          "${name}-0-1.${domainList[0]}" \
          "${name}-1-0.${domainList[1]}" \
@@ -85,15 +85,15 @@ then
 fi
 fi
 # check to see is TLS on
-spec=$( kubectl get ${mdbKind}/${name} -o jsonpath='{.spec.security}' )
+spec=$( kubectl $ns get ${mdbKind}/${name} -o jsonpath='{.spec.security}' )
 if [[ ${serviceType} != "" && ${internal} = 0 ]]
 then
 if [[ "${spec}" == "map[enabled:true]" || "${spec}" == *"refix":* || "${spec}" == *"ecret":* || "${spec}" == *\"ca\":* ]]
 then
     test -e "${PWD}/certs/ca.pem"               || kubectl $context $ns get configmap ca-pem -o jsonpath="{.data['ca-pem']}" > "${PWD}/certs/ca.pem"
-    #test -e "${PWD}/certs/${name}${mongos}.pem" || kubectl get secret mdb-${name}${mongos}-cert-pem -o jsonpath="{.data.*}" | base64 --decode > "${PWD}/certs/${name}${mongos}.pem"
+    #test -e "${PWD}/certs/${name}${mongos}.pem" || kubectl $ns get secret mdb-${name}${mongos}-cert-pem -o jsonpath="{.data.*}" | base64 --decode > "${PWD}/certs/${name}${mongos}.pem"
     kubectl $context $ns get secret mdb-${name}${mongos}-cert-pem -o jsonpath="{.data.*}" | base64 --decode > "${PWD}/certs/${name}${mongos}.pem"
-    eval version=$( kubectl get ${mdbKind} ${name} -o jsonpath={.spec.version} )
+    eval version=$( kubectl $ns get ${mdbKind} ${name} -o jsonpath={.spec.version} )
     if [[ ${version%%.*} = 3 ]]
     then
         ssltls_enabled="&ssl=true&sslCAFile=${PWD}/certs/ca.pem&sslPEMKeyFile=${PWD}/certs/${name}${mongos}.pem "

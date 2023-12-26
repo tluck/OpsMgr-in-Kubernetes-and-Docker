@@ -111,6 +111,14 @@ spec:
     #LDAP          role: dbAdminAnyDatabase
     #LDAP        - db: admin
     #LDAP          role: readWriteAnyDatabase
+    #LDAP    - role: cn=dbadmins,ou=users,dc=example,dc=org
+    #LDAP      db: admin
+    #LDAP      privileges: []
+    #LDAP      roles:
+    #LDAP        - db: admin
+    #LDAP          role: root
+    #LDAP        - db: admin
+    #LDAP          role: clusterAdmin
   additionalMongodConfig:
     operationProfiling:
       mode: "off" # "slowOp"

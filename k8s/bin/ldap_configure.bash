@@ -2,7 +2,7 @@
 
 #docker run --detach --rm --name openldap \
 #   --env LDAP_ADMIN_USERNAME=admin \
-#   --env LDAP_ADMIN_PASSWORD=adminpassword \
+#   --env LDAP_ADMIN_PASSWORD=${ldapBindQueryPassword} \
 #   --env LDAP_USERS="user01,user02" \
 #   --env LDAP_PASSWORDS="Mongodb1,Mongodb1" \
 #   -p "389:1389" bitnami/openldap:latest
@@ -11,7 +11,23 @@ source init.conf
 [[ ${demo} ]] && serviceType="NodePort"
 
 kubectl config set-context $(kubectl config current-context) --namespace=${namespace}
+
 serviceName="openldap-svc-ext"
+max=30
+n=0
+while [ $n -lt $max ]
+do
+    out=$( kubectl get svc | grep "${serviceName}.*pending" )
+    if [[ $? == 1 ]]
+    then
+        kubectl get $( kubectl get svc -o name | grep "${serviceName}" )
+        [[ $? == 1 ]] && exit 1
+        break
+    fi
+    sleep 5
+    n=$((n+1))
+done
+
 if [[ $serviceType == "NodePort" ]]
 then
     slist=( $(get_hns.bash -s "${serviceName}" ) ) 
@@ -45,7 +61,7 @@ olcMemberOfRefint: TRUE
 EOF
 
 # add User TL
-ldapmodify -H ${ldapServer} -x -a -w adminpassword -D cn=admin,dc=example,dc=org <<EOF
+ldapmodify -H ${ldapServer} -x -a -w ${ldapBindQueryPassword} -D cn=admin,dc=example,dc=org <<EOF
 dn: cn=Thomas.Luckenbach,ou=users,dc=example,dc=org
 cn: Thomas
 sn: Luckenbach
@@ -61,7 +77,7 @@ homeDirectory: /Users/tluck
 EOF
 
 # add User SL
-ldapmodify -H ${ldapServer} -x -a -w adminpassword -D cn=admin,dc=example,dc=org <<EOF
+ldapmodify -H ${ldapServer} -x -a -w ${ldapBindQueryPassword} -D cn=admin,dc=example,dc=org <<EOF
 dn: cn=Suzanne.Luckenbach,ou=users,dc=example,dc=org
 cn: Suzanne
 sn: Luckenbach
@@ -76,7 +92,7 @@ gidNumber: 1003
 homeDirectory: /Users/suzanne
 EOF
 
-#ldapmodify -H ${ldapServer} -x -c -w adminpassword -D cn=admin,dc=example,dc=org <<EOF
+#ldapmodify -H ${ldapServer} -x -c -w ${ldapBindQueryPassword} -D cn=admin,dc=example,dc=org <<EOF
 #dn: cn=readers,ou=users,dc=example,dc=org
 #changetype: modify
 #delete: member
@@ -86,25 +102,32 @@ EOF
 #EOF
 
 # put users in readers group -  DB users
-ldapmodify -H ${ldapServer} -x -c -w adminpassword -D cn=admin,dc=example,dc=org <<EOF
+ldapmodify -H ${ldapServer} -x -c -w ${ldapBindQueryPassword} -D cn=admin,dc=example,dc=org <<EOF
 dn: cn=readers,ou=users,dc=example,dc=org
 add: member
 member: cn=Thomas.Luckenbach,ou=users,dc=example,dc=org
 EOF
 
 # create dbusers group and add users  - org ossociations
-ldapadd -H ${ldapServer} -x -c -w adminpassword -D cn=admin,dc=example,dc=org <<EOF
+ldapadd -H ${ldapServer} -x -c -w ${ldapBindQueryPassword} -D cn=admin,dc=example,dc=org <<EOF
 dn: cn=dbusers,ou=users,dc=example,dc=org
 cn: dbusers
 objectClass: groupOfNames
-member: cn=dbAdmin,ou=users,dc=example,dc=org
 member: cn=User01,ou=users,dc=example,dc=org
 member: cn=User02,ou=users,dc=example,dc=org
 member: cn=Thomas.Luckenbach,ou=users,dc=example,dc=org
 EOF
 
+# create dbadmin group and add users  - org ossociations
+ldapadd -H ${ldapServer} -x -c -w ${ldapBindQueryPassword} -D cn=admin,dc=example,dc=org <<EOF
+dn: cn=dbadmins,ou=users,dc=example,dc=org
+cn: dbadmins
+objectClass: groupOfNames
+member: cn=dbAdmin,ou=users,dc=example,dc=org
+EOF
+
 # create managers group and add users  - org ossociations
-ldapadd -H ${ldapServer} -x -c -w adminpassword -D cn=admin,dc=example,dc=org <<EOF
+ldapadd -H ${ldapServer} -x -c -w ${ldapBindQueryPassword} -D cn=admin,dc=example,dc=org <<EOF
 dn: cn=managers,ou=users,dc=example,dc=org
 cn: managers
 objectClass: groupOfNames

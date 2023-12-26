@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source init.conf
+
 while getopts 'n:s:h' opts
 do
   case "$opts" in

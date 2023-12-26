@@ -72,19 +72,16 @@ then
     fi
 fi
 
-if [[ "${OM}" == true || "${Clusters}" == true ]]
-then
-    printf "\n%s\n" "__________________________________________________________________________________________"
-    printf "%s\n" "Deploy the Operator ..."
-    (set -x; deploy_Operator.bash)
-    [[ $? != 0 ]] && exit 1
-fi
+printf "\n%s\n" "__________________________________________________________________________________________"
+printf "%s\n" "Deploy the Operator ..."
+(set -x; deploy_Operator.bash)
+[[ $? != 0 ]] && exit 1
 
+if [[ "${OM}" == true ]]
+then
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Deploy OM and wait until Running status..."
 date
-if [[ "${OM}" == true ]]
-then
     test=" -t ${skipCertGen}" # [-n name] [-g] [-c cpu] [-m memory] [-d disk] [-v version] 
     prod=" -n ${omName} -c 1.00 -m 4Gi -d 40Gi -v ${omVersion} ${skipCertGen}"
 # [[ "${context}" == "docker"* ]] && docker pull "quay.io/mongodb/mongodb-enterprise-ops-manager:$omVersion" # issue with docker not (re)pulling the image

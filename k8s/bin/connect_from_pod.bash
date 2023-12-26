@@ -16,18 +16,19 @@ do
 done
 shift "$(($OPTIND -1))"
 
+ns="-n $namespace"
 mdbKind="MongoDB"
 if [[ ${multiCluster} == "-m" ]]
 then
     clusterDomain="${multiClusterDomain}"
     mdbKind="MongoDBMultiCluster"
     context="--context=$MDB_CLUSTER_0_CONTEXT"
-    ns="-n $namespace"
+    ns="-n $mcNamespace"
     member="-0"
 fi
 
 name=${name:-myproject1-myreplicaset}
-type=$( kubectl get ${mdbKind}/${name} -o jsonpath='{.spec.type}' )
+type=$( kubectl $ns get ${mdbKind}/${name} -o jsonpath='{.spec.type}' )
 #if [[ "${sharded}" == "1" ]]
 if [[ "${type}" == "ShardedCluster" ]]
 then
@@ -35,7 +36,7 @@ then
     mongos="-mongos"
 fi
 
-version=$( kubectl get ${mdbKind} ${name} -o jsonpath='{.spec.version}' )
+version=$( kubectl $ns get ${mdbKind} ${name} -o jsonpath='{.spec.version}' )
 # use mongo or mongosh (v6)
 mongo=mongo
 if [[ ${version%%.*} > 4 ]]

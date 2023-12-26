@@ -18,7 +18,8 @@ cat ${operator}| sed \
     -e "s/namespace: mongodb/namespace: $mcNamespace/"  > "${myOperator}"
 
 # kill off any existing operator
-kubectl delete deployment mongodb-enterprise-operator
+kubectl delete deployment mongodb-enterprise-operator > /dev/null 2>&1 
+kubectl delete deployment mongodb-enterprise-operator-multi-cluster > /dev/null 2>&1
 kubectl apply -f "${myOperator}"
 
 # set up roles for multi-cluster environment

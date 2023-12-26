@@ -23,7 +23,7 @@ TAB=$'\t'
 
 mdbKind=mdbmc
 #eval externalDomain=$( kubectl get mdbmc ${name} -o json | jq .spec.externalAccess.externalDomain ); 
-eval domainList=( $(kubectl get ${mdbKind} ${name} -o json|jq .spec.clusterSpecList[].externalAccess.externalDomain ) )
+eval domainList=( $(kubectl -n ${mcNamespace} get ${mdbKind} ${name} -o json|jq .spec.clusterSpecList[].externalAccess.externalDomain ) )
 eval dnszone=$( gcloud dns managed-zones list --format json | jq .[].name )
 
 eval iplist[0]=$( kubectl --context=$MDB_CLUSTER_0_CONTEXT -n ${mcNamespace} get svc ${name}-0-0-svc-external  -o json |jq .status.loadBalancer.ingress[].ip )
@@ -44,7 +44,7 @@ gcloud dns --project=${MDB_GKE_PROJECT} record-sets create ${name}-1-0.${domainL
 gcloud dns --project=${MDB_GKE_PROJECT} record-sets create ${name}-1-1.${domainList[1]} --type="A" --zone="${dnszone}" --rrdatas="${iplist[3]}" --ttl="300"
 gcloud dns --project=${MDB_GKE_PROJECT} record-sets create ${name}-2-0.${domainList[2]} --type="A" --zone="${dnszone}" --rrdatas="${iplist[4]}" --ttl="300"
 
-eval domainList=( $(kubectl get ${mdbKind} ${name} -o json|jq .spec.clusterSpecList[].externalAccess.externalDomain ) )
+eval domainList=( $(kubectl -n ${mcNamespace} get ${mdbKind} ${name} -o json|jq .spec.clusterSpecList[].externalAccess.externalDomain ) )
 
 names=(     "${name}-0-0" \
             "${name}-0-1" \

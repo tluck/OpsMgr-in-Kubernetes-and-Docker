@@ -30,6 +30,8 @@ cat <<EOF >> "${myOperator}"
               value: '480'
 EOF
 
+kubectl delete deployment mongodb-enterprise-operator > /dev/null 2>&1
+kubectl delete deployment mongodb-enterprise-operator-multi-cluster > /dev/null 2>&1
 kubectl apply -f "${myOperator}"
 
 if [[ ${tls} == true ]] 

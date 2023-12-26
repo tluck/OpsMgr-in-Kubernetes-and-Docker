@@ -244,11 +244,12 @@ then
   done
   fi
   delete_project.bash -p ${projectName} 
-  printf "Done.\n"
+  printf "... Done.\n"
   exit
 fi
 
 # Create map for OM Org/Project
+printf "Using Ops Manager at: ${opsMgrUrl} \n"
 if [[ ${tls} == true ]]
 then
   kubectl -n ${namespace} delete configmap "${fullName}" > /dev/null 2>&1
@@ -366,7 +367,9 @@ resource="${mdbKind}/${fullName}"
 printf "\n%s\n" "Monitoring the progress of resource ${resource} ..."
 notapproved="Not all certificates have been approved"
 certificate="Certificate"
-while true
+n=0
+max=40
+while [ $n -lt $max ]
 do
     kubectl -n ${namespace} get "${resource}"
     pstatus=$( kubectl -n ${namespace} get "${resource}" -o jsonpath={'.status.phase'} )
@@ -384,6 +387,7 @@ do
         break
     fi
     sleep 15
+    n=$((n+1))
 done
 
 sleep 5

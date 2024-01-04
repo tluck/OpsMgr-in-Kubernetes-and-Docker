@@ -54,6 +54,8 @@ done
 # make the ISTIO Mesh
 _install_istio_separate_network.sh 
 
+kubectl config use-context $MDB_CENTRAL_C_CONTEXT
+
 else
 
 cluster="MDB_CENTRAL_C"

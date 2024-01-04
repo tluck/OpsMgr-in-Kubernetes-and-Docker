@@ -27,13 +27,6 @@ d=$( dirname "$0" )
 cd "${d}"
 source init.conf
 
-#which jq > /dev/null
-#if [[ $? != 0 ]]
-#then
-#    printf "%s\n" "Exiting - Missing jq tool - run: brew install jq"
-#    exit 1
-#fi
-
 which kubectl > /dev/null
 if [[ $? != 0 ]]
 then
@@ -48,7 +41,7 @@ then
     exit 1
 fi
 
-[[ -e deploy.conf ]] && rm deploy.conf
+#[[ -e deploy.conf ]] && rm deploy.conf
 
 date
 printf "\n%s\n" "__________________________________________________________________________________________"
@@ -69,7 +62,7 @@ fi
 
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Deploy the Operator ..."
-(set -x; deploy_Operator.bash)
+(set -x; deploy_mcOperator.bash)
 [[ $? != 0 ]] && exit 1
 
 if [[ ${OM} == true ]]

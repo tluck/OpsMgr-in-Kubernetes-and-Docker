@@ -27,13 +27,6 @@ d=$( dirname "$0" )
 cd "${d}"
 source init.conf
 
-#which jq > /dev/null
-#if [[ $? != 0 ]]
-#then
-#    printf "%s\n" "Exiting - Missing jq tool - run: brew install jq"
-#    exit 1
-#fi
-
 which kubectl > /dev/null
 if [[ $? != 0 ]]
 then
@@ -72,7 +65,7 @@ printf "%s\n" "Deploy the Operator ..."
 (set -x; deploy_Operator.bash)
 [[ $? != 0 ]] && exit 1
 
-if [[ "${OM}" == true ]]
+if [[ ${OM} == true ]]
 then
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Deploy OM and wait until Running status..."
@@ -82,7 +75,7 @@ date
 # [[ "${context}" == "docker"* ]] && docker pull "quay.io/mongodb/mongodb-enterprise-ops-manager:$omVersion" # issue with docker not (re)pulling the image
 (set -x; deploy_OM.bash ${!options})
 
-if [[ "${omBackup}" == true ]]
+if [[ ${omBackup} == true ]]
 then
     printf "\n%s\n" "__________________________________________________________________________________________"
     # get the API key stored in a secret to find the AppDB orgId
@@ -113,7 +106,7 @@ printf "#deploy_Cluster.bash ${!options}\n" >> deploy.conf
 printf "#deploy_Cluster.bash ${!options}\n" >> deploy.conf
 fi # backup true
 fi # OM
-[[ "${OM}" == true && "${Clusters}" == false ]] && exit
+[[ ${OM} == true && ${Clusters} == false ]] && exit
 
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Create a specific Organization to put your Deployment projects in ..."
@@ -131,9 +124,9 @@ printf "%s\n" "Create a Production ReplicaSet Cluster with a splitHorizon config
 date
 projectName="myProject1"
 name="myreplicaset"
-test="-n ${name} -v 6.0.11-ent -c 0.50 -m 400Mi         -l ${ldapType} -o ${orgId} -p ${projectName} ${skipCertGen} -e horizon"
-prod="-n ${name} -v 6.0.11-ent -c 1.00 -m 4.0Gi -d 20Gi -l ${ldapType} -o ${orgId} -p ${projectName} ${skipCertGen} -e horizon"
-# source deploy.conf; deploy_Cluster.bash -n "myreplicaset" -v "6.0.11-ent" -c "0.50" -m "400Mi" -d "1Gi" -l "ldap" -o "$myDeployment_orgId" -p "myProject1" -g -e horizon
+test="-n ${name} -v 6.0.11-ent -c 0.50 -m 400Mi         -o ${orgId} -p ${projectName} ${skipCertGen} -l ${ldapType} -e horizon"
+prod="-n ${name} -v 6.0.11-ent -c 1.00 -m 4.0Gi -d 20Gi -o ${orgId} -p ${projectName} ${skipCertGen} -l ${ldapType} -e horizon"
+# source deploy.conf; deploy_Cluster.bash -n "myreplicaset" -v "6.0.11-ent" -c "0.50" -m "400Mi" -d "1Gi"  -o "$myDeployment_orgId" -p "myProject1" -l "ldap" -e horizon
 (set -x; deploy_Cluster.bash ${!options})
 printf "#deploy_Cluster.bash ${!options}\n" >> deploy.conf
 cluster1="${projectName}-${name}"

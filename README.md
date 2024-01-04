@@ -2,6 +2,16 @@
 
 ## In Kubernetes Summary:
 
+TL;DR: To run the whole demo (assumes you have the GCP gcloud cli/api and other tools installed)
+	
+	git clone https://github.com/tluck/OpsMgr-in-Kubernetes-and-Docker.git
+	cd OpsMgr-in-Kubernetes-and-Docker/k8s
+	cp sample_init.conf init.conf
+	./0_make_k8s.bash 
+	./_launch.bash
+	./_mc_launch.bash
+	
+
 This demo will install OM and a few MDB Clusters into a Kubernetes cluster.
 
 - Ops Manager v6 is the current version.
@@ -16,8 +26,12 @@ This demo will install OM and a few MDB Clusters into a Kubernetes cluster.
 - And Queriable backup is available too!  
 
 ### Step 1. Configure a K8s Cluster
-- Setup the K8s cluster and install the needed command tools: kubectl, jq, cfssl.
-	* Kubernetes - the demo compatible with RH Openshift, Docker-Desktop, Minikube, AWS EKS, GCP K8S.
+- Setup the K8s cluster
+- Install the needed command tools: kubectl, cfssl (to generate a CA).
+
+Note: see the multiCluster section below to create 4 seperate K8s clusters which can be used for this part.
+
+	* Kubernetes - the demo is compatible with RH Openshift, Docker-Desktop, Minikube, AWS EKS, GCP K8S.
 	* For a Production/Full Deployment:
 		* 48-64 Cores
 		* 192-256 GB Memory
@@ -30,18 +44,21 @@ This demo will install OM and a few MDB Clusters into a Kubernetes cluster.
 
 ### Step 2. Launch the Services
 The **_launch.bash** script runs several "deploy" scripts for each of the following steps.
-However, before you run the **_launch.bash** script or any of deploy scripts, copy the `sample_init.conf` file to `init.conf` and customer the parameters, such as update your username (use your email) and a password. Note: For a simple demo, you may need to change serviceType to NodePort vs LoadBalancer. 
+
+**Important** Before you run the **_launch.bash** script or any of the "deploy" scripts, copy the `sample_init.conf` file to `init.conf` and customize the parameters, such as adding your username (your email) and/or a new password. 
+
+Note: For a simple demo, you may need to change serviceType to NodePort vs LoadBalancer. 
 
 - Script 1: **deploy_Operator.bash**
-	- Setup the OM enviroment
-	- Defines the namespace
+	- Setup the environment in the namespace defined in init.conf
 	- Deploys the MongoDB Enterprise K8s Operator
+	- Deploys the Cert-Manager if TLS is on (default)
 
 - Script 2: **deploy_OM.bash**
 	- Setup the Ops Manager enviroment
   	- Deploy the OM Resources
   		- OpsManager
-  		- AppDB 
+  		- AppDB
   	- Monitors the progress of OM for Readiness
 
 - Script 3: **deploy_Cluster.bash** 
@@ -51,39 +68,62 @@ However, before you run the **_launch.bash** script or any of deploy scripts, co
 	- The cluster "myreplicaset" is a "Production" ReplicaSet Cluster and has a splitHorizon configuration for external cluster access
 		- connect via `bin/connect_external.bash` script
 	- The cluster "mysharded" is a "Production" Sharded Cluster using either NodePort or LoadBalancer for external cluster access
-	- The monitors the progress until the pods of the cluster are ready before it finishes.
-	- Note: for convenience, the k8s cluster node names are used for the external access.
+	- The script monitors the progress of the "mongodb" resource to attain "ready" before it exits.
+	- Note: for convenience, the k8s cluster node names are used for the split horizon external access.
 	
 ### Step 3. Login to Ops Manager
-- To login to OM, connect with a browser using the user/password in init.conf.
+- To login to OM, connect with a browser using the user/password defined in `init.conf`.
 
-	- The URL to OM depends on two things: (1) TLS is used and (2) the port exposure methods.  
+	- The URL to OM depends on two things: 
+		1. whethter TLS is used (default) and 
+		2. the port exposure methods.  
+	
 	- When TLS is configured, use port 8443 (port 8080 is for a non-secure setup).
    		- If using a LoadBalancer, use: https://opsmanager-svc.mynamespace.svc.cluster.local:8443
    		- Or with NodePort, use: https://opsmanager-svc.mynamespace.svc.cluster.local:32443
-   		
-- The admin user credentials and various other settings are held in ```init.conf```
-	- the scripts also create a hostname entry such as:
-	```127.0.0.1       opsmanager-svc.<namespace>.svc.cluster.local # opsmgr```
-	into the ```/etc/hosts``` file - which allows external access to OM using the same name as used internally (in the cluster).
 
-	- Note: if you add the custom TLS certificate authority (certs/ca.crt) to your keystore, this allows seamless unchallenged secure https access.
+   		Note: the actual URL will be shown along with the external name configured.
+   		
+- The admin user credentials and various other settings are held in `init.conf`
+	- The scripts also create a hostname entry such as:
+	
+		`127.0.0.1       opsmanager-svc.<namespace>.svc.cluster.local`
+	
+		or
+	
+		`34.168.131.193	opsmanager-svc.mongodb.svc.mdb.com opsmanager-svc om.mongodb.mdb.com`
+	
+		into the ```/etc/hosts``` file for your convenience.
+
+	- Note: Add the custom TLS certificate authority (certs/ca.crt) to your keystore. This will allow seamless unchallenged secure https access.
 	
 ### Step 4: LDAP Server (Optional)
 - Run ```bin/deploy_ldap.bash``` to create the server
    - This creates an openLDAP server and pre-configures OM for users and groups.
    - There are several DBusers: dbAdmin, User01, User02 (password is Mongodb1)
-   - There are several OpsMgr Users: Thomas.Luckenbach
-   - There are 3 groups:
+   - There are several OpsMgr Users: e.q Thomas.Luckenbach
+   - There are 4 groups:
+    	- dn: cn=dbadmins,ou=users,dc=example,dc=org
     	- dn: cn=dbusers,ou=users,dc=example,dc=org
     	- dn: cn=readers,ou=users,dc=example,dc=org
     	- dn: cn=managers,ou=users,dc=example,dc=org
 	- The "manager" group is intended for configuring LDAP for OM users
 	- The "dbusers" group is intended for configuring LDAP for DBusers
+	- The "dbadmim" group is intended for configuring LDAP for DBadmins for clusterAdmin etc.
 
 ### Step 5: BiConnector Server (Optional)
 - Run ```bin/deploy_BIC.bash -n <cluster> -p <NodePort> ``` to create the connector server 
    - This creates and configures a BiConnector server for a Cluster on NodePort N (e.g. 30307).
+
+### Step 6: MultiCluster K8s resources (Optional)
+- If you didn't already make multiple k8s clusters, run the ```0_make_k8s.bash``` to create 4 K8s in GCP.
+
+	Note: this script builds a central cluster and 4 member clusters and then installs Istio mesh. The central cluster also has a VPC-wide DNS server.
+- run ```_mc_launch.bash``` 
+	- Creates two 5-node replicaSets across 3 the K8s "member" clusters - one is externally accessible using an external domain.
+Note: this should be run afer you build OM resources as outlined above.
+
+
 
 # Ops Manager Demo Environment (in Docker)
 Docker Image Repo:     https://hub.docker.com/repository/docker/tjluckenbach/mongodb

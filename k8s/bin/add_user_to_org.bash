@@ -1,7 +1,7 @@
 #!/bin/bash
 
 source init.conf
-source custom.conf
+source deploy.conf
 
 while getopts 'i:o:u:h' opt
 do

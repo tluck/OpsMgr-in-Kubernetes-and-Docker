@@ -6,7 +6,7 @@ adminUser="$(     kubectl get secret admin-user-credentials -o json | jq .data.U
 kpublicApiKey="$(  kubectl get secret ${namespace}-${omName}-admin-key -o json | jq .data.publicKey  | sed -e's/"//g'| base64 --decode )"
 kprivateApiKey="$( kubectl get secret ${namespace}-${omName}-admin-key -o json | jq .data.privateKey | sed -e's/"//g'| base64 --decode )"
 
-test -e custom.conf && source custom.conf
+test -e deploy.conf && source deploy.conf
 
 if [[ $publicApiKey == "" ]]
 then
@@ -22,8 +22,8 @@ output=$( curl $curlOpts --silent --user "${kpublicApiKey}:${kprivateApiKey}" --
     if [[ "${output}" != "" ]]
     then
         printf  "Created new keys\n"
-        printf  "publicApiKey=$(  printf "${output}" |jq .publicKey  )\n" | tee -a custom.conf
-        printf  "privateApiKey=$( printf "${output}" |jq .privateKey )\n" | tee -a custom.conf
+        printf  "publicApiKey=$(  printf "${output}" |jq .publicKey  )\n" | tee -a deploy.conf
+        printf  "privateApiKey=$( printf "${output}" |jq .privateKey )\n" | tee -a deploy.conf
     else
         printf "%s\n" "* * * Error - did not create any keys"
         exit 1

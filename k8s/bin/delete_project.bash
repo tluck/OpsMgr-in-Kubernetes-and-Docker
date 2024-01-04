@@ -1,7 +1,7 @@
 #!/bin/bash
 
 source init.conf
-source custom.conf
+source deploy.conf
 
 while getopts 'i:o:p:u:h' opt
 do
@@ -31,8 +31,8 @@ errorCode=$( printf "%s" "$output" | jq .errorCode )
 
 if [[ "${errorCode}" == "null" ]]
 then
-    conf=$( sed -e "/${projectName}_Id/d" -e "/${projectName}_agentApiKey/d" custom.conf )
-    printf "%s\n" "${conf}" > custom.conf
+    conf=$( sed -e "/${projectName}_Id/d" -e "/${projectName}_agentApiKey/d" deploy.conf )
+    printf "%s\n" "${conf}" > deploy.conf
     exit 0
 else
     detail=$( printf "%s" "$output" | jq .detail )

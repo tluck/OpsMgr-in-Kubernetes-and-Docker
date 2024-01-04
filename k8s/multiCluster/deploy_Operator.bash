@@ -37,6 +37,12 @@ _istio_webhook.bash
 
 if [[ ${tls} == true ]] 
 then
+    which cfssl > /dev/null
+    if [[ $? != 0 ]]
+    then
+        printf "%s\n" "Exiting - Missing cloudformation certificiate tools - install cfssl and cfssljson"
+        exit 1
+    fi
     certs/make_cert_issuer.bash ${mcNamespace} ${issuerName} ${issuerVersion}
     [[ $? != 0 ]] && exit 1
 fi

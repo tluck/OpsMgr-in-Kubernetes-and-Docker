@@ -3,7 +3,7 @@
 # script to find out if there is an existing non-deleted Organization and what is the id
 
 source init.conf
-test -f custom.conf && source custom.conf
+test -f deploy.conf && source deploy.conf
 
 while getopts 'i:o:h' opt
 do

@@ -2,6 +2,9 @@
 
 source init.conf
 
+verb=create
+[[ $1 == "-d" ]] && verb=delete
+
 # the actual names for clusters and zones are set in init.conf
 domain="${clusterDomain:-mdb.com}"
 nodesPerRegion="2" # 1 = 3 total nodes, 2 = 6 total nodes (2 per zone)x(3 zones)
@@ -15,10 +18,12 @@ memberType="e2-standard-4"
 # e2-standard-8 8 core x 32 GB
 
 # Note: these next two variables are variable names
+if [[ $verb == "create" ]]
+then
 cluster="MDB_CENTRAL_C"
 gkeRegion=MDB_CENTRAL_REGION
 set -x
-gcloud container clusters create ${!cluster} --region="${!gkeRegion}" \
+gcloud container clusters ${verb} ${!cluster} --region="${!gkeRegion}" \
     --cluster-dns="clouddns" \
     --cluster-dns-scope="vpc" \
     --cluster-dns-domain="${domain}" \
@@ -36,7 +41,7 @@ do
   cluster=MDB_CLUSTER_${n}
   gkeZone=MDB_CLUSTER_${n}_ZONE
   set -x
-    gcloud container clusters create ${!cluster} --zone="${!gkeZone}" \
+    gcloud container clusters ${verb} ${!cluster} --zone="${!gkeZone}" \
     --num-nodes=${nodesPerZone} \
     --machine-type "${memberType}" \
     --cluster-version="1.27" \
@@ -48,3 +53,19 @@ done
 
 # make the ISTIO Mesh
 _install_istio_separate_network.sh 
+
+else
+
+cluster="MDB_CENTRAL_C"
+gkeRegion=MDB_CENTRAL_REGION
+set -x
+gcloud container clusters ${verb} ${!cluster} --region="${!gkeRegion}" 
+
+for n in 0 1 2 
+do
+  cluster=MDB_CLUSTER_${n}
+  gkeZone=MDB_CLUSTER_${n}_ZONE
+  set -x
+    gcloud container clusters ${verb} ${!cluster} --zone="${!gkeZone}" 
+done
+fi

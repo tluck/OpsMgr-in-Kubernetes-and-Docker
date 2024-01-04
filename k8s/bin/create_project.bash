@@ -1,7 +1,7 @@
 #!/bin/bash
 
 source init.conf
-source custom.conf
+source deploy.conf
 
 while getopts 'i:o:p:u:h' opt
 do
@@ -31,12 +31,12 @@ errorCode=$( printf "%s" "$output" | jq .errorCode )
 
 if [[ "${errorCode}" == "null" ]]
 then
-    conf=$( sed -e "/${projectName}_Id/d" -e "/${projectName}_agentApiKey/d" custom.conf )
-    printf "%s\n" "${conf}" > custom.conf
+    conf=$( sed -e "/${projectName}_Id/d" -e "/${projectName}_agentApiKey/d" deploy.conf )
+    printf "%s\n" "${conf}" > deploy.conf
     printf "%s\n" "Successfully created Project: $projectName in OrgId: ${orgId}"
-#    echo  projectName=\"${projectName}\"                                        >> custom.conf
-    echo  ${projectName}_projectId="$(   printf "%s" "$output" | jq .id )"          >> custom.conf
-    echo  ${projectName}_agentApiKey="$( printf "%s" "$output" | jq .agentApiKey )" >> custom.conf
+#    echo  projectName=\"${projectName}\"                                        >> deploy.conf
+    echo  ${projectName}_projectId="$(   printf "%s" "$output" | jq .id )"          >> deploy.conf
+    echo  ${projectName}_agentApiKey="$( printf "%s" "$output" | jq .agentApiKey )" >> deploy.conf
 else
     detail=$( printf "%s" "$output" | jq .detail )
     printf "%s\n" "* * * Error - did not create projectName.\n $detail \n"

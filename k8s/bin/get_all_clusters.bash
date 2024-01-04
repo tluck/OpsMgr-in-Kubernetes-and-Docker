@@ -2,12 +2,12 @@
 
 source init.conf 
 
-if [[ -e custom.conf ]]
+if [[ -e deploy.conf ]]
 then
-    source custom.conf
+    source deploy.conf
 else
     get_key.bash
-    source custom.conf
+    source deploy.conf
 fi
 
 out=$( curl $curlOpts --silent --user "${publicKey}:${privateKey}" --digest \

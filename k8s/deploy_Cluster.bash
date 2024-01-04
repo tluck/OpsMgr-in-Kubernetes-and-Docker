@@ -225,8 +225,7 @@ if [[ ${cleanup} == 1 ]]
 then
   printf "Cleaning up ... \n"
   kubectl -n ${namespace} delete ${mdbKind} "${fullName}" --now > /dev/null 2>&1
-  kubectl -n ${namespace} delete $( kubectl -n ${namespace} get pods -o name | grep "${fullName}" ) --force --now > /dev/null 2>&1
-  for type in pvc svc secrets configmaps
+  for type in sts pods svc secrets configmaps pvc
   do
     kubectl -n ${namespace} delete $( kubectl -n ${namespace} get $type -o name | grep "${fullName}" ) --now > /dev/null 2>&1
     if [[ ${multiCluster} == true ]]
@@ -368,7 +367,7 @@ printf "\n%s\n" "Monitoring the progress of resource ${resource} ..."
 notapproved="Not all certificates have been approved"
 certificate="Certificate"
 n=0
-max=40
+max=80
 while [ $n -lt $max ]
 do
     kubectl -n ${namespace} get "${resource}"

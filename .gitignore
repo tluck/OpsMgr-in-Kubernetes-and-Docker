@@ -7,6 +7,6 @@
 *.csr
 *.orig
 k8s/init.conf
-k8s/custom.conf
-k8s/multiCluster/custom.conf
+k8s/deploy.conf
+k8s/multiCluster/deploy.conf
 k8s/multiCluster/init.conf

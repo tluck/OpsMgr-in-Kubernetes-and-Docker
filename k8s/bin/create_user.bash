@@ -1,7 +1,7 @@
 #!/bin/bash
 
 source init.conf
-source custom.conf
+source deploy.conf
 
 orgName=${orgName:-myDeployment}
 orgInfo=( $( get_org.bash -o ${orgName} ) )

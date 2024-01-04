@@ -77,13 +77,16 @@ do
     then
         if [[ ${multiCluster} == true ]]
         then
-        kubectl --context=$MDB_CLUSTER_0_CONTEXT $ns get $( kubectl --context=$MDB_CLUSTER_0_CONTEXT $ns get svc -o name | grep "${name}.*external" ) 
-        kubectl --context=$MDB_CLUSTER_1_CONTEXT $ns get $( kubectl --context=$MDB_CLUSTER_1_CONTEXT $ns get svc -o name | grep "${name}.*external" ) 
-        kubectl --context=$MDB_CLUSTER_2_CONTEXT $ns get $( kubectl --context=$MDB_CLUSTER_2_CONTEXT $ns get svc -o name | grep "${name}.*external" ) 
+        #kubectl --context=$MDB_CLUSTER_0_CONTEXT $ns get $( kubectl --context=$MDB_CLUSTER_0_CONTEXT $ns get svc -o name | grep "${name}.*external" ) 
+        #kubectl --context=$MDB_CLUSTER_1_CONTEXT $ns get $( kubectl --context=$MDB_CLUSTER_1_CONTEXT $ns get svc -o name | grep "${name}.*external" ) 
+        #kubectl --context=$MDB_CLUSTER_2_CONTEXT $ns get $( kubectl --context=$MDB_CLUSTER_2_CONTEXT $ns get svc -o name | grep "${name}.*external" ) 
+        kubectl --context=$MDB_CLUSTER_0_CONTEXT $ns get svc  | grep "${name}.*external"  
+        kubectl --context=$MDB_CLUSTER_1_CONTEXT $ns get svc  | grep "${name}.*external"  
+        kubectl --context=$MDB_CLUSTER_2_CONTEXT $ns get svc  | grep "${name}.*external"  
         else
         kubectl ${context} ${ns} get $( kubectl ${context} ${ns} get svc -o name | grep "${name}.*external" ) 
         fi
-        [[ $? == 1 ]] && exit 1
+        #[[ $? == 1 ]] && exit 1
         break
     fi
     sleep 5

@@ -60,7 +60,7 @@ cleanup=${x:-0}
 projectName="${projectName:-$name}"
 fullName=$( printf "${projectName}-${name}"| tr '[:upper:]' '[:lower:]' )
 makeCerts=${makeCerts:-true}
-[[ ${demo} ]] && serviceType="NodePort"
+[[ ${demo} ]] && serviceType="NodePort" clusterDomain="cluster.local"
 duplicateServiceObjects=false
 
 # make manifest from template

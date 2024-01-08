@@ -58,6 +58,11 @@ then
         printf "Setting serviceType to NodePort\n"
         serviceType="NodePort"
     fi
+    if [[ ${clusterDomain} != "cluster.local" ]]
+    then
+        printf "Setting clusterDomain to cluster.local\n"
+        clusterDomain="cluster.local"
+    fi
 fi
 
 printf "\n%s\n" "__________________________________________________________________________________________"

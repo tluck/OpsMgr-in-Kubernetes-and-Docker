@@ -35,6 +35,10 @@ gcloud container clusters ${verb} ${!cluster} --region="${!gkeRegion}" \
 set +x
 gcloud container clusters get-credentials ${!cluster} --region="${!gkeRegion}"
 
+printf "Do you want to create 3 member clusters for use with Istio Mesh? (N/y)\n"
+read ans
+[[ $ans != y ]] && exit
+
 # 3 member clusters for the ISTIO Mesh
 for n in 0 1 2 
 do
@@ -61,13 +65,17 @@ else
 cluster="MDB_CENTRAL_C"
 gkeRegion=MDB_CENTRAL_REGION
 set -x
-gcloud container clusters ${verb} ${!cluster} --region="${!gkeRegion}" 
+printf 'y'| gcloud container clusters ${verb} ${!cluster} --region="${!gkeRegion}" 
+
+printf "Do you want to delete 3 memmber clusters with Istio Mesh? (N/y)\n"
+read ans
+[[ $ans != y ]] && exit
 
 for n in 0 1 2 
 do
   cluster=MDB_CLUSTER_${n}
   gkeZone=MDB_CLUSTER_${n}_ZONE
   set -x
-    gcloud container clusters ${verb} ${!cluster} --zone="${!gkeZone}" 
+    printf 'y'| gcloud container clusters ${verb} ${!cluster} --zone="${!gkeZone}" 
 done
 fi

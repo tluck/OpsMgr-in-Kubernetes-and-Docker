@@ -122,6 +122,7 @@ if [[ ${serviceType} == "NodePort" || ${demo} ]]
 then 
     LB="#LB  "
     serviceType="NodePort"
+    clusterDomain="cluster.local"
 else
     NP="#NP   "
 fi

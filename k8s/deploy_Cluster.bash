@@ -4,7 +4,7 @@ d=$( dirname "$0" )
 cd "${d}"
 source init.conf
 
-while getopts 'n:c:m:d:v:l:s:r:i:o:p:e:gxh' opt
+while getopts 'n:c:m:d:v:l:ks:r:i:o:p:e:gxh' opt
 do
   case "$opt" in
     n) name="$OPTARG" ;;
@@ -14,6 +14,7 @@ do
     v) ver="$OPTARG" ;;
     e) expose="$OPTARG" ;;
     l) ldap="$OPTARG" ;;
+    k) kmip=true ;;
     i|o) orgId="$OPTARG";;
     p) projectName="$OPTARG";;
     g) makeCerts=false ;; 
@@ -21,7 +22,7 @@ do
     s) shards="$OPTARG" ;;
     r) mongos="$OPTARG" ;;
     ?|h)
-      echo "Usage: $(basename $0) [-n name] [-c cpu] [-m memory] [-d disk] [-v ver] [ -e horizon ] [-s shards] [-r mongos] [-l ldap[s]] [-o orgId] [-p projectName] [-g] [-x]"
+      echo "Usage: $(basename $0) [-n name] [-c cpu] [-m memory] [-d disk] [-v ver] [ -e horizon ] [-s shards] [-r mongos] [-l ldap[s]] [-k] [-o orgId] [-p projectName] [-g] [-x]"
       echo "Usage:       -e to generate the external service definitions when using externalDomain or splitHorizon names"
       echo "Usage:           - for replicaSets: use -e horizon or -e external.domain"
       echo "Usaag:           - for sharded clusters: use -e mongos"
@@ -118,20 +119,20 @@ then
   # recreate configmap and secret for OM in mcNamespace
   if [[ ${namespace} != ${mcNamespace} ]]
   then
-  kubectl -n ${namespace} get configmap ${omName}-ca --namespace=${mcNamespace} >/dev/null 2>&1
+  kubectl -n ${mcNamespace} get configmap ${omName}-ca  >/dev/null 2>&1
   if [[ $? != 0 ]] 
   then
-    kubectl -n ${namespace} get configmap ${omName}-ca --namespace=${namespace} -o yaml \
+    kubectl -n ${namespace} get configmap ${omName}-ca -o yaml \
     | sed "s|namespace: ${namespace}|namespace: ${mcNamespace}|" \
-    | kubectl -n ${namespace} --namespace=${mcNamespace} apply -f -
+    | kubectl -n ${mcNamespace} apply -f -
   fi
 
-  kubectl -n ${namespace} get secret ${mcNamespace}-${omName}-admin-key --namespace=${mcNamespace} >/dev/null 2>&1
+  kubectl -n ${mcNamespace} get secret ${mcNamespace}-${omName}-admin-key >/dev/null 2>&1
   if [[ $? != 0 ]]
   then
-    eval publicKey=$(  kubectl -n ${namespace} get secret ${namespace}-${omName}-admin-key --namespace=${namespace} -o jsonpath='{.data.publicKey}' | base64 -d )
-    eval privateKey=$( kubectl -n ${namespace} get secret ${namespace}-${omName}-admin-key --namespace=${namespace} -o jsonpath='{.data.privateKey}' | base64 -d )
-    kubectl -n ${namespace} create secret generic ${mcNamespace}-${omName}-admin-key --namespace=${mcNamespace} \
+    eval publicKey=$(  kubectl -n ${namespace} get secret ${namespace}-${omName}-admin-key -o jsonpath='{.data.publicKey}' | base64 -d )
+    eval privateKey=$( kubectl -n ${namespace} get secret ${namespace}-${omName}-admin-key -o jsonpath='{.data.privateKey}' | base64 -d )
+    kubectl -n ${mcNamespace} create secret generic ${mcNamespace}-${omName}-admin-key \
       --from-literal="publicKey=${publicKey}" \
       --from-literal="privateKey=${privateKey}"
   fi
@@ -237,7 +238,7 @@ then
   done
   if [[ ${tls} == true ]]
   then
-  for type in csr certificaterequests certificates
+  for type in csr certificaterequests certificates secrets
   do
     kubectl -n ${namespace} delete $( kubectl -n ${namespace} get $type -o name | grep "${fullName}" ) --now > /dev/null 2>&1
   done
@@ -294,6 +295,15 @@ else
     --from-literal="projectName=${projectName}" \
     --from-literal="baseUrl=${opsMgrUrl}" 2> /dev/null
 fi # tls
+
+# create secrets and config map for KMIP server
+if [[ ${kmip} == true ]] 
+then
+    kubectl -n ${namespace} delete configmap ${fullName}-kmip-ca-pem >/dev/null 2>&1
+    kubectl -n ${namespace} create configmap ${fullName}-kmip-ca-pem --from-file="ca.pem=certs/kmip_ca.pem"
+    kubectl -n ${namespace} delete secret generic ${fullName}-kmip-client-pem >/dev/null 2>&1
+    kubectl -n ${namespace} create secret generic ${fullName}-kmip-client-pem --from-file="cert.pem=certs/kmip_cert.pem"
+fi
 
 # Create a a secret for a db user credentials
 [[ ${cleanup} == 1 ]] && kubectl -n ${namespace} delete secret         ${fullName}-admin > /dev/null 2>&1

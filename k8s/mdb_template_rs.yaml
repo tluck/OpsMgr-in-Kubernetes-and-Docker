@@ -52,9 +52,25 @@ spec:
             limits:
               cpu: "RSCPU"
               memory: RSMEM 
+          #KMIP volumeMounts:
+          #KMIP   - name: kmip-client-pem
+          #KMIP     mountPath: /kmip/cert
+          #KMIP   - name: kmip-ca-pem
+          #KMIP     mountPath: /kmip/ca
+        #KMIP volumes:
+        #KMIP  - name: kmip-client-pem
+        #KMIP    secret:
+        #KMIP      secretName: PROJECT-NAME-kmip-client-pem
+        #KMIP  - name: kmip-ca-pem
+        #KMIP    configMap:
+        #KMIP      name: PROJECT-NAME-kmip-ca-pem
+        #KMIP      items:
+        #KMIP        - key: ca.pem
+        #KMIP          path: ca.pem
     persistence:
       single:
         storage: RSDISK # 2Gi
+
   #EXPOSE externalAccess:
   #EXPOSE   #EXTDOMAIN externalDomain: EXTDOMAINNAME
   #EXPOSE   externalService:
@@ -134,6 +150,6 @@ spec:
   #KMIP     enableEncryption: true
   #KMIP     kmip:
   #KMIP       clientCertificateFile: /kmip/cert/cert.pem
-  #KMIP       serverCAFile: /mongodb-automation/tls/ca/ca-pem
-  #KMIP       serverName: kmip.server.tld
+  #KMIP       serverCAFile:          /kmip/ca/ca.pem
+  #KMIP       serverName: kmip.server.mdb.com
   #KMIP       port: 5696

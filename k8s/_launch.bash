@@ -129,8 +129,8 @@ printf "%s\n" "Create a Production ReplicaSet Cluster with a splitHorizon config
 date
 projectName="myProject1"
 name="myreplicaset"
-test="-n ${name} -v 6.0.11-ent -c 0.50 -m 400Mi         -o ${orgId} -p ${projectName} ${skipCertGen} -l ${ldapType} -e horizon"
-prod="-n ${name} -v 6.0.11-ent -c 1.00 -m 4.0Gi -d 20Gi -o ${orgId} -p ${projectName} ${skipCertGen} -l ${ldapType} -e horizon"
+test="-n ${name} -v 7.0.4-ent -c 0.50 -m 400Mi         -o ${orgId} -p ${projectName} ${skipCertGen} -l ${ldapType} -e horizon"
+prod="-n ${name} -v 7.0.4-ent -c 1.00 -m 4.0Gi -d 20Gi -o ${orgId} -p ${projectName} ${skipCertGen} -l ${ldapType} -e horizon"
 # source deploy.conf; deploy_Cluster.bash -n "myreplicaset" -v "6.0.11-ent" -c "0.50" -m "400Mi" -d "1Gi"  -o "$myDeployment_orgId" -p "myProject1" -l "ldap" -e horizon
 (set -x; deploy_Cluster.bash ${!options})
 printf "#deploy_Cluster.bash ${!options}\n" >> deploy.conf

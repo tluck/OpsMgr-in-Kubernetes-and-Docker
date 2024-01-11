@@ -129,9 +129,9 @@ printf "%s\n" "Create a Production ReplicaSet Cluster with a splitHorizon config
 date
 projectName="myProject1"
 name="myreplicaset"
-test="-n ${name} -v 6.0.11-ent -c 0.50 -m 400Mi         -o ${orgId} -p ${projectName} ${skipCertGen} -l ${ldapType} -e horizon"
-prod="-n ${name} -v 6.0.11-ent -c 1.00 -m 4.0Gi -d 20Gi -o ${orgId} -p ${projectName} ${skipCertGen} -l ${ldapType} -e horizon"
-# source deploy.conf; deploy_Cluster.bash -n "myreplicaset" -v "6.0.11-ent" -c "0.50" -m "400Mi" -d "1Gi"  -o "$myDeployment_orgId" -p "myProject1" -l "ldap" -e horizon
+test="-n ${name} -v ${mdbVersion} -c 0.50 -m 400Mi         -l ${ldapType} -o ${orgId} -p ${projectName} -e horizon ${skipCertGen}"
+prod="-n ${name} -v ${mdbVersion} -c 1.00 -m 4.0Gi -d 20Gi -l ${ldapType} -o ${orgId} -p ${projectName} -e horizon ${skipCertGen}"
+# source deploy.conf; deploy_Cluster.bash -n "myreplicaset" -v "6.0.11-ent" -c "0.50" -m "400Mi" -d "1Gi" -l "ldap" -o "$myDeployment_orgId" -p "myProject1" -e horizon
 (set -x; deploy_Cluster.bash ${!options})
 printf "#deploy_Cluster.bash ${!options}\n" >> deploy.conf
 cluster1="${projectName}-${name}"
@@ -141,12 +141,12 @@ printf "%s\n" "Create a Production Sharded Cluster  ..."
 date
 projectName="myProject2"
 name="mysharded"
-prod="-n ${name} -v ${mdbVersion} -c 0.50 -m 2Gi -d 4Gi -s 2 -r 2 -l ${ldapType} -o ${orgId} -p ${projectName} ${skipCertGen} -e mongos"
+prod="-n ${name} -v ${mdbVersion} -c 0.50 -m 2Gi -d 4Gi -s 2 -r 2 -l ${ldapType} -o ${orgId} -p ${projectName} -e mongos ${skipCertGen}"
 if [[ ${demo} ]]
 then
     printf "\n%s\n" " *** skipping sharded deployment - not enough resources ***"
 else
-# source deploy.conf; deploy_Cluster.bash -n "mysharded" -c "0.33" -m "400Mi" -d "1Gi" -s "1" -r "1" -l "ldap" -o "${myDeployment_orgId}" -p "myProject2" -g
+# source deploy.conf; deploy_Cluster.bash -n "mysharded" -c "0.33" -m "400Mi" -d "1Gi" -s "1" -r "1" -l "ldap" -o "${myDeployment_orgId}" -p "myProject2" 
 (set -x; deploy_Cluster.bash ${!options})
 printf "#deploy_Cluster.bash ${!options}\n" >> deploy.conf
 cluster2="${projectName}-${name}"

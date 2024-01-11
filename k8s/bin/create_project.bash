@@ -25,7 +25,7 @@ curlData=$( printf '{ "name" : "PROJECT", "orgId" : "ORGID" }' | sed -e"s/PROJEC
 
 output=$( curl $curlOpts --silent --user "${publicKey}:${privateKey}" --digest \
      --header "Content-Type: application/json" \
-     --request POST "${opsMgrExtUrl2}/api/public/v1.0/groups?pretty=true" \
+     --request POST "${opsMgrExtUrl1}/api/public/v1.0/groups?pretty=true" \
      --data "${curlData}" )
 errorCode=$( printf "%s" "$output" | jq .errorCode )
 

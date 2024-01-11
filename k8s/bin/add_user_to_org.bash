@@ -19,7 +19,7 @@ shift "$(($OPTIND -1))"
 output=$( curl $curlOpts --silent --user "${publicKey}:${privateKey}" --digest \
   --header "Accept: application/json" \
   --header "Content-Type: application/json" \
-  --request GET "${opsMgrExtUrl2}/api/public/v1.0/users/byName/${user}?pretty=true" )
+  --request GET "${opsMgrExtUrl1}/api/public/v1.0/users/byName/${user}?pretty=true" )
 
 errorCode=$?
 
@@ -37,7 +37,7 @@ curlData=$( printf '{
 output=$( curl $curlOpts --silent --user "${publicKey}:${privateKey}" --digest \
   --header "Accept: application/json" \
   --header "Content-Type: application/json" \
-     --request PATCH "${opsMgrExtUrl2}/api/public/v1.0/users/${userId}" \
+     --request PATCH "${opsMgrExtUrl1}/api/public/v1.0/users/${userId}" \
      --data "${curlData}" )
 
 errorCode=$?

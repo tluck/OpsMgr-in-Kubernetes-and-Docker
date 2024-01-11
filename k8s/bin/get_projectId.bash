@@ -21,7 +21,7 @@ projectName=${projectName:-myProject1}
 output=$( curl $curlOpts --silent --user "${publicKey}:${privateKey}" --digest \
  --header 'Accept: application/json' \
  --header 'Content-Type: application/json' \
- --request GET "${opsMgrExtUrl2}/api/public/v1.0/groups/byName/${projectName}/?pretty=true" )
+ --request GET "${opsMgrExtUrl1}/api/public/v1.0/groups/byName/${projectName}/?pretty=true" )
 
 errorCode=$( printf "%s" "$output" | jq .errorCode )
 

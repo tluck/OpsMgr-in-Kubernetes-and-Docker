@@ -37,9 +37,26 @@ spec:
   #MULTI     #MCEXPOSE   externalService:
   #MULTI     #MCEXPOSE   #  annotations:
   #MULTI     #MCEXPOSE   #    "cloud.google.com/l4-rbs": "enabled"
+  #MULTI statefulSet:
+  #MULTI   spec:
+  #MULTI     template:
+  #MULTI       spec:
+  #MULTI         containers:
+  #MULTI         - name: mongodb-enterprise-database
+  #MULTI           resources:
+  #MULTI             limits:
+  #MULTI               cpu: "RSCPU"
+  #MULTI               memory: RSMEM 
+  #MULTI     volumeClaimTemplates:
+  #MULTI     - metadata:
+  #MULTI         name: data
+  #MULTI       spec:
+  #MULTI         resources:
+  #MULTI           requests:
+  #MULTI             storage: RSDISK # 2Gi
   podSpec:
     # `podTemplate` allows to set custom fields in PodTemplateSpec for the
-    # Database Pods.
+    # Used for non-MultiCluster Mongodb Pods.
     # For more information see:
     # https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.17/#podtemplatespec-v1-core
     podTemplate:
@@ -52,11 +69,11 @@ spec:
             limits:
               cpu: "RSCPU"
               memory: RSMEM 
-          #KMIP volumeMounts:
-          #KMIP   - name: kmip-client-pem
-          #KMIP     mountPath: /kmip/cert
-          #KMIP   - name: kmip-ca-pem
-          #KMIP     mountPath: /kmip/ca
+        #KMIP   volumeMounts:
+        #KMIP     - name: kmip-client-pem
+        #KMIP       mountPath: /kmip/cert
+        #KMIP     - name: kmip-ca-pem
+        #KMIP       mountPath: /kmip/ca
         #KMIP volumes:
         #KMIP  - name: kmip-client-pem
         #KMIP    secret:
@@ -83,10 +100,6 @@ spec:
     #TLS certsSecretPrefix: mdb # provide custom x509 certificates (keys and certs)
     #TLS tls:
     #TLS   ca: ca-pem # provide a custom certificate authority (cert in a pem file)
-    #  enabled: true # false # deprecated in 1.16
-    #  secretRef:
-    #    prefix: mdb # same as certsSecretPrefix (not needed)
-    #    name: mdb-myreplicaset-cert
     authentication:
       enabled : true # false
       agents: 

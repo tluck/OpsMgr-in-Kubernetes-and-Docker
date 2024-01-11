@@ -26,7 +26,7 @@ projectId=$( get_projectId.bash -p ${projectName} )
 
 output=$( curl $curlOpts --silent --user "${publicKey}:${privateKey}" --digest \
      --header "Content-Type: application/json" \
-     --request DELETE "${opsMgrExtUrl2}/api/public/v1.0/groups/{$projectId}" )
+     --request DELETE "${opsMgrExtUrl1}/api/public/v1.0/groups/{$projectId}" )
 errorCode=$( printf "%s" "$output" | jq .errorCode )
 
 if [[ "${errorCode}" == "null" ]]

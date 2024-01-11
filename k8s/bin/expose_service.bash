@@ -44,7 +44,7 @@ fi
 # fi
 
 n=0
-max=10
+max=30
 while [ $n -lt $max ]
 do
     out=$( kubectl ${context} ${ns} get svc | grep "${name}.*external" ) 

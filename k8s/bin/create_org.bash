@@ -32,7 +32,7 @@ curlData=$( printf '{ "name" : "NAME" }' | sed -e"s/NAME/${orgName}/" )
 oid=$( curl $curlOpts --silent --user "${publicKey}:${privateKey}" --digest \
  --header 'Accept: application/json' \
  --header 'Content-Type: application/json' \
- --request POST "${opsMgrExtUrl2}/api/public/v1.0/orgs?pretty=true" \
+ --request POST "${opsMgrExtUrl1}/api/public/v1.0/orgs?pretty=true" \
  --data "${curlData}" ) 
 
 errorCode=$( printf "%s" "$oid" | jq .errorCode )

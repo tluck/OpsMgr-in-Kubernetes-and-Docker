@@ -11,6 +11,6 @@ kubectl -n ${namespace}   exec ${omName}-backup-daemon-0 -i -t -c mongodb-backup
 
 for context in $contexts
 do
-    kubectl --context=$context delete namespace ${namespace} 
-    kubectl --context=$context delete namespace ${mcNamespace}
+    kubectl --context=$context delete namespace ${namespace} &
+    kubectl --context=$context delete namespace ${mcNamespace} &
 done

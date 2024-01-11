@@ -19,7 +19,7 @@ curlData=$( printf '{
 output=$( curl $curlOpts -s --user "${publicKey}:${privateKey}" --digest \
   --header "Accept: application/json" \
   --header "Content-Type: application/json" \
-  --request POST "${opsMgrExtUrl2}/api/public/v1.0/users" \
+  --request POST "${opsMgrExtUrl1}/api/public/v1.0/users" \
   --data "${curlData}" )
 
 printf "New User\n" 

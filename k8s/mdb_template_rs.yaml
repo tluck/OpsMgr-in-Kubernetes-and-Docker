@@ -6,7 +6,8 @@ metadata:
   namespace: NAMESPACE
 spec:
   members: 3
-  version: VERSION
+  version: "VERSION"
+  featureCompatibilityVersion: "FCV"
   clusterDomain: DOMAINNAME
   type: ReplicaSet
   opsManager:
@@ -155,6 +156,7 @@ spec:
   #TLS   net:
   #TLS     tls:
   #TLS       mode: "TLSMODE" # "requireTLS" "preferTLS" "allowTLS" 
+  #TLS       allowConnectionsWithoutCertificates: "ALLOWCON"
   # The default TLS mode is 'requireTLS' but it can be customized using the
   # the `additionalMongodConfig` structure. Please find more information here:
   # https://docs.mongodb.com/manual/reference/configuration-options/#net.tls.mode

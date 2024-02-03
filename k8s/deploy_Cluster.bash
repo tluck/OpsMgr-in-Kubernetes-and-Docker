@@ -15,14 +15,14 @@ do
     e) expose="$OPTARG" ;;
     l) ldap="$OPTARG" ;;
     k) kmip=true ;;
-    i|o) orgId="$OPTARG";;
+    o) orgName="$OPTARG";;
     p) projectName="$OPTARG";;
     g) makeCerts=false ;; 
-    x) x=1 ;; # cleanup
+    x) x=true ;; # cleanup
     s) shards="$OPTARG" ;;
     r) mongos="$OPTARG" ;;
     ?|h)
-      echo "Usage: $(basename $0) [-n name] [-c cpu] [-m memory] [-d disk] [-v ver] [ -e horizon ] [-s shards] [-r mongos] [-l ldap[s]] [-k] [-o orgId] [-p projectName] [-g] [-x]"
+      echo "Usage: $(basename $0) [-n name] [-c cpu] [-m memory] [-d disk] [-v ver] [ -e horizon ] [-s shards] [-r mongos] [-l ldap[s]] [-k] [-o orgName] [-p projectName] [-g] [-x]"
       echo "Usage:       -e to generate the external service definitions when using externalDomain or splitHorizon names"
       echo "Usage:           - for replicaSets: use -e horizon or -e external.domain"
       echo "Usaag:           - for sharded clusters: use -e mongos"
@@ -54,11 +54,17 @@ else
 fi
 
 ver="${ver:-$mdbVersion}"
+dbFcv="${ver%.*}"
 mem="${mem:-2Gi}"
 cpu="${cpu:-1.0}"
 dsk="${dsk:-1Gi}"
-cleanup=${x:-0}
+cleanup=${x:-false}
 projectName="${projectName:-$name}"
+if [[ ${orgName} != "" ]]
+then
+    orgInfo=( $( get_org.bash -o ${orgName} ) )
+    orgId=${orgInfo[1]}
+fi
 fullName=$( printf "${projectName}-${name}"| tr '[:upper:]' '[:lower:]' )
 makeCerts=${makeCerts:-true}
 [[ ${demo} ]] && serviceType="NodePort" clusterDomain="cluster.local"
@@ -80,8 +86,13 @@ else
 fi
 
 sslRequireValidMMSServerCertificates=false
+allowConnectionsWithoutCertificates=true
 tlsMode=${tlsMode:-"requireTLS"}
-[[ ${tlsMode} == "requireTLS" ]] && sslRequireValidMMSServerCertificates=true
+if [[ ${tlsMode} == "requireTLS" ]]
+then
+    sslRequireValidMMSServerCertificates=true
+    allowConnectionsWithoutCertificates=false
+fi
 
 kmipc="#KMIP "
 kmipString=${kmipc}
@@ -177,8 +188,10 @@ cat ${template} | sed \
   -e "s|DUPSERVICE|$duplicateServiceObjects|" \
   -e "s|$tlsc|$tlsr|" \
   -e "s|TLSMODE|$tlsMode|" \
+  -e "s|ALLOWCON|$allowConnectionsWithoutCertificates|" \
   -e "s|$kmipc|$kmipString|" \
   -e "s|VERSION|$ver|" \
+  -e "s/FCV/$dbFcv/" \
   -e "s|RSMEM|$mem|" \
   -e "s|RSCPU|$cpu|" \
   -e "s|RSDISK|$dsk|" \
@@ -222,11 +235,11 @@ then
 fi
 
 # clean up old stuff
-if [[ ${cleanup} == 1 ]]
+if [[ ${cleanup} == true ]]
 then
   printf "Cleaning up ... \n"
   kubectl -n ${namespace} delete ${mdbKind} "${fullName}" --now > /dev/null 2>&1
-  for type in sts pods svc secrets configmaps pvc
+  for type in sts pods svc secrets configmaps pvc mdbu
   do
     kubectl -n ${namespace} delete $( kubectl -n ${namespace} get $type -o name | grep "${fullName}" ) --now > /dev/null 2>&1
     if [[ ${multiCluster} == true ]]
@@ -284,12 +297,18 @@ then
       kubectl -n ${namespace} delete secret mdb-${fullName}-cert > /dev/null 2>&1
       "${PWD}/certs/make_cluster_certs.bash" "${fullName}"
       kubectl -n ${namespace} apply -f "${PWD}/certs/certs_mdb-${fullName}-cert.yaml"
+
+      ctype="agent"
+      cert="-certs"
+      kubectl -n ${namespace} delete secret mdb-${fullName}-${ctype}${cert} > /dev/null 2>&1
+      "${PWD}/certs/make_sharded_certs.bash" "${fullName}" ${ctype} ${cert}
+      kubectl -n ${namespace} apply -f "${PWD}/certs/certs_mdb-${fullName}-${ctype}${cert}.yaml"
     fi
   fi # end if sharded or replicaset
 
 else
 # no tls here
-  [[ ${cleanup} == 1 ]] && kubectl -n ${namespace} delete configmap "${fullName}" > /dev/null 2>&1
+    kubectl -n ${namespace} delete configmap "${fullName}" > /dev/null 2>&1
     kubectl -n ${namespace} create configmap "${fullName}" \
     --from-literal="orgId=${orgId}" \
     --from-literal="projectName=${projectName}" \
@@ -306,20 +325,20 @@ then
 fi
 
 # Create a a secret for a db user credentials
-[[ ${cleanup} == 1 ]] && kubectl -n ${namespace} delete secret         ${fullName}-admin > /dev/null 2>&1
+kubectl -n ${namespace} delete secret         ${fullName}-admin > /dev/null 2>&1
 kubectl -n ${namespace} create secret generic ${fullName}-admin \
     --from-literal=name="${dbuser}" \
     --from-literal=password="${dbpassword}" 2> /dev/null
 
 # Create the User Resources
-[[ ${cleanup} == 1 ]] && kubectl -n ${namespace} delete mdbu ${fullName}-admin > /dev/null 2>&1
+kubectl -n ${namespace} delete mdbu ${fullName}-admin > /dev/null 2>&1
 kubectl -n ${namespace} apply -f "${mdbuser1}" 2> /dev/null
 
 if [[ ${ldap} == 'ldap' || ${ldap} == 'ldaps' ]]
 then
-  [[ ${cleanup} == 1 ]] && kubectl -n ${namespace} delete mdbu ${fullName}-ldap > /dev/null 2>&1
+  kubectl -n ${namespace} delete mdbu ${fullName}-ldap > /dev/null 2>&1
   kubectl -n ${namespace} apply -f "${mdbuser2}"
-  [[ ${cleanup} == 1 ]] && kubectl -n ${namespace} delete secret "${fullName}-ldapsecret" > /dev/null 2>&1
+  kubectl -n ${namespace} delete secret "${fullName}-ldapsecret" > /dev/null 2>&1
   kubectl -n ${namespace} create secret generic "${fullName}-ldapsecret" \
     --from-literal=password="${ldapBindQueryPassword}" 2> /dev/null 
 fi

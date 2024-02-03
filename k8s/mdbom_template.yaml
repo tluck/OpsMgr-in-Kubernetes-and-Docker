@@ -43,7 +43,8 @@ spec:
 
   applicationDatabase:
     members: 3
-    version: APPDBVER # 5.0.9-ent # 4.4.4-ent
+    version: "APPDBVER" # 6.0.12-ent # 5.0.7-ent # 4.4.4-ent
+    featureCompatibilityVersion: "FCV"
     clusterDomain: DOMAINNAME
     # persistent: true
     #TLS security:

@@ -57,6 +57,7 @@ fi
 omVer="${omVer:-$omVersion}"
 omBackup="${omBackup:-false}"
 appdbVer="${appdbVer:-$appdbVersion}"
+appdbFcv="${appdbVer%.*}"
 makeCerts=${makeCerts:-true}
 
 printf "\n"
@@ -132,6 +133,7 @@ cat mdbom_template.yaml | sed \
     -e "s/VERSION/$omVer/" \
     -e "s/DOMAINNAME/$clusterDomain/" \
     -e "s/APPDBVER/$appdbVer/" \
+    -e "s/FCV/$appdbFcv/" \
     -e "s/MMSADMINEMAILADDR/$user/" \
     -e "s/MMSEMAIL/$mmsemail/" \
     -e "s/MMSMAILHOSTNAME/$mmsmailhostname/" \

@@ -36,6 +36,6 @@ then
     exit 0
 else
     detail=$( printf "%s" "$output" | jq .detail )
-    printf "%s\n" "* * * Error - did not delete projectName.\n $detail \n"
+    printf "%s\n" "* * * Error - did not delete ${projectName}: $detail"
     exit 1
 fi

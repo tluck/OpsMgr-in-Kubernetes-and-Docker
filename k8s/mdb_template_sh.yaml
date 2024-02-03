@@ -5,7 +5,8 @@ metadata:
   name: PROJECT-NAME 
   namespace: NAMESPACE
 spec:
-  version: VERSION
+  version: "VERSION"
+  featureCompatibilityVersion: "FCV"
   clusterDomain: DOMAINNAME
   type: ShardedCluster
   shardCount: SHARDS

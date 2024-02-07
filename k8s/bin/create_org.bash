@@ -1,7 +1,7 @@
 #!/bin/bash
 
 source init.conf
-test -f deploy.conf && source deploy.conf
+test -f ${deployconf} && source ${deployconf}
 
 while getopts 'o:h' opt
 do
@@ -42,15 +42,15 @@ fi
 
 if [[ "${errorCode}" == "null" ]]
 then
-    conf=$( sed -e "/${orgName//-/_}_orgId=/d" deploy.conf )
-    printf "%s\n" "${conf}" > deploy.conf
+    conf=$( sed -e "/${orgName//-/_}_orgId=/d" ${deployconf} )
+    printf "%s\n" "${conf}" > ${deployconf}
     if [[ ${orgExists} == 1 ]]
     then
     printf "\n%s\n" "Using the existing Organization: ${orgName} with orgID: ${orgId}" 
     else
     printf "\n%s\n" "Created a new Organization: ${orgName} with orgId: ${orgId}"
     fi
-    printf  "${orgName//-/_}_orgId=\"${orgId}\"\n"     >> deploy.conf
+    printf  "${orgName//-/_}_orgId=\"${orgId}\"\n"     >> ${deployconf}
 else
     printf "%s\n" "* * * Error - Organiztion creation failed"
     exit 1

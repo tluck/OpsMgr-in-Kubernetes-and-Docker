@@ -1,7 +1,7 @@
 #!/bin/bash
 
 source init.conf
-source deploy.conf
+source ${deployconf}
 
 while getopts 'i:o:u:h' opt
 do

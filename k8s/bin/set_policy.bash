@@ -1,9 +1,7 @@
 #!/bin/bash
 
-# script to find out if there is an existing non-deleted Organization and what is the id
-
 source init.conf
-test -f deploy.conf && source deploy.conf
+test -f ${deployconf} && source ${deployconf}
 
 while getopts 'p:rh' opt
 do

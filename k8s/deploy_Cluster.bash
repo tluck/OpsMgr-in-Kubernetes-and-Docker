@@ -191,7 +191,7 @@ cat ${template} | sed \
   -e "s|ALLOWCON|$allowConnectionsWithoutCertificates|" \
   -e "s|$kmipc|$kmipString|" \
   -e "s|VERSION|$ver|" \
-  -e "s/FCV/$dbFcv/" \
+  -e "s|FCV|$dbFcv|" \
   -e "s|RSMEM|$mem|" \
   -e "s|RSCPU|$cpu|" \
   -e "s|RSDISK|$dsk|" \
@@ -263,6 +263,11 @@ fi
 
 # Create map for OM Org/Project
 printf "Using Ops Manager at: ${opsMgrUrl} \n"
+printf "%s\n" "Deploying cluster: ${fullName}, version: ${mdbVersion}, cores: ${cpu}, memory: ${mem}, disk: ${dsk}" 
+[[ ${shards} ]] && printf "%s\n" "    shards: ${shards}, mongos: ${mongos}"
+printf "%s\n" "    in org: ${deploymentOrgName}, project: ${projectName} with: expose: ${expose}, LDAP: ${ldapType}"
+printf "\n"
+
 if [[ ${tls} == true ]]
 then
   kubectl -n ${namespace} delete configmap "${fullName}" > /dev/null 2>&1

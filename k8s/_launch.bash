@@ -27,8 +27,6 @@ d=$( dirname "$0" )
 cd "${d}"
 source init.conf
 
-deploymentOrgName=${deploymentOrgName//-/_}
-
 which kubectl > /dev/null
 if [[ $? != 0 ]]
 then
@@ -42,8 +40,6 @@ then
     printf "%s\n" "Exiting - Check kubectl or cluster readiness"
     exit 1
 fi
-
-[[ -e deploy.conf ]] && rm deploy.conf
 
 date
 printf "\n%s\n" "__________________________________________________________________________________________"
@@ -81,6 +77,7 @@ date
     prod="-n ${omName} -c 1.00 -m 4Gi -d 40Gi -v ${omVersion} ${skipCertGen}"
 # [[ "${context}" == "docker"* ]] && docker pull "quay.io/mongodb/mongodb-enterprise-ops-manager:$omVersion" # issue with docker not (re)pulling the image
 (set -x; deploy_OM.bash ${!options})
+printf "#deploy_OM.bash ${!options}\n" >> ${deployconf}
 
 if [[ ${omBackup} == true ]]
 then
@@ -93,7 +90,7 @@ then
     test="-n ${omName}-oplog -v ${appdbVersion} -c 0.33 -m 300Mi         -o ${omName}-db ${skipCertGen}"
     prod="-n ${omName}-oplog -v ${appdbVersion} -c 0.50 -m 2.0Gi -d 40Gi -o ${omName}-db ${skipCertGen}"
 (set -x; deploy_Cluster.bash ${!options})
-printf "#deploy_Cluster.bash ${!options}\n" >> deploy.conf
+printf "#deploy_Cluster.bash ${!options}\n" >> ${deployconf}
 
     printf "\n%s\n" "__________________________________________________________________________________________"
     printf "%s\n" "Create the Backup BlockStore DB for OM ..."
@@ -101,7 +98,7 @@ printf "#deploy_Cluster.bash ${!options}\n" >> deploy.conf
     test="-n ${omName}-blockstore -v ${appdbVersion} -c 0.33 -m 300Mi         -o ${omName}-db ${skipCertGen}"
     prod="-n ${omName}-blockstore -v ${appdbVersion} -c 1.00 -m 4.0Gi -d 40Gi -o ${omName}-db ${skipCertGen}"
 (set -x; deploy_Cluster.bash ${!options})
-printf "#deploy_Cluster.bash ${!options}\n" >> deploy.conf
+printf "#deploy_Cluster.bash ${!options}\n" >> ${deployconf}
 fi # backup true
 fi # OM
 [[ ${OM} == true && ${Clusters} == false ]] && exit
@@ -109,9 +106,11 @@ fi # OM
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Create a specific Organization to put your Deployment projects in ..."
 date
-# Create the Org and put the info in deploy.conf
+# Create the Org and put the info in ${deployconf}
 (set -x; deploy_org.bash -o "${deploymentOrgName}" ) # -o newOrgName
-test -e deploy.conf && source deploy.conf
+test -e ${deployconf} && source ${deployconf}
+orgId="${deploymentOrgName//-/_}_orgId"
+orgId="${!orgId}"
 
 printf "\n%s\n" "__________________________________________________________________________________________"
 printf "%s\n" "Create a Production ReplicaSet Cluster with a splitHorizon configuration for External access ..."
@@ -120,9 +119,9 @@ projectName="myProject1"
 name="myreplicaset"
 test="-n ${name} -v ${mdbVersion} -c 0.50 -m 400Mi         -l ${ldapType} -o ${deploymentOrgName} -p ${projectName} -e horizon ${skipCertGen}"
 prod="-n ${name} -v ${mdbVersion} -c 1.00 -m 4.0Gi -d 20Gi -l ${ldapType} -o ${deploymentOrgName} -p ${projectName} -e horizon ${skipCertGen}"
-## source deploy.conf; deploy_Cluster.bash -n "myreplicaset" -v "6.0.11-ent" -c "0.50" -m "400Mi" -d "1Gi" -l "ldap" -o "myDeployment" -p "myProject1" -e horizon
+## source ${deployconf}; deploy_Cluster.bash -n "myreplicaset" -v "6.0.11-ent" -c "0.50" -m "400Mi" -d "1Gi" -l "ldap" -o "myDeployment" -p "myProject1" -e horizon
 (set -x; deploy_Cluster.bash ${!options})
-printf "#deploy_Cluster.bash ${!options}\n" >> deploy.conf
+printf "#deploy_Cluster.bash ${!options}\n" >> ${deployconf}
 cluster1="${projectName}-${name}"
 
 printf "\n%s\n" "__________________________________________________________________________________________"
@@ -135,9 +134,9 @@ if [[ ${demo} ]]
 then
     printf "\n%s\n" " *** skipping sharded deployment - not enough resources ***"
 else
-## source deploy.conf; deploy_Cluster.bash -n "mysharded" -c "0.33" -m "400Mi" -d "1Gi" -s "1" -r "1" -l "ldap" -o "myDeployment" -p "myProject2" 
+## source ${deployconf}; deploy_Cluster.bash -n "mysharded" -c "0.33" -m "400Mi" -d "1Gi" -s "1" -r "1" -l "ldap" -o "myDeployment" -p "myProject2" 
 (set -x; deploy_Cluster.bash ${!options})
-printf "#deploy_Cluster.bash ${!options}\n" >> deploy.conf
+printf "#deploy_Cluster.bash ${!options}\n" >> ${deployconf}
 cluster2="${projectName}-${name}"
 fi
 

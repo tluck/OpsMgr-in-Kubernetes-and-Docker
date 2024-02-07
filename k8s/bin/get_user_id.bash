@@ -1,7 +1,7 @@
 #!/bin/bash 
 
 source init.conf
-source deploy.conf
+source ${deployconf}
 
 while getopts 'u:h' opt
 do
@@ -24,9 +24,9 @@ output=$( curl $curlOpts --silent --user "${publicKey}:${privateKey}" --digest \
 
 errorCode=$?
 
-conf=$( sed -e '/userId/d' deploy.conf ) 
-printf "%s\n" "${conf}" > deploy.conf
-printf  "userId=$( printf "${output}" | jq .id )" >> deploy.conf
+conf=$( sed -e '/userId/d' ${deployconf} ) 
+printf "%s\n" "${conf}" > ${deployconf}
+printf  "userId=$( printf "${output}" | jq .id )" >> ${deployconf}
 
 exit $errorCode
 

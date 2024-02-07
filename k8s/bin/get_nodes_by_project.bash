@@ -1,7 +1,7 @@
 #!/bin/bash
 
 source init.conf
-source deploy.conf 
+source ${deployconf} 
 projectId=$1
 
 

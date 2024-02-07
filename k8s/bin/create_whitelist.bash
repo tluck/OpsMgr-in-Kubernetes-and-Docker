@@ -1,13 +1,13 @@
 #!/bin/bash
 
-conf=$( sed -e '/myNodeIp/d' deploy.conf )
-printf "%s\n" "${conf}" > deploy.conf
+conf=$( sed -e '/myNodeIp/d' ${deployconf} )
+printf "%s\n" "${conf}" > ${deployconf}
 eval nodes=( $( kubectl get node -o json |jq ".items[].status.addresses[0].address" ) )
 myNodeIp=${nodes[0]}
-printf "myNodeIp=${myNodeIp}" | tee -a deploy.conf
+printf "myNodeIp=${myNodeIp}" | tee -a ${deployconf}
 
 source init.conf
-source deploy.conf
+source ${deployconf}
 
 curlData=$( printf '{ "cidrBlock": "MYIP", "description": "my IP"}' | sed -e"s?MYIP?${myNodeIp}/1?g" )
 output=$( curl $curlOpts --silent --user "${publicApiKey}:${privateApiKey}" --digest \

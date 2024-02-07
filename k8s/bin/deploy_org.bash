@@ -1,6 +1,6 @@
 #!/bin/bash 
 
-# creates deploy.conf with the out from below
+# creates ${deployconf} with the out from below
 source init.conf
 
 while getopts 'i:o:u:h' opt
@@ -28,13 +28,13 @@ fi
 create_org.bash -o "${orgName}"
 if [[ $? != 0 ]]
 then
-    #rm deploy.conf
+    #rm ${deployconf}
     exit 1
 fi
-source deploy.conf
+source ${deployconf}
 # user can be supplied or is in init.conf
-# add user to the org (orgId is in deploy.conf)
+# add user to the org (orgId is in ${deployconf})
 orgId="${orgName}_orgId"
 orgId="${!orgId}"
 add_user_to_org.bash -u "${user}" -i "${orgId}"
-#cat deploy.conf
+#cat ${deployconf}

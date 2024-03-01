@@ -104,7 +104,8 @@ then
     fi
 fi
     fcs=\'${ecs}${ssltls_enabled}\'
-    printf "%s\n" "The connection string (external): ${fcs} ${ssltls_options}"
+    printf "The connection string (external): "
+    printf "%s\n" "${fcs}"
 
 else # internal
 if [[ "${spec}" == "map[enabled:true]" || "${spec}" == *"refix":* || "${spec}" == *"ecret":* || "${spec}" == *\"ca\":* ]]
@@ -123,5 +124,6 @@ then
 fi
     fcs=\'${ics}${ssltls_enabled}\'
     #printf "%s\n" "The connection string (internal): ${fcs} ${ssltls_options}"
-    printf "%s\n" "The connection string (internal): ${fcs}"
+    printf "The connection string (internal): "
+    printf "%s\n" "${fcs}"
 fi

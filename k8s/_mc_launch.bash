@@ -34,6 +34,13 @@ then
     exit 1
 fi
 
+which kubectl-mongodb > /dev/null
+if [[ $? != 0 ]]
+then
+    printf "%s\n" "Exiting - Missing kubectl-mongodb extension - install kubectl-mongodb"
+    exit 1
+fi
+
 kubectl api-resources > /dev/null 2>&1
 if [[ $? != 0 ]]
 then

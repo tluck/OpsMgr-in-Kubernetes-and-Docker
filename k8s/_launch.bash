@@ -83,6 +83,7 @@ if [[ ${omBackup} == true ]]
 then
     printf "\n%s\n" "__________________________________________________________________________________________"
     # put these resources in the same org as the AppDB
+    (set -x; deploy_org.bash -o "${omName}-db" ) # -o newOrgName
     printf "Using Organization: ${omName}-db with orgName: ${omName}-db for the OM resources\n"
     printf "\n%s\n" "__________________________________________________________________________________________"
     printf "%s\n" "Create the Backup Oplog DB for OM ..."

@@ -7,7 +7,7 @@ source init.conf
 export CTX_CLUSTER1=$MDB_CLUSTER_0_CONTEXT
 export CTX_CLUSTER2=$MDB_CLUSTER_1_CONTEXT
 export CTX_CLUSTER3=$MDB_CLUSTER_2_CONTEXT
-export VERSION=1.20.1
+export VERSION=1.20.3
 
 # download Istio 1.10.3 under the path
 [[ ! -e istio-${VERSION} ]] && curl -L https://istio.io/downloadIstio | ISTIO_VERSION=${VERSION} sh -

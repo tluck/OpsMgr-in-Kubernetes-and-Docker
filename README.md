@@ -14,7 +14,7 @@ TL;DR: To run the whole demo (assumes you have the GCP gcloud cli/api and other 
 
 This demo will install OM and a few MDB Clusters into a Kubernetes cluster.
 
-- Ops Manager v6 is the current version.
+- Ops Manager v7 is the current version.
   * Application DB - aka App DB - a Cluster for OM data
   * For Backup, 2 Clusters are built: a blockstore Cluster for data and an oplog Cluster for continous backups
 - 2 Production Clusters
@@ -32,7 +32,7 @@ This demo will install OM and a few MDB Clusters into a Kubernetes cluster.
 Note: see the multiCluster section below to create 4 seperate K8s clusters which can be used for this part.
 
 	* Kubernetes - the demo is compatible with RH Openshift, Docker-Desktop, Minikube, AWS EKS, GCP K8S.
-	* For a Production/Full Deployment:
+	* For a small Production/Full Deployment:
 		* 48-64 Cores
 		* 192-256 GB Memory
 		* 2000-5000 GB Disk 
